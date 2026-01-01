@@ -7,6 +7,7 @@ export type OrganizerDto = {
   memberNick: string;
   memberDesc?: string;
   memberImage?: string;
+  bannerImage?: string;
   memberViews?: number;
   memberLikes?: number;
   isVerified?: boolean;
