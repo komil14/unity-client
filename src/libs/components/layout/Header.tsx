@@ -60,7 +60,7 @@ export default function Header() {
         >
           <Logo className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
           <span className="text-lg sm:text-xl font-semibold text-foreground">
-            Eventify
+            Unity
           </span>
         </Link>
 

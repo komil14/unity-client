@@ -3,7 +3,7 @@ import { Card, Section } from "../shared/ui";
 export default function HelpPage() {
   return (
     <div>
-      <Section title="Help" description="Quick answers and support links.">
+      <Section title="Help" description="Quick answers for Unity.">
         <Card>
           <div style={{ fontWeight: 800, fontSize: 16 }}>Getting started</div>
           <div

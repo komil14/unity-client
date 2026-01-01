@@ -18,11 +18,11 @@ export default function Footer() {
             className="flex items-center gap-3 hover:scale-95 transition-transform"
           >
             <Logo className="h-8 w-8" />
-            <span className="text-xl font-bold">Eventify</span>
+            <span className="text-xl font-bold">Unity</span>
           </Link>
           <p className="leading-6 text-muted-foreground md:leading-7">
-            Discover local events, join communities, and connect with people who
-            share your interests.
+            Find volunteering opportunities, join groups, and connect with
+            people who want to make an impact.
           </p>
           <div className="flex flex-wrap items-center gap-2 md:gap-4">
             <a
@@ -100,7 +100,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 mt-4 mb-12">
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <p className="text-sm text-muted-foreground md:text-base">
-            © 2026 Eventify. All rights reserved.
+            © 2026 Unity. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm text-muted-foreground md:text-base">
             <p>Privacy Policy</p>
