@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
   DollarSign,
@@ -10,9 +12,10 @@ import {
 } from "lucide-react";
 
 import type { EventDto } from "../../services/eventsApi";
+import { useToggleLikeMutation } from "../../services/likesApi";
 import { imageUrlFromFilename } from "../shared/ui";
 
-function clampStyle(lines: number): React.CSSProperties {
+function clampStyle(lines: number): CSSProperties {
   return {
     display: "-webkit-box",
     WebkitLineClamp: lines,
@@ -46,8 +49,16 @@ function formatDateTime(value: string): string {
 }
 
 export default function EventCard({ event }: { event: EventDto }) {
+  const navigate = useNavigate();
+  const [toggleLike, toggleState] = useToggleLikeMutation();
   const img = imageUrlFromFilename(event.eventImages?.[0]);
   const upcoming = isUpcoming(event.eventDate);
+
+  const [likesCount, setLikesCount] = useState<number>(event.eventLikes);
+
+  useEffect(() => {
+    setLikesCount(event.eventLikes);
+  }, [event.eventLikes]);
 
   const priceLabel = event.eventPoints ? `+${event.eventPoints} pts` : "Free";
 
@@ -143,14 +154,32 @@ export default function EventCard({ event }: { event: EventDto }) {
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-4 py-3 text-foreground"
-                onClick={(e) => {
+                disabled={toggleState.isLoading}
+                onClick={async (e) => {
                   e.preventDefault();
                   e.stopPropagation();
+
+                  try {
+                    const res = await toggleLike({
+                      likeGroup: "EVENT",
+                      likeRefId: event._id,
+                    }).unwrap();
+
+                    setLikesCount((prev) => {
+                      const delta = res.status === "liked" ? 1 : -1;
+                      return Math.max(0, prev + delta);
+                    });
+                  } catch (err: any) {
+                    const status = err?.status;
+                    if (status === 401 || status === 403) {
+                      navigate("/login");
+                    }
+                  }
                 }}
                 aria-label="Likes"
               >
                 <Heart className="h-5 w-5 text-destructive" />
-                <span className="font-semibold">{event.eventLikes}</span>
+                <span className="font-semibold">{likesCount}</span>
               </button>
 
               <button
