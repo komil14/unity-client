@@ -5,6 +5,10 @@ import Footer from "@/libs/components/layout/Footer";
 import HomePage from "./screens/homePage/HomePage.tsx";
 import EventsPage from "./screens/eventsPage/EventsPage.tsx";
 import EventDetailPage from "./screens/eventsPage/EventDetailPage.tsx";
+import GroupsPage from "./screens/groupPage/GroupsPage.tsx";
+import GroupDetailPage from "./screens/groupPage/GroupDetailPage.tsx";
+import OrganizersPage from "./screens/organizerPage/OrganizersPage.tsx";
+import OrganizerDetailPage from "./screens/organizerPage/OrganizerDetailPage.tsx";
 import LoginPage from "./screens/authPage/LoginPage.tsx";
 import SignupPage from "./screens/authPage/SignupPage.tsx";
 
@@ -33,6 +37,10 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/groups" element={<GroupsPage />} />
+          <Route path="/groups/:id" element={<GroupDetailPage />} />
+          <Route path="/organizers" element={<OrganizersPage />} />
+          <Route path="/organizers/:id" element={<OrganizerDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>

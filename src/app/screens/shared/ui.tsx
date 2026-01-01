@@ -18,6 +18,17 @@ export function imageUrlFromFilename(filename?: string): string | undefined {
   return `/uploads/events/${filename}`;
 }
 
+export function uploadUrlFromFilename(
+  folder: string,
+  filename?: string
+): string | undefined {
+  if (!filename) return undefined;
+  if (filename.startsWith("http://") || filename.startsWith("https://")) {
+    return filename;
+  }
+  return `/uploads/${folder}/${filename}`;
+}
+
 export function clampText(text: string, max = 160): string {
   if (!text) return "";
   const clean = text.replace(/\s+/g, " ").trim();

@@ -6,6 +6,6 @@ export const api = createApi({
     baseUrl: "/api",
     credentials: "include", // backend uses authToken cookie
   }),
-  tagTypes: ["Event", "Me", "Application"],
+  tagTypes: ["Event", "Me", "Application", "Group", "Organizer"],
   endpoints: () => ({}),
 });
