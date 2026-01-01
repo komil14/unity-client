@@ -300,18 +300,6 @@ function organizerImageUrl(src?: string): string | undefined {
   return `/uploads/members/${src}`;
 }
 
-function organizerBannerUrl(src?: string): string | undefined {
-  if (!src) return undefined;
-  if (src.startsWith("http://") || src.startsWith("https://")) return src;
-  if (src.startsWith("/uploads/")) return src;
-  if (src.startsWith("uploads/")) return `/${src}`;
-  // If DB stores a folder prefix like `events/<file>`
-  if (src.includes("/")) return `/uploads/${src.replace(/^\/+/, "")}`;
-  // Default: event images live in /uploads/events
-  if (src.startsWith("/")) return src;
-  return `/uploads/events/${src}`;
-}
-
 function TopOrganizersSection() {
   const { data, isLoading, isError } = useGetTopOrganizersQuery({ limit: 4 });
 
@@ -351,11 +339,8 @@ function TopOrganizersSection() {
           <div className="text-muted-foreground">No organizers yet.</div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {data.map((org, idx) => {
+            {data.map((org) => {
               const avatarImg = organizerImageUrl(org.memberImage);
-              const bannerImg =
-                organizerBannerUrl(org.bannerImage) ??
-                organizerImageUrl(org.memberImage);
               const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
 
               return (
@@ -364,135 +349,115 @@ function TopOrganizersSection() {
                   to={`/organizers/${org._id}`}
                   className="group block h-full"
                 >
-                  <div className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-background/30 transition-colors hover:bg-background/40">
-                    <div className="absolute right-3 top-3 inline-flex items-center rounded-full border border-border bg-background/50 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
-                      #{idx + 1}
+                  <div className="flex h-full flex-col rounded-[var(--radius-lg)] border border-border bg-background/30 p-5 transition-colors hover:bg-background/40">
+                    <div className="flex items-start gap-4">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-full border border-border bg-muted">
+                        {avatarImg ? (
+                          <img
+                            src={avatarImg}
+                            alt={org.memberNick}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-foreground">
+                            {initial}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="min-w-0 truncate text-lg font-extrabold tracking-tight text-foreground">
+                            {org.memberNick}
+                          </div>
+                          {org.isVerified ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                              <BadgeCheck className="h-3.5 w-3.5" />
+                              Verified
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-1 text-sm font-semibold text-muted-foreground">
+                          Organizer
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="relative h-24 w-full overflow-hidden border-b border-border bg-muted">
-                      {bannerImg ? (
-                        <img
-                          src={bannerImg}
-                          alt={org.memberNick}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm font-bold text-muted-foreground">
-                          {org.memberNick || "Organizer"}
+                    <div className="mt-5 grid grid-cols-2 gap-4">
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                          <Heart className="h-5 w-5 text-primary" />
+                          Likes
                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/70 to-transparent" />
+                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                          {formatCompactNumber(org.memberLikes)}
+                        </div>
+                      </div>
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                          <Eye className="h-5 w-5 text-primary" />
+                          Views
+                        </div>
+                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                          {formatCompactNumber(org.memberViews)}
+                        </div>
+                      </div>
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                          <CalendarCheck className="h-5 w-5 text-primary" />
+                          Events
+                        </div>
+                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                          {formatCompactNumber(org.eventsCount)}
+                        </div>
+                      </div>
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                          <Heart className="h-5 w-5 text-primary" />
+                          Event likes
+                        </div>
+                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                          {formatCompactNumber(org.eventsLikesTotal)}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-4">
-                      <div className="-mt-10 flex items-end gap-3">
-                        <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted shadow-sm">
-                          {avatarImg ? (
-                            <img
-                              src={avatarImg}
-                              alt={org.memberNick}
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-lg font-extrabold text-foreground">
-                              {initial}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <div className="min-w-0 truncate text-base font-extrabold tracking-tight text-foreground">
-                              {org.memberNick}
-                            </div>
-                            {org.isVerified ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                                <BadgeCheck className="h-3.5 w-3.5" />
-                                Verified
-                              </span>
-                            ) : null}
-                          </div>
-                          <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-                            {org.memberDesc || "Organizer"}
-                          </div>
-                        </div>
+                    <div className="mt-4 rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                        <Eye className="h-5 w-5 text-primary" />
+                        Event views
                       </div>
-
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                            <Heart className="h-4 w-4 text-primary" />
-                            Likes
-                          </div>
-                          <div className="mt-1 text-lg font-extrabold text-foreground">
-                            {formatCompactNumber(org.memberLikes)}
-                          </div>
-                        </div>
-                        <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                            <Eye className="h-4 w-4 text-primary" />
-                            Views
-                          </div>
-                          <div className="mt-1 text-lg font-extrabold text-foreground">
-                            {formatCompactNumber(org.memberViews)}
-                          </div>
-                        </div>
-                        <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                            <CalendarCheck className="h-4 w-4 text-primary" />
-                            Events
-                          </div>
-                          <div className="mt-1 text-lg font-extrabold text-foreground">
-                            {formatCompactNumber(org.eventsCount)}
-                          </div>
-                        </div>
-                        <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                            <Heart className="h-4 w-4 text-primary" />
-                            Event likes
-                          </div>
-                          <div className="mt-1 text-lg font-extrabold text-foreground">
-                            {formatCompactNumber(org.eventsLikesTotal)}
-                          </div>
-                        </div>
-
-                        <div className="col-span-2 rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
-                          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                            <Eye className="h-4 w-4 text-primary" />
-                            Event views
-                          </div>
-                          <div className="mt-1 text-lg font-extrabold text-foreground">
-                            {formatCompactNumber(org.eventsViewsTotal)}
-                          </div>
-                        </div>
+                      <div className="mt-2 text-3xl font-extrabold text-foreground">
+                        {formatCompactNumber(org.eventsViewsTotal)}
                       </div>
+                    </div>
 
-                      <div className="mt-3 flex items-center justify-between rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-2 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Newspaper className="h-4 w-4 text-primary" />
-                          <span className="font-semibold">Articles</span>
-                          <span className="font-extrabold text-foreground">
-                            {formatCompactNumber(org.articlesCount)}
-                          </span>
-                        </div>
-                        <div className="h-4 w-px bg-border" />
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className="h-4 w-4 text-primary" />
-                          <span className="font-semibold">Comments</span>
-                          <span className="font-extrabold text-foreground">
-                            {formatCompactNumber(org.articleCommentsCount)}
-                          </span>
-                        </div>
+                    <div className="mt-4 flex items-center justify-between rounded-[var(--radius-lg)] border border-border bg-background/20 px-4 py-3 text-sm font-semibold text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Newspaper className="h-5 w-5 text-primary" />
+                        Articles
+                        <span className="ml-1 text-foreground">
+                          {formatCompactNumber(org.articlesCount)}
+                        </span>
                       </div>
+                      <div className="h-5 w-px bg-border" />
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-primary" />
+                        Comments
+                        <span className="ml-1 text-foreground">
+                          {formatCompactNumber(org.articleCommentsCount)}
+                        </span>
+                      </div>
+                    </div>
 
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className="text-sm font-semibold text-muted-foreground">
+                    <div className="mt-auto pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-extrabold tracking-tight text-muted-foreground">
                           View profile
                         </span>
                         <span
-                          className="text-primary transition-transform group-hover:translate-x-0.5"
+                          className="text-primary transition-transform group-hover:translate-x-1"
                           aria-hidden="true"
                         >
                           →
