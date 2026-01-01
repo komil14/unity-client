@@ -38,7 +38,9 @@ export function Section({
     <section style={{ marginBottom: 28 }}>
       <h2 style={{ margin: 0, fontSize: 22, letterSpacing: 0.2 }}>{title}</h2>
       {description ? (
-        <p style={{ marginTop: 8, marginBottom: 16, color: "var(--text-muted)" }}>
+        <p
+          style={{ marginTop: 8, marginBottom: 16, color: "var(--text-muted)" }}
+        >
           {description}
         </p>
       ) : (
