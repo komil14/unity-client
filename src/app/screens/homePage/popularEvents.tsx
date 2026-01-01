@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 
 import { useGetEventsQuery } from "../../services/eventsApi";
+import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "../eventsPage/EventCard";
 
 export default function PopularEventsSection() {
@@ -11,6 +13,17 @@ export default function PopularEventsSection() {
     order: "eventLikes",
     direction: "desc",
   });
+
+  const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
+  const { data: likesData } = useCheckLikesBatchQuery(
+    { likeGroup: "EVENT", likeRefIds: eventIds },
+    { skip: eventIds.length === 0 }
+  );
+
+  const likedSet = useMemo(() => {
+    const ids = likesData?.likedRefIds ?? [];
+    return new Set(ids);
+  }, [likesData]);
 
   return (
     <section className="mb-7">
@@ -49,7 +62,7 @@ export default function PopularEventsSection() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {data.map((event) => (
               <div key={event._id} className="h-full">
-                <EventCard event={event} />
+                <EventCard event={event} likedByMe={likedSet.has(event._id)} />
               </div>
             ))}
           </div>
