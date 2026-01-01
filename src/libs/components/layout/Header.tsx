@@ -1,6 +1,14 @@
 import { Link, NavLink } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { Menu, X, Home, Calendar, HelpCircle } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  Calendar,
+  HelpCircle,
+  Users,
+  Building2,
+} from "lucide-react";
 
 import { Button, buttonVariants } from "@/libs/components/ui/button";
 import {
@@ -20,6 +28,8 @@ import { useCheckAuthQuery } from "@/app/services/authApi";
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/events", label: "Events", icon: Calendar },
+  { href: "/groups", label: "Groups", icon: Users },
+  { href: "/organizers", label: "Organizers", icon: Building2 },
   { href: "/help", label: "Help", icon: HelpCircle },
 ];
 
