@@ -14,6 +14,13 @@ export type OrganizerDto = {
   updatedAt?: string;
   eventsOrganizedCount?: number;
   groupsOrganizedCount?: number;
+  // Top organizers aggregates
+  eventsCount?: number;
+  eventsLikesTotal?: number;
+  eventsViewsTotal?: number;
+  articlesCount?: number;
+  articleCommentsCount?: number;
+  topScore?: number;
 };
 
 export type GetOrganizersParams = {
@@ -49,8 +56,25 @@ export const organizersApi = api.injectEndpoints({
       query: (id) => `/organizer/detail/${id}`,
       providesTags: (_result, _err, id) => [{ type: "Organizer", id }],
     }),
+
+    getTopOrganizers: build.query<OrganizerDto[], { limit?: number } | void>({
+      query: (params) => ({
+        url: "/organizer/top",
+        params: params ?? undefined,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((o) => ({ type: "Organizer" as const, id: o._id })),
+              { type: "Organizer" as const, id: "TOP" },
+            ]
+          : [{ type: "Organizer" as const, id: "TOP" }],
+    }),
   }),
 });
 
-export const { useGetOrganizersQuery, useGetOrganizerByIdQuery } =
-  organizersApi;
+export const {
+  useGetOrganizersQuery,
+  useGetOrganizerByIdQuery,
+  useGetTopOrganizersQuery,
+} = organizersApi;
