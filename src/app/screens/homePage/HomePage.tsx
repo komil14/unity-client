@@ -419,6 +419,16 @@ function TopOrganizersSection() {
                           {formatCompactNumber(org.eventsLikesTotal)}
                         </div>
                       </div>
+
+                      <div className="col-span-2 rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                          <Eye className="h-4 w-4 text-primary" />
+                          Event views
+                        </div>
+                        <div className="mt-1 text-lg font-extrabold text-foreground">
+                          {formatCompactNumber(org.eventsViewsTotal)}
+                        </div>
+                      </div>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between rounded-[var(--radius-lg)] border border-border bg-background/20 px-3 py-2 text-xs text-muted-foreground">
