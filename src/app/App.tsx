@@ -1,6 +1,7 @@
 import "../css/App.css";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
-import HomeNavbar from "./components/headers/HomeNavbar";
+import Header from "@/libs/components/layout/Header";
+import Footer from "@/libs/components/layout/Footer";
 import HomePage from "./screens/homePage/HomePage.tsx";
 import EventsPage from "./screens/eventsPage/EventsPage.tsx";
 import EventDetailPage from "./screens/eventsPage/EventDetailPage.tsx";
@@ -9,16 +10,17 @@ import SignupPage from "./screens/authPage/SignupPage.tsx";
 
 function HomeLayout() {
   const location = useLocation();
-  const pathname = location.pathname;
-
-  const active = pathname.startsWith("/events") ? "events" : ("home" as const);
+  void location;
 
   return (
     <>
-      <HomeNavbar active={active} />
-      <main className="appContent">
-        <Outlet />
+      <Header />
+      <main className="flex-1 w-full flex flex-col">
+        <div className="content-container py-6">
+          <Outlet />
+        </div>
       </main>
+      <Footer />
     </>
   );
 }
