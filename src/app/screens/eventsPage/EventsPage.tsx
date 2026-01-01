@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
+import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "./EventCard";
 import { ArrowDownUp, Calendar, Search, X } from "lucide-react";
 
@@ -84,6 +85,17 @@ export default function EventsPage() {
   }, [order, direction, search, startDate, endDate]);
 
   const { data, isLoading, isError } = useGetEventsQuery(query);
+
+  const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
+  const { data: likesData } = useCheckLikesBatchQuery(
+    { likeGroup: "EVENT", likeRefIds: eventIds },
+    { skip: eventIds.length === 0 }
+  );
+
+  const likedSet = useMemo(() => {
+    const ids = likesData?.likedRefIds ?? [];
+    return new Set(ids);
+  }, [likesData]);
 
   return (
     <div>
@@ -201,7 +213,11 @@ export default function EventsPage() {
           }}
         >
           {data.map((event) => (
-            <EventCard key={event._id} event={event} />
+            <EventCard
+              key={event._id}
+              event={event}
+              likedByMe={likedSet.has(event._id)}
+            />
           ))}
         </div>
       )}

@@ -48,13 +48,24 @@ function formatDateTime(value: string): string {
   return `${datePart}, ${timePart}`;
 }
 
-export default function EventCard({ event }: { event: EventDto }) {
+export default function EventCard({
+  event,
+  likedByMe,
+}: {
+  event: EventDto;
+  likedByMe?: boolean;
+}) {
   const navigate = useNavigate();
   const [toggleLike, toggleState] = useToggleLikeMutation();
   const img = imageUrlFromFilename(event.eventImages?.[0]);
   const upcoming = isUpcoming(event.eventDate);
 
   const [likesCount, setLikesCount] = useState<number>(event.eventLikes);
+  const [liked, setLiked] = useState<boolean>(Boolean(likedByMe));
+
+  useEffect(() => {
+    setLiked(Boolean(likedByMe));
+  }, [event._id, likedByMe]);
 
   useEffect(() => {
     setLikesCount(event.eventLikes);
@@ -165,6 +176,8 @@ export default function EventCard({ event }: { event: EventDto }) {
                       likeRefId: event._id,
                     }).unwrap();
 
+                    setLiked(res.status === "liked");
+
                     setLikesCount((prev) => {
                       const delta = res.status === "liked" ? 1 : -1;
                       return Math.max(0, prev + delta);
@@ -177,8 +190,12 @@ export default function EventCard({ event }: { event: EventDto }) {
                   }
                 }}
                 aria-label="Likes"
+                aria-pressed={liked}
               >
-                <Heart className="h-5 w-5 text-destructive" />
+                <Heart
+                  className="h-5 w-5 text-destructive"
+                  fill={liked ? "currentColor" : "none"}
+                />
                 <span className="font-semibold">{likesCount}</span>
               </button>
 
