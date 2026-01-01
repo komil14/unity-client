@@ -1,12 +1,7 @@
 import { Link } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
-import {
-  Card,
-  Section,
-  clampText,
-  formatDate,
-  imageUrlFromFilename,
-} from "../shared/ui";
+import { Section, Card } from "../shared/ui";
+import EventCard from "../eventsPage/EventCard";
 
 function Hero() {
   return (
@@ -94,77 +89,13 @@ function EventsGrid({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: 14,
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: 16,
           }}
         >
-          {data.map((event) => {
-            const img = imageUrlFromFilename(event.eventImages?.[0]);
-            return (
-              <Link
-                key={event._id}
-                to={`/events/${event._id}`}
-                style={{ display: "block" }}
-              >
-                <Card>
-                  {img ? (
-                    <div
-                      style={{
-                        height: 140,
-                        borderRadius: "var(--radius-sm)",
-                        backgroundImage: `url(${img})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        border: "1px solid var(--border-color)",
-                        marginBottom: 12,
-                      }}
-                    />
-                  ) : null}
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 10,
-                    }}
-                  >
-                    <div style={{ fontWeight: 700 }}>{event.eventTitle}</div>
-                    <div style={{ color: "var(--text-muted)", fontSize: 13 }}>
-                      {formatDate(event.eventDate)}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 8,
-                      color: "var(--text-muted)",
-                      fontSize: 14,
-                    }}
-                  >
-                    {clampText(event.eventDesc, 110)}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 12,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      color: "var(--text-muted)",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span>{event.eventLocation}</span>
-                    <span>
-                      <span style={{ color: "var(--secondary)" }}>
-                        {event.eventLikes}
-                      </span>{" "}
-                      likes · {event.eventViews} views
-                    </span>
-                  </div>
-                </Card>
-              </Link>
-            );
-          })}
+          {data.map((event) => (
+            <EventCard key={event._id} event={event} />
+          ))}
         </div>
       )}
     </Section>
