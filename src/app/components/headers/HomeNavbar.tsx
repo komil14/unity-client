@@ -1,4 +1,6 @@
 import "../../../css/HomeNavbar.css";
+import { Link } from "react-router-dom";
+import { useCheckAuthQuery } from "../../services/authApi";
 
 type HomeNavbarActive = "home" | "events" | "groups" | "volunteer" | "help";
 
@@ -9,8 +11,8 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { key: "home", label: "Home", href: "#" },
-  { key: "events", label: "Events", href: "#" },
+  { key: "home", label: "Home", href: "/" },
+  { key: "events", label: "Events", href: "/events" },
   { key: "groups", label: "Groups", href: "#" },
   { key: "volunteer", label: "Volunteer", href: "#" },
   { key: "help", label: "Help", href: "#" },
@@ -66,20 +68,23 @@ export default function HomeNavbar({
 }: {
   active?: HomeNavbarActive;
 }) {
+  const { data } = useCheckAuthQuery(undefined);
+  const me = data?.member;
+
   return (
     <header className="homeNavbar" role="banner">
       <div className="homeNavbar__inner">
-        <a className="homeNavbar__brand" href="#" aria-label="Unity">
+        <Link className="homeNavbar__brand" to="/" aria-label="Unity">
           <span className="homeNavbar__brandText">
             <i className="fa-solid fa-leaf"></i>Unity
           </span>
-        </a>
+        </Link>
 
         <nav className="homeNavbar__nav" aria-label="Primary">
           {navItems.map((item) => (
-            <a
+            <Link
               key={item.key}
-              href={item.href}
+              to={item.href}
               className={
                 item.key === active
                   ? "homeNavbar__link homeNavbar__link--active"
@@ -87,7 +92,7 @@ export default function HomeNavbar({
               }
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -115,13 +120,24 @@ export default function HomeNavbar({
             <span className="homeNavbar__langDot" aria-hidden="true" />
           </button>
 
-          <button
-            className="homeNavbar__iconBtn"
-            type="button"
-            aria-label="Account"
-          >
-            <UserIcon />
-          </button>
+          {me ? (
+            <span
+              className="homeNavbar__iconBtn"
+              aria-label={`Logged in as ${me.memberNick}`}
+              title={`${me.memberNick} (${me.memberType})`}
+              style={{ cursor: "default" }}
+            >
+              <UserIcon />
+            </span>
+          ) : (
+            <Link
+              className="homeNavbar__iconBtn"
+              to="/login"
+              aria-label="Login"
+            >
+              <UserIcon />
+            </Link>
+          )}
         </div>
       </div>
     </header>
