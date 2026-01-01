@@ -31,7 +31,10 @@ export type GetEventsParams = {
   page?: number;
   limit?: number;
   order?: string;
+  direction?: "asc" | "desc";
   search?: string;
+  startDate?: string;
+  endDate?: string;
   memberId?: string;
 };
 
