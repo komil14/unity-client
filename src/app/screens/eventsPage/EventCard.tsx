@@ -52,8 +52,8 @@ export default function EventCard({ event }: { event: EventDto }) {
   const priceLabel = event.eventPoints ? `+${event.eventPoints} pts` : "Free";
 
   return (
-    <Link to={`/events/${event._id}`} className="block">
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/40">
+    <Link to={`/events/${event._id}`} className="block h-full">
+      <div className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/40">
         <div className="relative">
           <div className="relative aspect-[16/11] w-full overflow-hidden">
             {img ? (
@@ -83,7 +83,7 @@ export default function EventCard({ event }: { event: EventDto }) {
             </div>
           </div>
 
-          <div className="p-4">
+          <div className="flex flex-1 flex-col p-4">
             <div
               className="text-xl font-extrabold tracking-tight text-foreground"
               style={clampStyle(1)}
@@ -127,7 +127,14 @@ export default function EventCard({ event }: { event: EventDto }) {
             </div>
 
             <div className="mt-4 rounded-[var(--radius-lg)] border border-border bg-background/20 p-3 text-sm text-muted-foreground">
-              <div style={{ ...clampStyle(3), whiteSpace: "pre-wrap" }}>
+              <div
+                style={{
+                  ...clampStyle(3),
+                  lineHeight: "1.4em",
+                  maxHeight: "4.2em",
+                  whiteSpace: "normal",
+                }}
+              >
                 {event.eventDesc}
               </div>
             </div>
