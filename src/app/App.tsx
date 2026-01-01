@@ -2,7 +2,7 @@ import "../css/App.css";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import Header from "@/libs/components/layout/Header";
 import Footer from "@/libs/components/layout/Footer";
-import HomePage from "./screens/homePage/HomePage.tsx";
+import HomePage from "./screens/homePage";
 import EventsPage from "./screens/eventsPage/EventsPage.tsx";
 import EventDetailPage from "./screens/eventsPage/EventDetailPage.tsx";
 import GroupsPage from "./screens/groupPage/GroupsPage.tsx";

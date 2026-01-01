@@ -1,0 +1,27 @@
+import { useState } from "react";
+
+import HeroSection from "./hero";
+import WhyJoinSection, { type WhyTab } from "./whyJoin";
+import PopularEventsSection from "./popularEvents";
+import TrendingEventsSection from "./trendingEvents";
+import TopOrganizersSection from "./topOrganizers";
+import FinalCtaSection from "./finalCta";
+
+export default function HomePage() {
+  const [whyTab, setWhyTab] = useState<WhyTab>("volunteers");
+
+  return (
+    <div>
+      <HeroSection />
+
+      <div id="why" />
+      <WhyJoinSection whyTab={whyTab} setWhyTab={setWhyTab} />
+
+      <PopularEventsSection />
+      <TrendingEventsSection />
+      <TopOrganizersSection />
+
+      <FinalCtaSection />
+    </div>
+  );
+}
