@@ -18,7 +18,7 @@ export default function Footer() {
             className="flex items-center gap-3 hover:scale-95 transition-transform"
           >
             <Logo className="h-8 w-8" />
-            <span className="text-xl font-bold">Unity</span>
+            <span className="text-xl font-bold tracking-wide">UNITY</span>
           </Link>
           <p className="leading-6 text-muted-foreground md:leading-7">
             Find volunteering opportunities, join groups, and connect with
