@@ -5,6 +5,7 @@ export type OrganizerDto = {
   memberType: string;
   memberStatus: string;
   memberNick: string;
+  memberPhone?: string;
   memberDesc?: string;
   memberImage?: string;
   bannerImage?: string;
@@ -28,6 +29,7 @@ export type GetOrganizersParams = {
   page?: number;
   limit?: number;
   order?: string;
+  direction?: "asc" | "desc";
   search?: string;
   onlyActive?: boolean;
 };
