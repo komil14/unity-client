@@ -149,19 +149,12 @@ export default function EventCard({
             </div>
 
             <div className="mt-4 rounded-[var(--radius-lg)] border border-border bg-background/20 p-3 text-sm text-muted-foreground">
-              <div
-                style={{
-                  ...clampStyle(3),
-                  lineHeight: "1.4em",
-                  maxHeight: "4.2em",
-                  whiteSpace: "normal",
-                }}
-              >
+              <div className="truncate" title={event.eventDesc}>
                 {event.eventDesc}
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between">
+            <div className="mt-auto flex items-center justify-between pt-5">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-4 py-3 text-foreground"

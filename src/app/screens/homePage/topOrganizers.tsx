@@ -96,19 +96,18 @@ export default function TopOrganizersSection() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="min-w-0 truncate text-lg font-extrabold tracking-tight text-foreground">
-                            {org.memberNick}
-                          </div>
+                        <div className="text-lg font-extrabold tracking-tight leading-snug text-foreground break-words">
+                          {org.memberNick}
+                        </div>
+
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
+                          <span>Organizer</span>
                           {org.isVerified ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
                               <BadgeCheck className="h-3.5 w-3.5" />
                               Verified
                             </span>
                           ) : null}
-                        </div>
-                        <div className="mt-1 text-sm font-semibold text-muted-foreground">
-                          Organizer
                         </div>
                       </div>
                     </div>
