@@ -2,16 +2,14 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 
-import { useGetEventsQuery } from "../../services/eventsApi";
+import { useGetWeeklyPopularEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "../eventsPage/EventCard";
 
 export default function PopularEventsSection() {
-  const { data, isLoading, isError } = useGetEventsQuery({
-    page: 1,
+  const { data, isLoading, isError } = useGetWeeklyPopularEventsQuery({
+    days: 7,
     limit: 4,
-    order: "eventLikes",
-    direction: "desc",
   });
 
   const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
@@ -36,12 +34,12 @@ export default function PopularEventsSection() {
             </h2>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            The 4 most liked events right now.
+            Top events this week by volunteer applications.
           </p>
         </div>
 
         <Link
-          to="/events?order=eventLikes"
+          to="/events"
           className="inline-flex items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 py-2 text-sm font-semibold text-foreground hover:bg-background/60"
         >
           See all

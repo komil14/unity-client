@@ -38,6 +38,16 @@ export type GetEventsParams = {
   memberId?: string;
 };
 
+export type WeeklyPopularParams = {
+  days?: number;
+  limit?: number;
+};
+
+export type WeeklyPopularEventDto = EventDto & {
+  weeklyApplicants?: number;
+  weeklyApplyRate?: number;
+};
+
 export const eventsApi = api.injectEndpoints({
   endpoints: (build) => ({
     getEvents: build.query<EventDto[], GetEventsParams | void>({
@@ -57,7 +67,28 @@ export const eventsApi = api.injectEndpoints({
       query: (id) => `/event/detail/${id}`,
       providesTags: (_result, _err, id) => [{ type: "Event", id }],
     }),
+
+    getWeeklyPopularEvents: build.query<
+      WeeklyPopularEventDto[],
+      WeeklyPopularParams | void
+    >({
+      query: (params) => ({
+        url: "/event/popular-weekly",
+        params: params ?? undefined,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((e) => ({ type: "Event" as const, id: e._id })),
+              { type: "Event" as const, id: "POPULAR_WEEKLY" },
+            ]
+          : [{ type: "Event" as const, id: "POPULAR_WEEKLY" }],
+    }),
   }),
 });
 
-export const { useGetEventsQuery, useGetEventByIdQuery } = eventsApi;
+export const {
+  useGetEventsQuery,
+  useGetEventByIdQuery,
+  useGetWeeklyPopularEventsQuery,
+} = eventsApi;
