@@ -17,6 +17,8 @@ import {
   useCheckLikesBatchQuery,
   useToggleLikeMutation,
 } from "../../services/likesApi";
+import { useCheckAuthQuery } from "../../services/authApi";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
 function organizerImageUrl(src?: string): string | undefined {
   if (!src) return undefined;
@@ -37,6 +39,9 @@ const ORDER_OPTIONS: { label: string; value: string }[] = [
 export default function OrganizersPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { data: authData } = useCheckAuthQuery();
+  const isAuthenticated = Boolean(authData?.member?._id);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   const initialOrder = searchParams.get("order") || "createdAt";
   const [order, setOrder] = useState(initialOrder);
@@ -121,6 +126,11 @@ export default function OrganizersPage() {
     likedByMe: boolean,
     memberLikes: number
   ) => {
+    if (!isAuthenticated) {
+      setShowLoginAlert(true);
+      return;
+    }
+
     if (pendingLikeIds.has(orgId)) return;
 
     const nextLiked = !likedByMe;
@@ -416,6 +426,19 @@ export default function OrganizersPage() {
           </div>
         </>
       )}
+
+      <AlertDialog
+        isOpen={showLoginAlert}
+        onClose={() => setShowLoginAlert(false)}
+        onConfirm={() => {
+          setShowLoginAlert(false);
+          navigate("/login");
+        }}
+        title="Login Required"
+        description="Join our community to show your appreciation for amazing organizers! Create an account or login to continue."
+        confirmText="Login Now"
+        cancelText="Maybe Later"
+      />
     </div>
   );
 }

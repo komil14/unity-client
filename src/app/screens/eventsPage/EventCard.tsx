@@ -13,7 +13,9 @@ import {
 
 import type { EventDto } from "../../services/eventsApi";
 import { useToggleLikeMutation } from "../../services/likesApi";
+import { useCheckAuthQuery } from "../../services/authApi";
 import { imageUrlFromFilename } from "../../../libs/shared/ui";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
 function clampStyle(lines: number): CSSProperties {
   return {
@@ -57,11 +59,14 @@ export default function EventCard({
 }) {
   const navigate = useNavigate();
   const [toggleLike, toggleState] = useToggleLikeMutation();
+  const { data: authData } = useCheckAuthQuery();
+  const isAuthenticated = Boolean(authData?.member?._id);
   const img = imageUrlFromFilename(event.eventImages?.[0]);
   const upcoming = isUpcoming(event.eventDate);
 
   const [likesCount, setLikesCount] = useState<number>(event.eventLikes);
   const [liked, setLiked] = useState<boolean>(Boolean(likedByMe));
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   useEffect(() => {
     setLiked(Boolean(likedByMe));
@@ -165,6 +170,11 @@ export default function EventCard({
                   e.preventDefault();
                   e.stopPropagation();
 
+                  if (!isAuthenticated) {
+                    setShowLoginAlert(true);
+                    return;
+                  }
+
                   try {
                     const res = await toggleLike({
                       likeGroup: "EVENT",
@@ -225,6 +235,19 @@ export default function EventCard({
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        isOpen={showLoginAlert}
+        onClose={() => setShowLoginAlert(false)}
+        onConfirm={() => {
+          setShowLoginAlert(false);
+          navigate("/login");
+        }}
+        title="Login Required"
+        description="Join our community to like events and show your support! Create an account or login to continue."
+        confirmText="Login Now"
+        cancelText="Maybe Later"
+      />
     </Link>
   );
 }
