@@ -20,7 +20,6 @@ export function AlertDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  variant = "default",
 }: AlertDialogProps) {
   const [isVisible, setIsVisible] = useState(false);
 

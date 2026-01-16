@@ -5,6 +5,7 @@ import WhyJoinSection, { type WhyTab } from "./whyJoin";
 import PopularEventsSection from "./popularEvents";
 import TrendingEventsSection from "./trendingEvents";
 import TopOrganizersSection from "./topOrganizers";
+import AdvertisementSection from "./advertisement";
 import FinalCtaSection from "./finalCta";
 
 export default function HomePage() {
@@ -19,6 +20,7 @@ export default function HomePage() {
 
       <PopularEventsSection />
       <TrendingEventsSection />
+      <AdvertisementSection />
       <TopOrganizersSection />
 
       <FinalCtaSection />
