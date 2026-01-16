@@ -5,7 +5,7 @@ import {
   useGetOrganizerByIdQuery,
   useViewOrganizerMutation,
 } from "../../services/organizersApi";
-import { Card, clampText } from "../shared/ui";
+import { Card, clampText } from "../../../libs/shared/ui";
 
 export default function OrganizerDetailPage() {
   const { id } = useParams();

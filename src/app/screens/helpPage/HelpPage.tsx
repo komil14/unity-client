@@ -1,4 +1,4 @@
-import { Card, Section } from "../shared/ui";
+import { Card, Section } from "../../../libs/shared/ui";
 
 export default function HelpPage() {
   return (

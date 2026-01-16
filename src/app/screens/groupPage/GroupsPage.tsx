@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useGetGroupsQuery } from "../../services/groupsApi";
-import { Card, clampText, uploadUrlFromFilename } from "../shared/ui";
+import {
+  Card,
+  clampText,
+  uploadUrlFromFilename,
+} from "../../../libs/shared/ui";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
   { label: "Newest", value: "createdAt" },

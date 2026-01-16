@@ -4,7 +4,11 @@ import {
   useGetGroupByIdQuery,
   useJoinGroupMutation,
 } from "../../services/groupsApi";
-import { Card, clampText, uploadUrlFromFilename } from "../shared/ui";
+import {
+  Card,
+  clampText,
+  uploadUrlFromFilename,
+} from "../../../libs/shared/ui";
 
 export default function GroupDetailPage() {
   const { id } = useParams();

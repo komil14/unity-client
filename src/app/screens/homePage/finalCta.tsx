@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Section } from "../shared/ui";
+import { Section } from "../../../libs/shared/ui";
 import {
   BadgeCheck,
   CalendarCheck,

@@ -6,7 +6,7 @@ import {
   clampText,
   formatDate,
   imageUrlFromFilename,
-} from "../shared/ui";
+} from "../../../libs/shared/ui";
 
 export default function EventDetailPage() {
   const { id } = useParams();

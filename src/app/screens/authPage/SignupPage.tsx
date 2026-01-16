@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSignupMutation } from "../../services/authApi";
-import { Card } from "../shared/ui";
+import { Card } from "../../../libs/shared/ui";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Signup failed.";
