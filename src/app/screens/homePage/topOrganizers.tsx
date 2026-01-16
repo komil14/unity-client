@@ -78,9 +78,9 @@ export default function TopOrganizersSection() {
                   to={`/organizers/${org._id}`}
                   className="group block h-full"
                 >
-                  <div className="flex h-full flex-col rounded-[var(--radius-lg)] border border-border bg-background/30 p-5 transition-colors hover:bg-background/40">
-                    <div className="flex items-start gap-4">
-                      <div className="relative h-16 w-16 overflow-hidden rounded-full border border-border bg-muted">
+                  <div className="flex h-full flex-col rounded-[var(--radius-lg)] border border-border bg-background/30 p-3 transition-colors hover:bg-background/40">
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border bg-muted flex-shrink-0">
                         {avatarImg ? (
                           <img
                             src={avatarImg}
@@ -89,22 +89,22 @@ export default function TopOrganizersSection() {
                             loading="lazy"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-foreground">
+                          <div className="flex h-full w-full items-center justify-center text-lg font-extrabold text-foreground">
                             {initial}
                           </div>
                         )}
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="text-lg font-extrabold tracking-tight leading-snug text-foreground break-words">
+                        <div className="text-sm font-extrabold tracking-tight leading-snug text-foreground break-words">
                           {org.memberNick}
                         </div>
 
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs font-semibold text-muted-foreground">
                           <span>Organizer</span>
                           {org.isVerified ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                              <BadgeCheck className="h-3.5 w-3.5" />
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0 text-[10px] font-semibold text-primary">
+                              <BadgeCheck className="h-2.5 w-2.5" />
                               Verified
                             </span>
                           ) : null}
@@ -112,80 +112,80 @@ export default function TopOrganizersSection() {
                       </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 gap-4">
-                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                          <Heart className="h-5 w-5 text-primary" />
-                          Likes
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-2">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                          <Heart className="h-3.5 w-3.5 text-primary" />
+                          <span>Likes</span>
                         </div>
-                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                        <div className="mt-1 text-lg font-extrabold text-foreground">
                           {formatCompactNumber(org.memberLikes)}
                         </div>
                       </div>
-                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                          <Eye className="h-5 w-5 text-primary" />
-                          Views
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-2">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                          <Eye className="h-3.5 w-3.5 text-primary" />
+                          <span>Views</span>
                         </div>
-                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                        <div className="mt-1 text-lg font-extrabold text-foreground">
                           {formatCompactNumber(org.memberViews)}
                         </div>
                       </div>
-                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                          <CalendarCheck className="h-5 w-5 text-primary" />
-                          Events
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-2">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                          <CalendarCheck className="h-3.5 w-3.5 text-primary" />
+                          <span>Events</span>
                         </div>
-                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                        <div className="mt-1 text-lg font-extrabold text-foreground">
                           {formatCompactNumber(org.eventsCount)}
                         </div>
                       </div>
-                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                          <Heart className="h-5 w-5 text-primary" />
-                          Event likes
+                      <div className="rounded-[var(--radius-lg)] border border-border bg-background/20 p-2">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                          <Heart className="h-3.5 w-3.5 text-primary" />
+                          <span>Event likes</span>
                         </div>
-                        <div className="mt-2 text-3xl font-extrabold text-foreground">
+                        <div className="mt-1 text-lg font-extrabold text-foreground">
                           {formatCompactNumber(org.eventsLikesTotal)}
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-4 rounded-[var(--radius-lg)] border border-border bg-background/20 p-4">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                        <Eye className="h-5 w-5 text-primary" />
-                        Event views
+                    <div className="mt-2 rounded-[var(--radius-lg)] border border-border bg-background/20 p-2">
+                      <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                        <Eye className="h-3.5 w-3.5 text-primary" />
+                        <span>Event views</span>
                       </div>
-                      <div className="mt-2 text-3xl font-extrabold text-foreground">
+                      <div className="mt-1 text-lg font-extrabold text-foreground">
                         {formatCompactNumber(org.eventsViewsTotal)}
                       </div>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between rounded-[var(--radius-lg)] border border-border bg-background/20 px-4 py-3 text-sm font-semibold text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Newspaper className="h-5 w-5 text-primary" />
-                        Articles
-                        <span className="ml-1 text-foreground">
+                    <div className="mt-2 flex items-center justify-between gap-1 rounded-[var(--radius-lg)] border border-border bg-background/20 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Newspaper className="h-3.5 w-3.5 text-primary" />
+                        <span>Articles</span>
+                        <span className="text-foreground">
                           {formatCompactNumber(org.articlesCount)}
                         </span>
                       </div>
-                      <div className="h-5 w-px bg-border" />
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-primary" />
-                        Comments
-                        <span className="ml-1 text-foreground">
+                      <div className="h-3 w-px bg-border" />
+                      <div className="flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5 text-primary" />
+                        <span>Comments</span>
+                        <span className="text-foreground">
                           {formatCompactNumber(org.articleCommentsCount)}
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-4">
+                    <div className="mt-auto pt-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-extrabold tracking-tight text-muted-foreground">
+                        <span className="text-xs font-extrabold tracking-tight text-muted-foreground">
                           View profile
                         </span>
                         <span
-                          className="text-primary transition-transform group-hover:translate-x-1"
+                          className="text-primary transition-transform group-hover:translate-x-0.5"
                           aria-hidden="true"
                         >
                           →
