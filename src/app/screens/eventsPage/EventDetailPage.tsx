@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ExternalLink,
@@ -23,6 +23,7 @@ import {
   useCheckLikesBatchQuery,
 } from "../../services/likesApi";
 import { imageUrlFromFilename } from "../../../libs/shared/ui";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -54,15 +55,18 @@ function isUpcoming(dateValue: string): boolean {
 export default function EventDetailPage() {
   const { id } = useParams();
   const eventId = id ?? "";
+  const navigate = useNavigate();
 
   // Check if current user is an organizer
   const { data: authData } = useCheckAuthQuery();
   const isOrganizer = authData?.member?.memberType === "ORG";
+  const isAuthenticated = Boolean(authData?.member?._id);
 
   const [joinEvent, joinState] = useJoinEventMutation();
   const [toggleLike] = useToggleLikeMutation();
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   const { data, isLoading, isError } = useGetEventByIdQuery(eventId, {
     skip: !eventId,
@@ -94,6 +98,12 @@ export default function EventDetailPage() {
 
   const handleLike = async () => {
     if (!eventId) return;
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setShowLoginAlert(true);
+      return;
+    }
 
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
@@ -299,6 +309,12 @@ export default function EventDetailPage() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 {/* Like and Share Buttons */}
                 <div className="flex items-center gap-3">
+                  {/* View Count */}
+                  <div className="inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-2 text-sm font-semibold text-foreground">
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <span>{data.eventViews || 0}</span>
+                  </div>
+
                   {/* Like Button */}
                   <button
                     onClick={handleLike}
@@ -491,6 +507,18 @@ export default function EventDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Login Alert Dialog */}
+      <AlertDialog
+        isOpen={showLoginAlert}
+        onClose={() => setShowLoginAlert(false)}
+        onConfirm={() => navigate("/login")}
+        title="Login Required"
+        description="Join our community to like events, apply to activities, and connect with amazing people. Create your account today!"
+        confirmText="Go to Login"
+        cancelText="Maybe Later"
+        variant="primary"
+      />
     </div>
   );
 }
