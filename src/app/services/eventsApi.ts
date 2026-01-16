@@ -7,6 +7,7 @@ export type MemberData = {
   memberStatus: string;
   memberImage?: string;
   memberDesc?: string;
+  isVerified?: boolean;
 };
 
 export type EventDto = {

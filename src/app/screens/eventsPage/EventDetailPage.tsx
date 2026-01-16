@@ -401,8 +401,9 @@ export default function EventDetailPage() {
 
                 <Link
                   to={`/organizers/${data.memberId}`}
-                  className="flex items-start gap-3 hover:opacity-80 transition-opacity"
+                  className="grid grid-cols-[auto_1fr_auto] items-center gap-4 hover:opacity-80 transition-opacity"
                 >
+                  {/* Column 1: Image */}
                   <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border bg-muted flex-shrink-0">
                     {data.memberData.memberImage ? (
                       <img
@@ -416,20 +417,24 @@ export default function EventDetailPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0 pt-1">
-                    <div className="font-bold text-foreground text-lg mb-1">
+
+                  {/* Column 2: Name and Role */}
+                  <div className="min-w-0">
+                    <div className="font-bold text-foreground text-base mb-0.5">
                       {data.memberData.memberNick}
                     </div>
-                    <div className="text-xs text-muted-foreground mb-2">
+                    <div className="text-xs text-muted-foreground">
                       Organizer
                     </div>
-                    {data.memberData.memberStatus === "verified" && (
-                      <div className="inline-flex items-center gap-1 rounded-full bg-yellow-100 text-yellow-700 px-2.5 py-1">
-                        <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span className="text-xs font-bold">Verified</span>
-                      </div>
-                    )}
                   </div>
+
+                  {/* Column 3: Verified Badge */}
+                  {data.memberData.isVerified && (
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1">
+                      <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="text-xs font-semibold">Verified</span>
+                    </div>
+                  )}
                 </Link>
               </div>
             )}
