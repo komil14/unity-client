@@ -3,7 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "./EventCard";
-import { ArrowDownUp, Calendar, Search, X } from "lucide-react";
+import {
+  ArrowDownUp,
+  Calendar,
+  LoaderCircle,
+  Search,
+  Users,
+  X,
+} from "lucide-react";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
   { label: "Event Date", value: "eventDate" },
@@ -199,7 +206,48 @@ export default function EventsPage() {
       </div>
 
       {isLoading ? (
-        <div style={{ color: "var(--text-muted)" }}>Loading…</div>
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-border bg-card/30 p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/30">
+                <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-foreground">
+                  Searching volunteer events…
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Matching opportunities to your filters
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <Users className="h-4 w-4 text-primary" />
+              <span>Connecting volunteers & organizers</span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/20 shadow-sm"
+              >
+                <div className="animate-pulse p-4">
+                  <div className="h-40 w-full rounded-[var(--radius-lg)] bg-background/30" />
+                  <div className="mt-4 h-5 w-3/4 rounded bg-background/30" />
+                  <div className="mt-3 h-4 w-full rounded bg-background/20" />
+                  <div className="mt-2 h-4 w-5/6 rounded bg-background/20" />
+                  <div className="mt-5 flex items-center justify-between">
+                    <div className="h-9 w-28 rounded-[var(--radius-lg)] bg-background/20" />
+                    <div className="h-9 w-12 rounded-[var(--radius-lg)] bg-background/20" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : isError ? (
         <div style={{ color: "var(--danger)" }}>Failed to load events.</div>
       ) : !data?.length ? (

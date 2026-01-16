@@ -1,11 +1,22 @@
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { useGetOrganizerByIdQuery } from "../../services/organizersApi";
+import {
+  useGetOrganizerByIdQuery,
+  useViewOrganizerMutation,
+} from "../../services/organizersApi";
 import { Card, clampText } from "../shared/ui";
 
 export default function OrganizerDetailPage() {
   const { id } = useParams();
   const organizerId = id ?? "";
+
+  const [viewOrganizer] = useViewOrganizerMutation();
+
+  useEffect(() => {
+    if (!organizerId) return;
+    viewOrganizer(organizerId);
+  }, [organizerId, viewOrganizer]);
 
   const { data, isLoading, isError } = useGetOrganizerByIdQuery(organizerId, {
     skip: !organizerId,
