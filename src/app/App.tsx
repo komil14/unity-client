@@ -10,6 +10,7 @@ import GroupsPage from "./screens/groupPage/GroupsPage.tsx";
 import GroupDetailPage from "./screens/groupPage/GroupDetailPage.tsx";
 import OrganizersPage from "./screens/organizerPage/OrganizersPage.tsx";
 import OrganizerDetailPage from "./screens/organizerPage/OrganizerDetailPage.tsx";
+import ProfilePage from "./screens/volunteerPage/ProfilePage.tsx";
 import HelpPage from "./screens/helpPage/HelpPage.tsx";
 import LoginPage from "./screens/authPage/LoginPage.tsx";
 import SignupPage from "./screens/authPage/SignupPage.tsx";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/groups/:id" element={<GroupDetailPage />} />
             <Route path="/organizers" element={<OrganizersPage />} />
             <Route path="/organizers/:id" element={<OrganizerDetailPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
