@@ -20,6 +20,13 @@ import {
   SheetTrigger,
 } from "@/libs/components/ui/sheet";
 import { ModeToggle } from "@/libs/components/ui/mode-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/libs/components/ui/dropdown-menu";
 import { Logo } from "@/libs/components/common/Logo";
 import { cn } from "@/libs/utils";
 
@@ -36,6 +43,21 @@ const navLinks = [
 export default function Header() {
   const { data: authData } = useCheckAuthQuery();
   const isAuthed = Boolean(authData?.member?._id);
+  const displayName = authData?.member?.memberNick || "Guest";
+  const displayPhone = authData?.member?.memberPhone || "+000 00 000 00 00";
+  const initial = displayName.charAt(0).toUpperCase();
+  const avatarSrcRaw = authData?.member?.memberImage;
+
+  function avatarUrl(src?: string): string | undefined {
+    if (!src) return undefined;
+    if (src.startsWith("http://") || src.startsWith("https://")) return src;
+    if (src.startsWith("/uploads/")) return src;
+    if (src.startsWith("uploads/")) return `/${src}`;
+    if (src.includes("/")) return `/uploads/${src.replace(/^\/+/, "")}`;
+    if (src.startsWith("/")) return src;
+    return `/uploads/members/${src}`;
+  }
+  const avatar = avatarUrl(avatarSrcRaw);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -81,7 +103,61 @@ export default function Header() {
           <ModeToggle />
 
           {isAuthed ? (
-            <span className="text-sm text-muted-foreground">Signed in</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full border border-border bg-card hover:bg-accent"
+                  aria-label="Open profile menu"
+                >
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt={displayName}
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex h-full w-full items-center justify-center rounded-full text-sm font-bold">
+                      {initial}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="rounded-xl border bg-white dark:bg-popover p-0 w-60 shadow-xl"
+              >
+                {/* Identity section */}
+                <div className="px-4 py-3">
+                  <div className="text-sm font-extrabold text-foreground truncate">
+                    {displayName}
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground truncate">
+                    {displayPhone}
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+
+                {/* Menu links */}
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="w-full">
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    // Best-effort SPA logout (server endpoint may vary)
+                    fetch("/member/logout", { method: "POST" }).finally(() => {
+                      window.location.assign("/login");
+                    });
+                  }}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2 lg:gap-4">
               <Link to="/login">
@@ -139,9 +215,64 @@ export default function Header() {
                     </SheetClose>
                   </div>
 
-                  <div className="grid grid-cols-1 items-center px-4 pb-4">
-                    <div className="flex items-center justify-center">
+                  <div className="px-4 pb-4">
+                    <div className="flex items-center justify-between">
                       <ModeToggle />
+                      {isAuthed && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 rounded-full border border-border bg-card hover:bg-accent"
+                              aria-label="Open profile menu"
+                            >
+                              {avatar ? (
+                                <img
+                                  src={avatar}
+                                  alt={displayName}
+                                  className="h-full w-full rounded-full object-cover"
+                                />
+                              ) : (
+                                <span className="inline-flex h-full w-full items-center justify-center rounded-full text-sm font-bold">
+                                  {initial}
+                                </span>
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="rounded-xl border bg-white dark:bg-popover p-0 w-60 shadow-xl"
+                          >
+                            <div className="px-4 py-3">
+                              <div className="text-sm font-extrabold text-foreground truncate">
+                                {displayName}
+                              </div>
+                              <div className="mt-0.5 text-xs text-muted-foreground truncate">
+                                {displayPhone}
+                              </div>
+                            </div>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link to="/profile" className="w-full">
+                                Profile
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => {
+                                fetch("/member/logout", {
+                                  method: "POST",
+                                }).finally(() => {
+                                  window.location.assign("/login");
+                                });
+                              }}
+                            >
+                              Logout
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </div>
                 </SheetHeader>
