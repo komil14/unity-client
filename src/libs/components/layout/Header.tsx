@@ -30,7 +30,7 @@ import {
 import { Logo } from "@/libs/components/common/Logo";
 import { cn } from "@/libs/utils";
 
-import { useCheckAuthQuery } from "@/app/services/authApi";
+import { useCheckAuthQuery, useLogoutMutation } from "@/app/services/authApi";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -47,6 +47,7 @@ export default function Header() {
   const displayPhone = authData?.member?.memberPhone || "+000 00 000 00 00";
   const initial = displayName.charAt(0).toUpperCase();
   const avatarSrcRaw = authData?.member?.memberImage;
+  const [logout] = useLogoutMutation();
 
   function avatarUrl(src?: string): string | undefined {
     if (!src) return undefined;
@@ -147,11 +148,12 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => {
-                    // Best-effort SPA logout (server endpoint may vary)
-                    fetch("/member/logout", { method: "POST" }).finally(() => {
+                  onClick={async () => {
+                    try {
+                      await logout().unwrap();
+                    } finally {
                       window.location.assign("/login");
-                    });
+                    }
                   }}
                 >
                   Logout
@@ -260,12 +262,12 @@ export default function Header() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => {
-                                fetch("/member/logout", {
-                                  method: "POST",
-                                }).finally(() => {
+                              onClick={async () => {
+                                try {
+                                  await logout().unwrap();
+                                } finally {
                                   window.location.assign("/login");
-                                });
+                                }
                               }}
                             >
                               Logout

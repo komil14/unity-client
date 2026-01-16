@@ -59,8 +59,16 @@ export const authApi = api.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Me", id: "ME" }],
     }),
+    logout: build.mutation<{ ok: boolean }, void>({
+      query: () => ({ url: "/member/logout", method: "POST" }),
+      invalidatesTags: [{ type: "Me", id: "ME" }],
+    }),
   }),
 });
 
-export const { useCheckAuthQuery, useLoginMutation, useSignupMutation } =
-  authApi;
+export const {
+  useCheckAuthQuery,
+  useLoginMutation,
+  useSignupMutation,
+  useLogoutMutation,
+} = authApi;
