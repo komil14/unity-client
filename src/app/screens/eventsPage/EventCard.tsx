@@ -16,6 +16,7 @@ import { useToggleLikeMutation } from "../../services/likesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { imageUrlFromFilename } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
+import { useToast } from "../../../libs/components/ui/toast";
 
 function clampStyle(lines: number): CSSProperties {
   return {
@@ -61,6 +62,7 @@ export default function EventCard({
   const [toggleLike, toggleState] = useToggleLikeMutation();
   const { data: authData } = useCheckAuthQuery();
   const isAuthenticated = Boolean(authData?.member?._id);
+  const { showToast } = useToast();
   const img = imageUrlFromFilename(event.eventImages?.[0]);
   const upcoming = isUpcoming(event.eventDate);
 
@@ -187,6 +189,13 @@ export default function EventCard({
                       const delta = res.status === "liked" ? 1 : -1;
                       return Math.max(0, prev + delta);
                     });
+
+                    // Show success toast
+                    showToast(
+                      res.status === "liked"
+                        ? "Event added to your favorites!"
+                        : "Event removed from your favorites!"
+                    );
                   } catch (err: any) {
                     const status = err?.status;
                     if (status === 401 || status === 403) {

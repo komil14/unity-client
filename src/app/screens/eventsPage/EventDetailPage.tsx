@@ -24,6 +24,7 @@ import {
 } from "../../services/likesApi";
 import { imageUrlFromFilename } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
+import { useToast } from "../../../libs/components/ui/toast";
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -67,6 +68,7 @@ export default function EventDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const { showToast } = useToast();
 
   const { data, isLoading, isError } = useGetEventByIdQuery(eventId, {
     skip: !eventId,
@@ -111,6 +113,13 @@ export default function EventDetailPage() {
 
     try {
       await toggleLike({ likeRefId: eventId, likeGroup: "EVENT" }).unwrap();
+
+      // Show success toast
+      showToast(
+        wasLiked
+          ? "Event removed from your favorites!"
+          : "Event added to your favorites!"
+      );
     } catch (err) {
       // Revert on error
       setIsLiked(wasLiked);

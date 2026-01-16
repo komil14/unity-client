@@ -2,6 +2,7 @@ import "../css/App.css";
 import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import Header from "@/libs/components/layout/Header";
 import Footer from "@/libs/components/layout/Footer";
+import { ToastProvider } from "@/libs/components/ui/toast";
 import HomePage from "./screens/homePage";
 import EventsPage from "./screens/eventsPage/EventsPage.tsx";
 import EventDetailPage from "./screens/eventsPage/EventDetailPage.tsx";
@@ -32,24 +33,26 @@ function HomeLayout() {
 
 function App() {
   return (
-    <div className="appShell">
-      <Routes>
-        <Route element={<HomeLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/events/:id" element={<EventDetailPage />} />
-          <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/groups/:id" element={<GroupDetailPage />} />
-          <Route path="/organizers" element={<OrganizersPage />} />
-          <Route path="/organizers/:id" element={<OrganizerDetailPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-        </Route>
+    <ToastProvider>
+      <div className="appShell">
+        <Routes>
+          <Route element={<HomeLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/groups" element={<GroupsPage />} />
+            <Route path="/groups/:id" element={<GroupDetailPage />} />
+            <Route path="/organizers" element={<OrganizersPage />} />
+            <Route path="/organizers/:id" element={<OrganizerDetailPage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+          </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </ToastProvider>
   );
 }
 

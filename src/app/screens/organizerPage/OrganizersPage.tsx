@@ -19,6 +19,7 @@ import {
 } from "../../services/likesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
+import { useToast } from "../../../libs/components/ui/toast";
 
 function organizerImageUrl(src?: string): string | undefined {
   if (!src) return undefined;
@@ -42,6 +43,7 @@ export default function OrganizersPage() {
   const { data: authData } = useCheckAuthQuery();
   const isAuthenticated = Boolean(authData?.member?._id);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const { showToast } = useToast();
 
   const initialOrder = searchParams.get("order") || "createdAt";
   const [order, setOrder] = useState(initialOrder);
@@ -158,6 +160,13 @@ export default function OrganizersPage() {
         ...prev,
         [orgId]: Math.max(0, memberLikes + delta),
       }));
+
+      // Show success toast
+      showToast(
+        finalLiked
+          ? "Organizer added to your favorites!"
+          : "Organizer removed from your favorites!"
+      );
     } catch (err: any) {
       setLikedOverrides((prev) => {
         const next = { ...prev };
