@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "./EventCard";
 import {
-  ArrowDownUp,
   Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
   LoaderCircle,
-  Search,
   Users,
   X,
 } from "lucide-react";
@@ -43,6 +45,13 @@ export default function EventsPage() {
 
   const initialEndDate = searchParams.get("endDate") || "";
   const [endDate, setEndDate] = useState(initialEndDate);
+
+  // Calendar popover states
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const startDateRef = useRef<HTMLDivElement>(null);
+  const endDateRef = useRef<HTMLDivElement>(null);
 
   // Keep component state in sync if the user navigates with browser history.
   useEffect(() => {
@@ -104,6 +113,83 @@ export default function EventsPage() {
     return new Set(ids);
   }, [likesData]);
 
+  // Calendar helpers
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    // Add previous month's trailing days
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    // Add current month's days
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+    return days;
+  };
+
+  const formatDateDisplay = (dateString: string) => {
+    if (!dateString) return "End Date";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const handleDateSelect = (day: number, isStartDate: boolean) => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const selectedDate = new Date(year, month, day);
+    const dateString = selectedDate.toISOString().split("T")[0];
+
+    if (isStartDate) {
+      setStartDate(dateString);
+      setShowStartCalendar(false);
+    } else {
+      setEndDate(dateString);
+      setShowEndCalendar(false);
+    }
+  };
+
+  const isToday = (day: number | null) => {
+    if (!day) return false;
+    const today = new Date();
+    return (
+      day === today.getDate() &&
+      calendarMonth.getMonth() === today.getMonth() &&
+      calendarMonth.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Close calendar on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        startDateRef.current &&
+        !startDateRef.current.contains(event.target as Node)
+      ) {
+        setShowStartCalendar(false);
+      }
+      if (
+        endDateRef.current &&
+        !endDateRef.current.contains(event.target as Node)
+      ) {
+        setShowEndCalendar(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div>
       <div className="mb-4">
@@ -117,38 +203,189 @@ export default function EventsPage() {
 
       <div className="mb-6 rounded-[var(--radius-lg)] border border-border bg-card/30 p-4 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center gap-3">
+          {/* Search Input */}
           <div className="relative min-w-[260px] flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search events..."
-              className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 pl-10 pr-3 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
-          <div className="relative">
-            <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="h-11 w-[170px] rounded-[var(--radius-lg)] border border-border bg-background/40 pl-10 pr-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="Start date"
-            />
+          {/* Start Date Picker */}
+          <div className="relative" ref={startDateRef}>
+            <button
+              onClick={() => {
+                setShowStartCalendar(!showStartCalendar);
+                setShowEndCalendar(false);
+                setCalendarMonth(startDate ? new Date(startDate) : new Date());
+              }}
+              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors"
+            >
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>
+                {startDate ? formatDateDisplay(startDate) : "Start Date"}
+              </span>
+            </button>
+
+            {/* Start Date Calendar Popover */}
+            {showStartCalendar && (
+              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-50 w-80">
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() - 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    className="p-1 hover:bg-muted rounded"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <span className="font-semibold text-foreground">
+                    {calendarMonth.toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() + 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    className="p-1 hover:bg-muted rounded"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                {/* Day Headers */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                    <div
+                      key={day}
+                      className="text-center text-xs font-medium text-muted-foreground py-2"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar Days */}
+                <div className="grid grid-cols-7 gap-1">
+                  {getDaysInMonth(calendarMonth).map((day, index) => (
+                    <button
+                      key={index}
+                      onClick={() => day && handleDateSelect(day, true)}
+                      disabled={!day}
+                      className={`
+                        aspect-square p-2 text-sm rounded-lg transition-colors
+                        ${!day ? "invisible" : ""}
+                        ${
+                          isToday(day)
+                            ? "bg-primary/20 text-primary font-semibold"
+                            : ""
+                        }
+                        ${day && !isToday(day) ? "hover:bg-muted" : ""}
+                      `}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="relative">
-            <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="h-11 w-[170px] rounded-[var(--radius-lg)] border border-border bg-background/40 pl-10 pr-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="End date"
-            />
+          {/* End Date Picker */}
+          <div className="relative" ref={endDateRef}>
+            <button
+              onClick={() => {
+                setShowEndCalendar(!showEndCalendar);
+                setShowStartCalendar(false);
+                setCalendarMonth(endDate ? new Date(endDate) : new Date());
+              }}
+              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors"
+            >
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{endDate ? formatDateDisplay(endDate) : "End Date"}</span>
+            </button>
+
+            {/* End Date Calendar Popover */}
+            {showEndCalendar && (
+              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-50 w-80">
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() - 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    className="p-1 hover:bg-muted rounded"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <span className="font-semibold text-foreground">
+                    {calendarMonth.toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const newMonth = new Date(calendarMonth);
+                      newMonth.setMonth(newMonth.getMonth() + 1);
+                      setCalendarMonth(newMonth);
+                    }}
+                    className="p-1 hover:bg-muted rounded"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                {/* Day Headers */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                    <div
+                      key={day}
+                      className="text-center text-xs font-medium text-muted-foreground py-2"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar Days */}
+                <div className="grid grid-cols-7 gap-1">
+                  {getDaysInMonth(calendarMonth).map((day, index) => (
+                    <button
+                      key={index}
+                      onClick={() => day && handleDateSelect(day, false)}
+                      disabled={!day}
+                      className={`
+                        aspect-square p-2 text-sm rounded-lg transition-colors
+                        ${!day ? "invisible" : ""}
+                        ${
+                          isToday(day)
+                            ? "bg-primary/20 text-primary font-semibold"
+                            : ""
+                        }
+                        ${day && !isToday(day) ? "hover:bg-muted" : ""}
+                      `}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Sort Dropdown */}
           <div className="relative">
             <select
               value={order}
@@ -157,7 +394,6 @@ export default function EventsPage() {
                 setOrder(nextOrder);
                 setDirection((prev) => {
                   const defaultDir = defaultDirectionForOrder(nextOrder);
-                  // If the user hasn't customized direction, snap to default for that field.
                   return prev === defaultDirectionForOrder(order)
                     ? defaultDir
                     : prev;
@@ -172,11 +408,10 @@ export default function EventsPage() {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              ▾
-            </div>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
 
+          {/* Direction Toggle */}
           <button
             type="button"
             className="inline-flex h-11 w-12 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60"
@@ -184,9 +419,14 @@ export default function EventsPage() {
             aria-label="Toggle sort direction"
             title={direction === "asc" ? "Ascending" : "Descending"}
           >
-            <ArrowDownUp className="h-4 w-4" />
+            {direction === "asc" ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
           </button>
 
+          {/* Clear Button */}
           <button
             type="button"
             className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60"
