@@ -387,7 +387,6 @@ function SettingsForm({
 
       const result = await updateProfile(formData as any).unwrap();
       console.log("Image upload successful:", result);
-      showToast("Profile picture updated successfully!");
       setPreviewImage(null);
       onUpdate();
     } catch (err: any) {
@@ -434,7 +433,6 @@ function SettingsForm({
       console.log("Result type:", typeof result);
       console.log("Result keys:", Object.keys(result));
 
-      showToast("Profile updated successfully!");
       onUpdate();
     } catch (err: any) {
       console.error("❌ Failed to save profile");
@@ -608,11 +606,28 @@ function ApplicationsList({
           key={app._id}
           className="rounded-lg border border-border bg-background/50 p-4 hover:bg-muted/30 transition-colors"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-2">
+          <div className="flex items-start gap-4">
+            {/* Event Image */}
+            {app.eventData?.eventImages?.[0] && (
+              <div className="flex-shrink-0">
+                <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted">
+                  <img
+                    src={uploadUrlFromFilename(
+                      "events",
+                      app.eventData.eventImages[0]
+                    )}
+                    alt={app.eventData.eventTitle || "Event"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Event Info */}
+            <div className="flex-1 space-y-2 min-w-0">
               <div className="flex items-center gap-2">
                 {statusIcons[status]}
-                <h3 className="font-semibold text-foreground">
+                <h3 className="font-semibold text-foreground truncate">
                   {app.eventData?.eventTitle || "Event"}
                 </h3>
               </div>
@@ -626,17 +641,21 @@ function ApplicationsList({
                 {app.eventData?.eventLocation && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {app.eventData.eventLocation}
+                    <span className="truncate">
+                      {app.eventData.eventLocation}
+                    </span>
                   </div>
                 )}
               </div>
               {app.applicationNote && (
-                <p className="text-sm text-muted-foreground italic">
+                <p className="text-sm text-muted-foreground italic line-clamp-2">
                   Note: {app.applicationNote}
                 </p>
               )}
             </div>
-            <div className="text-right">
+
+            {/* Date */}
+            <div className="flex-shrink-0 text-right">
               <p className="text-xs text-muted-foreground">
                 {new Date(app.createdAt).toLocaleDateString()}
               </p>
