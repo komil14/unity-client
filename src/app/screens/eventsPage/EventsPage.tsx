@@ -201,7 +201,7 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-[var(--radius-lg)] border border-border bg-card/30 p-4 shadow-sm backdrop-blur">
+      <div className="mb-6 rounded-[var(--radius-lg)] border border-border bg-card/30 p-4 shadow-sm backdrop-blur relative z-10">
         <div className="flex flex-wrap items-center gap-3">
           {/* Search Input */}
           <div className="relative min-w-[260px] flex-1">
@@ -231,7 +231,7 @@ export default function EventsPage() {
 
             {/* Start Date Calendar Popover */}
             {showStartCalendar && (
-              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-50 w-80">
+              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-[9999] w-80">
                 {/* Month Navigation */}
                 <div className="flex items-center justify-between mb-4">
                   <button
@@ -316,7 +316,7 @@ export default function EventsPage() {
 
             {/* End Date Calendar Popover */}
             {showEndCalendar && (
-              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-50 w-80">
+              <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-[9999] w-80">
                 {/* Month Navigation */}
                 <div className="flex items-center justify-between mb-4">
                   <button
