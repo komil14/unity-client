@@ -50,6 +50,9 @@ export default function EventsPage() {
   const initialLiked = searchParams.get("liked") === "true";
   const [showLikedOnly, setShowLikedOnly] = useState(initialLiked);
 
+  const initialPage = parseInt(searchParams.get("page") || "1", 10);
+  const [page, setPage] = useState(initialPage);
+
   // Calendar popover states
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
@@ -64,6 +67,7 @@ export default function EventsPage() {
     const nextStartDate = searchParams.get("startDate") || "";
     const nextEndDate = searchParams.get("endDate") || "";
     const nextLiked = searchParams.get("liked") === "true";
+    const nextPage = parseInt(searchParams.get("page") || "1", 10);
     const nextDirection =
       (searchParams.get("direction") as "asc" | "desc" | null) ||
       defaultDirectionForOrder(nextOrder);
@@ -73,6 +77,7 @@ export default function EventsPage() {
     setStartDate(nextStartDate);
     setEndDate(nextEndDate);
     setShowLikedOnly(nextLiked);
+    setPage(nextPage);
     setDirection(nextDirection);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -87,25 +92,32 @@ export default function EventsPage() {
     if (endDate) next.set("endDate", endDate);
     if (order !== "createdAt") next.set("order", order);
     if (showLikedOnly) next.set("liked", "true");
+    if (page > 1) next.set("page", String(page));
     const defaultDir = defaultDirectionForOrder(order);
     if (direction !== defaultDir) next.set("direction", direction);
 
     setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, startDate, endDate, order, direction, showLikedOnly, page]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, startDate, endDate, order, direction, showLikedOnly]);
 
   const query = useMemo(() => {
     const trimmed = search.trim();
     return {
-      page: 1,
-      limit: 12,
+      page,
+      limit: 10,
       order,
       direction,
       search: trimmed ? trimmed : undefined,
       startDate: startDate ? startDate : undefined,
       endDate: endDate ? endDate : undefined,
     };
-  }, [order, direction, search, startDate, endDate]);
+  }, [order, direction, search, startDate, endDate, page]);
 
   const { data, isLoading, isError } = useGetEventsQuery(query);
 
@@ -466,6 +478,7 @@ export default function EventsPage() {
               setEndDate("");
               setOrder("createdAt");
               setShowLikedOnly(false);
+              setPage(1);
               setDirection(defaultDirectionForOrder("createdAt"));
               setSearchParams(new URLSearchParams(), { replace: true });
             }}
@@ -532,21 +545,70 @@ export default function EventsPage() {
           No liked events found. Start liking events to see them here!
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-            gap: 16,
-          }}
-        >
-          {filteredData.map((event) => (
-            <EventCard
-              key={event._id}
-              event={event}
-              likedByMe={likedSet.has(event._id)}
-            />
-          ))}
-        </div>
+        <>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {filteredData.map((event) => (
+              <EventCard
+                key={event._id}
+                event={event}
+                likedByMe={likedSet.has(event._id)}
+              />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="mt-8 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => {
+                const pageNum = page - 2 + i;
+                // Don't show page numbers less than 1
+                if (pageNum < 1) return null;
+                // If current page has full results (10), only show up to current+1 (we don't know beyond that)
+                if (filteredData.length >= 10 && pageNum > page + 1)
+                  return null;
+                // If current page has fewer than 10 results, it's the last page - don't show beyond it
+                if (filteredData.length < 10 && pageNum > page) return null;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`h-10 w-10 rounded-lg border transition-colors ${
+                      pageNum === page
+                        ? "border-primary bg-primary/20 text-primary font-semibold"
+                        : "border-border bg-background/40 text-foreground hover:bg-background/60"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={filteredData.length < 10}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

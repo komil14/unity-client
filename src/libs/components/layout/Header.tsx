@@ -8,7 +8,6 @@ import {
   HelpCircle,
   Users,
   Building2,
-  Heart,
 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/libs/components/ui/button";
