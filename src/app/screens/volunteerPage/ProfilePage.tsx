@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   Sparkles,
   Clock,
@@ -317,6 +317,8 @@ function SettingsForm({
     memberDesc: member.memberDesc || "",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log("=== SettingsForm Rendered ===");
   console.log("Current member prop:", member);
@@ -343,6 +345,62 @@ function SettingsForm({
       console.log("Updated formData:", updated);
       return updated;
     });
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    console.log("Image file selected:", file.name, file.size);
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("File size must be less than 5MB");
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      showToast("Only JPG, JPEG, PNG files are allowed");
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const preview = e.target?.result as string;
+      setPreviewImage(preview);
+      console.log("Image preview created");
+    };
+    reader.readAsDataURL(file);
+
+    // Upload immediately
+    uploadImage(file);
+  };
+
+  const uploadImage = async (file: File) => {
+    try {
+      console.log("Starting image upload:", file.name);
+      const formData = new FormData();
+      formData.append("memberImage", file);
+
+      const result = await updateProfile(formData as any).unwrap();
+      console.log("Image upload successful:", result);
+      showToast("Profile picture updated successfully!");
+      setPreviewImage(null);
+      onUpdate();
+    } catch (err: any) {
+      console.error("Image upload failed:", err);
+      const errorMsg =
+        err?.data?.message || err?.message || "Failed to upload image";
+      showToast(errorMsg);
+      setPreviewImage(null);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSave = async () => {
@@ -422,7 +480,18 @@ function SettingsForm({
             )}
           </div>
         </div>
-        <button className="flex flex-col items-center justify-center w-48 h-24 border-2 border-dashed border-border rounded-lg hover:bg-muted/50 transition-colors">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png"
+          onChange={handleImageSelect}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={handleUploadClick}
+          className="flex flex-col items-center justify-center w-48 h-24 border-2 border-dashed border-border rounded-lg hover:bg-muted/50 transition-colors"
+        >
           <Upload className="h-6 w-6 text-muted-foreground mb-1" />
           <span className="text-xs text-muted-foreground font-medium">
             Upload Photo
