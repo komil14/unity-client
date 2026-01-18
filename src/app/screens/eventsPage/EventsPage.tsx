@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   Users,
   X,
+  Heart,
 } from "lucide-react";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
@@ -46,6 +47,9 @@ export default function EventsPage() {
   const initialEndDate = searchParams.get("endDate") || "";
   const [endDate, setEndDate] = useState(initialEndDate);
 
+  const initialLiked = searchParams.get("liked") === "true";
+  const [showLikedOnly, setShowLikedOnly] = useState(initialLiked);
+
   // Calendar popover states
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
@@ -59,6 +63,7 @@ export default function EventsPage() {
     const nextSearch = searchParams.get("search") || "";
     const nextStartDate = searchParams.get("startDate") || "";
     const nextEndDate = searchParams.get("endDate") || "";
+    const nextLiked = searchParams.get("liked") === "true";
     const nextDirection =
       (searchParams.get("direction") as "asc" | "desc" | null) ||
       defaultDirectionForOrder(nextOrder);
@@ -67,6 +72,7 @@ export default function EventsPage() {
     setSearch(nextSearch);
     setStartDate(nextStartDate);
     setEndDate(nextEndDate);
+    setShowLikedOnly(nextLiked);
     setDirection(nextDirection);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -80,12 +86,13 @@ export default function EventsPage() {
     if (startDate) next.set("startDate", startDate);
     if (endDate) next.set("endDate", endDate);
     if (order !== "createdAt") next.set("order", order);
+    if (showLikedOnly) next.set("liked", "true");
     const defaultDir = defaultDirectionForOrder(order);
     if (direction !== defaultDir) next.set("direction", direction);
 
     setSearchParams(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, startDate, endDate, order, direction]);
+  }, [search, startDate, endDate, order, direction, showLikedOnly]);
 
   const query = useMemo(() => {
     const trimmed = search.trim();
@@ -112,6 +119,12 @@ export default function EventsPage() {
     const ids = likesData?.likedRefIds ?? [];
     return new Set(ids);
   }, [likesData]);
+
+  // Filter to show only liked events if showLikedOnly is true
+  const filteredData = useMemo(() => {
+    if (!showLikedOnly) return data;
+    return data?.filter((event) => likedSet.has(event._id)) ?? [];
+  }, [data, showLikedOnly, likedSet]);
 
   // Calendar helpers
   const getDaysInMonth = (date: Date) => {
@@ -411,6 +424,23 @@ export default function EventsPage() {
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
 
+          {/* Liked Events Toggle */}
+          <button
+            type="button"
+            className={`inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border px-4 font-semibold transition-colors ${
+              showLikedOnly
+                ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
+                : "border-border bg-background/40 text-foreground hover:bg-background/60"
+            }`}
+            onClick={() => setShowLikedOnly(!showLikedOnly)}
+            title="Show only liked events"
+          >
+            <Heart
+              className={`h-4 w-4 ${showLikedOnly ? "fill-current" : ""}`}
+            />
+            My Likes
+          </button>
+
           {/* Direction Toggle */}
           <button
             type="button"
@@ -435,6 +465,7 @@ export default function EventsPage() {
               setStartDate("");
               setEndDate("");
               setOrder("createdAt");
+              setShowLikedOnly(false);
               setDirection(defaultDirectionForOrder("createdAt"));
               setSearchParams(new URLSearchParams(), { replace: true });
             }}
@@ -491,7 +522,15 @@ export default function EventsPage() {
       ) : isError ? (
         <div style={{ color: "var(--danger)" }}>Failed to load events.</div>
       ) : !data?.length ? (
-        <div style={{ color: "var(--text-muted)" }}>No events found.</div>
+        <div style={{ color: "var(--text-muted)" }}>
+          {showLikedOnly
+            ? "You haven't liked any events yet."
+            : "No events found."}
+        </div>
+      ) : !filteredData?.length ? (
+        <div style={{ color: "var(--text-muted)" }}>
+          No liked events found. Start liking events to see them here!
+        </div>
       ) : (
         <div
           style={{
@@ -500,7 +539,7 @@ export default function EventsPage() {
             gap: 16,
           }}
         >
-          {data.map((event) => (
+          {filteredData.map((event) => (
             <EventCard
               key={event._id}
               event={event}

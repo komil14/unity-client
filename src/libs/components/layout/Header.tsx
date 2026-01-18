@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Users,
   Building2,
+  Heart,
 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/libs/components/ui/button";
@@ -144,6 +145,13 @@ export default function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/profile" className="w-full">
                     Profile
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/events?liked=true" className="w-full">
+                    My Liked Events
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
