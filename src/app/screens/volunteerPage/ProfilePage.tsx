@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Sparkles,
   Clock,
@@ -10,9 +10,13 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
-import { useCheckAuthQuery } from "../../services/authApi";
+import {
+  useCheckAuthQuery,
+  useUpdateProfileMutation,
+} from "../../services/authApi";
 import { useGetMyApplicationsQuery } from "../../services/applicationsApi";
-import { imageUrlFromFilename } from "../../../libs/shared/ui";
+import { uploadUrlFromFilename } from "../../../libs/shared/ui.tsx";
+import { useToast } from "../../../libs/components/ui/toast";
 
 type TabType = "pending" | "approved" | "rejected" | "completed" | "settings";
 
@@ -20,6 +24,7 @@ export default function ProfilePage() {
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
   const { data: applications, isLoading: appsLoading } =
     useGetMyApplicationsQuery();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("settings");
 
   const member = authData?.member;
@@ -142,11 +147,7 @@ export default function ProfilePage() {
                 <div className="h-32 w-32 rounded-full bg-muted border-4 border-border flex items-center justify-center overflow-hidden">
                   {member.memberImage ? (
                     <img
-                      src={
-                        member.memberImage.startsWith("http")
-                          ? member.memberImage
-                          : `/uploads/members/${member.memberImage}`
-                      }
+                      src={uploadUrlFromFilename("members", member.memberImage)}
                       alt={member.memberNick}
                       className="h-full w-full object-cover"
                     />
@@ -287,7 +288,10 @@ export default function ProfilePage() {
 
           {/* Content Area */}
           {activeTab === "settings" ? (
-            <SettingsForm member={member} />
+            <SettingsForm
+              member={member}
+              onUpdate={() => showToast("Profile updated successfully!")}
+            />
           ) : (
             <ApplicationsList apps={filteredApps} status={activeTab} />
           )}
@@ -297,19 +301,98 @@ export default function ProfilePage() {
   );
 }
 
-function SettingsForm({ member }: { member: any }) {
+function SettingsForm({
+  member,
+  onUpdate,
+}: {
+  member: any;
+  onUpdate: () => void;
+}) {
+  const [updateProfile] = useUpdateProfileMutation();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     memberNick: member.memberNick || "",
     memberPhone: member.memberPhone || "",
     memberAddress: member.memberAddress || "",
     memberDesc: member.memberDesc || "",
   });
+  const [isSaving, setIsSaving] = useState(false);
+
+  console.log("=== SettingsForm Rendered ===");
+  console.log("Current member prop:", member);
+  console.log("Current formData state:", formData);
+
+  // Sync form with member data when member changes
+  useEffect(() => {
+    console.log("useEffect: member changed, updating form");
+    setFormData({
+      memberNick: member.memberNick || "",
+      memberPhone: member.memberPhone || "",
+      memberAddress: member.memberAddress || "",
+      memberDesc: member.memberDesc || "",
+    });
+  }, [member._id]); // Only re-sync when member ID changes
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    console.log(`Form field changed: ${name} = ${value}`);
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      console.log("Updated formData:", updated);
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      const payload: any = {};
+      if (formData.memberNick !== member.memberNick)
+        payload.memberNick = formData.memberNick;
+      if (formData.memberPhone !== member.memberPhone)
+        payload.memberPhone = formData.memberPhone;
+      if (formData.memberAddress !== member.memberAddress)
+        payload.memberAddress = formData.memberAddress;
+      if (formData.memberDesc !== member.memberDesc)
+        payload.memberDesc = formData.memberDesc;
+
+      if (Object.keys(payload).length === 0) {
+        console.log("No changes detected");
+        setIsSaving(false);
+        return;
+      }
+
+      console.log("=== handleSave Started ===");
+      console.log("Current member:", member);
+      console.log("Saving profile with payload:", payload);
+
+      // Perform update via API
+      console.log("Calling updateProfile mutation...");
+      const result = await updateProfile(payload).unwrap();
+
+      console.log("✅ Update successful! Result:", result);
+      console.log("Result type:", typeof result);
+      console.log("Result keys:", Object.keys(result));
+
+      showToast("Profile updated successfully!");
+      onUpdate();
+    } catch (err: any) {
+      console.error("❌ Failed to save profile");
+      console.error("Error type:", typeof err);
+      console.error("Full error object:", err);
+      console.error("Error status:", err?.status);
+      console.error("Error data:", err?.data);
+      console.error("Error message:", err?.message);
+
+      const errorMsg =
+        err?.data?.message || err?.message || "Failed to update profile";
+      console.error("Final error message:", errorMsg);
+      showToast(errorMsg);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -328,11 +411,7 @@ function SettingsForm({ member }: { member: any }) {
           <div className="h-32 w-32 rounded-full bg-muted border-4 border-border flex items-center justify-center overflow-hidden">
             {member.memberImage ? (
               <img
-                src={
-                  member.memberImage.startsWith("http")
-                    ? member.memberImage
-                    : `/uploads/members/${member.memberImage}`
-                }
+                src={uploadUrlFromFilename("members", member.memberImage)}
                 alt={member.memberNick}
                 className="h-full w-full object-cover"
               />
@@ -418,8 +497,13 @@ function SettingsForm({ member }: { member: any }) {
         <button className="px-6 py-2 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors">
           Cancel
         </button>
-        <button className="px-6 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors">
-          Save Changes
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="px-6 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        >
+          {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>

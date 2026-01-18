@@ -5,6 +5,10 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     credentials: "include", // backend uses authToken cookie
+    prepareHeaders: (headers, { getState }) => {
+      // Headers are set here if needed
+      return headers;
+    },
   }),
   tagTypes: ["Event", "Me", "Application", "Group", "Organizer", "Like"],
   endpoints: () => ({}),

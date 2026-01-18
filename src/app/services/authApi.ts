@@ -37,6 +37,14 @@ export type SignupInput = {
   memberImage?: string;
 };
 
+export type UpdateProfileInput = {
+  memberNick?: string;
+  memberPhone?: string;
+  memberAddress?: string;
+  memberDesc?: string;
+  memberImage?: string;
+};
+
 export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     checkAuth: build.query<{ member: MemberDto }, void>({
@@ -59,6 +67,50 @@ export const authApi = api.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Me", id: "ME" }],
     }),
+    updateProfile: build.mutation<MemberDto, UpdateProfileInput>({
+      query: (body) => {
+        console.log("updateProfile query called with body:", body);
+        return {
+          url: "/member/profile",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: (result, err, arg) => {
+        console.log(
+          "updateProfile invalidatesTags - result:",
+          result,
+          "error:",
+          err
+        );
+        return [{ type: "Me", id: "ME" }];
+      },
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        console.log("updateProfile onQueryStarted - arg:", arg);
+        try {
+          const { data } = await queryFulfilled;
+          console.log("updateProfile - got data response:", data);
+          // Update the cached auth data
+          dispatch(
+            authApi.util.updateQueryData("checkAuth", undefined, (draft) => {
+              console.log(
+                "Updating cache - draft.member before:",
+                draft.member
+              );
+              if (draft.member) {
+                Object.assign(draft.member, data);
+                console.log(
+                  "Updated cache - draft.member after:",
+                  draft.member
+                );
+              }
+            })
+          );
+        } catch (err) {
+          console.error("Failed to update cache:", err);
+        }
+      },
+    }),
     logout: build.mutation<{ ok: boolean }, void>({
       query: () => ({ url: "/member/logout", method: "POST" }),
       invalidatesTags: [{ type: "Me", id: "ME" }],
@@ -70,5 +122,6 @@ export const {
   useCheckAuthQuery,
   useLoginMutation,
   useSignupMutation,
+  useUpdateProfileMutation,
   useLogoutMutation,
 } = authApi;
