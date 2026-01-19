@@ -64,9 +64,9 @@ export default function EventCard({
   const isAuthenticated = Boolean(authData?.member?._id);
   const { showToast } = useToast();
   const img = imageUrlFromFilename(event.eventImages?.[0]);
-  const upcoming = isUpcoming(event.eventDate);
+  const upcoming = isUpcoming(event.eventDate || "");
 
-  const [likesCount, setLikesCount] = useState<number>(event.eventLikes);
+  const [likesCount, setLikesCount] = useState<number>(event.eventLikes || 0);
   const [liked, setLiked] = useState<boolean>(Boolean(likedByMe));
   const [showLoginAlert, setShowLoginAlert] = useState(false);
 
@@ -75,7 +75,7 @@ export default function EventCard({
   }, [event._id, likedByMe]);
 
   useEffect(() => {
-    setLikesCount(event.eventLikes);
+    setLikesCount(event.eventLikes || 0);
   }, [event.eventLikes]);
 
   const priceLabel = event.eventPoints ? `+${event.eventPoints} pts` : "Free";
@@ -137,7 +137,7 @@ export default function EventCard({
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 flex-shrink-0" />
                 <span className="truncate text-xs">
-                  {formatDateTime(event.eventDate)}
+                  {formatDateTime(event.eventDate || "")}
                 </span>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function EventCard({
                     showToast(
                       res.status === "liked"
                         ? "Event added to your favorites!"
-                        : "Event removed from your favorites!"
+                        : "Event removed from your favorites!",
                     );
                   } catch (err: any) {
                     const status = err?.status;

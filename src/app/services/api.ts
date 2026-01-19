@@ -5,7 +5,7 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     credentials: "include", // backend uses authToken cookie
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers) => {
       // Headers are set here if needed
       return headers;
     },

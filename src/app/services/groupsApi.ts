@@ -1,71 +1,28 @@
 import { api } from "./api";
+import type {
+  MemberData,
+  GroupDto,
+  GroupDetailDto,
+  GetGroupsParams,
+  JoinGroupInput,
+  JoinGroupResponse,
+  CreateGroupInput,
+  UpdateGroupInput,
+} from "../../lib/types/api";
 
-export type MemberData = {
-  _id: string;
-  memberNick: string;
-  memberType: string;
-  memberStatus: string;
-  memberImage?: string;
-  memberDesc?: string;
-  isVerified?: boolean;
-};
-
-export type GroupDto = {
-  _id: string;
-  groupStatus: string;
-  groupName: string;
-  groupDesc: string;
-  groupImage?: string;
-  groupCategories?: string[];
-  memberId: string;
-  memberCount: number;
-  groupLikes: number;
-  groupViews: number;
-  createdAt: string;
-  updatedAt: string;
-  memberData?: MemberData;
-};
-
-export type GroupDetailDto = GroupDto & {
-  meJoined?: boolean;
-  groupMemberRole?: string;
-  joinDate?: string;
-};
-
-export type GetGroupsParams = {
-  page?: number;
-  limit?: number;
-  order?: string;
-  search?: string;
-  memberId?: string;
-};
-
-export type JoinGroupInput = {
-  groupId: string;
-};
-
-export type JoinGroupResponse = {
-  joined: boolean;
-  message?: string;
-};
-
-export type CreateGroupInput = {
-  groupName: string;
-  groupDesc: string;
-  groupCategories?: string[] | string;
-  groupImage?: File;
-};
-
-export type UpdateGroupInput = {
-  _id: string;
-  groupName?: string;
-  groupDesc?: string;
-  groupCategories?: string[] | string;
-  groupImage?: File;
+export type {
+  MemberData,
+  GroupDto,
+  GroupDetailDto,
+  GetGroupsParams,
+  JoinGroupInput,
+  JoinGroupResponse,
+  CreateGroupInput,
+  UpdateGroupInput,
 };
 
 function toCategoriesValue(
-  value: string[] | string | undefined
+  value: string[] | string | undefined,
 ): string | undefined {
   if (value === undefined) return undefined;
   if (Array.isArray(value)) return value.join(",");

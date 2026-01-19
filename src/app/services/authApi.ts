@@ -1,48 +1,18 @@
 import { api } from "./api";
+import type {
+  MemberDto,
+  AuthResponse,
+  LoginInput,
+  SignupInput,
+  UpdateProfileInput,
+} from "../../lib/types/api";
 
-export type MemberDto = {
-  _id: string;
-  memberType: "USER" | "ORG" | "ADMIN" | string;
-  memberStatus: "ACTIVE" | "BLOCK" | "DELETE" | "PENDING" | string;
-  memberNick: string;
-  memberPhone: string;
-  memberAddress?: string;
-  memberDesc?: string;
-  memberImage?: string;
-  memberPoints?: number;
-  memberLikes?: number;
-  memberViews?: number;
-  isVerified?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export type AuthResponse = {
-  member: MemberDto;
-  accessToken: string;
-};
-
-export type LoginInput = {
-  memberNick: string;
-  memberPassword: string;
-};
-
-export type SignupInput = {
-  memberType: "USER" | "ORG";
-  memberNick: string;
-  memberPhone: string;
-  memberPassword: string;
-  memberAddress?: string;
-  memberDesc?: string;
-  memberImage?: string;
-};
-
-export type UpdateProfileInput = {
-  memberNick?: string;
-  memberPhone?: string;
-  memberAddress?: string;
-  memberDesc?: string;
-  memberImage?: string;
+export type {
+  MemberDto,
+  AuthResponse,
+  LoginInput,
+  SignupInput,
+  UpdateProfileInput,
 };
 
 export const authApi = api.injectEndpoints({
@@ -76,12 +46,12 @@ export const authApi = api.injectEndpoints({
           body,
         };
       },
-      invalidatesTags: (result, err, arg) => {
+      invalidatesTags: (result, err) => {
         console.log(
           "updateProfile invalidatesTags - result:",
           result,
           "error:",
-          err
+          err,
         );
         return [{ type: "Me", id: "ME" }];
       },
@@ -95,16 +65,16 @@ export const authApi = api.injectEndpoints({
             authApi.util.updateQueryData("checkAuth", undefined, (draft) => {
               console.log(
                 "Updating cache - draft.member before:",
-                draft.member
+                draft.member,
               );
               if (draft.member) {
                 Object.assign(draft.member, data);
                 console.log(
                   "Updated cache - draft.member after:",
-                  draft.member
+                  draft.member,
                 );
               }
-            })
+            }),
           );
         } catch (err) {
           console.error("Failed to update cache:", err);

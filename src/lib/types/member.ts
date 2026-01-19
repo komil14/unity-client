@@ -28,8 +28,3 @@ export interface MemberUpdateInput {
   memberDesc?: string;
   memberImage?: string;
 }
-
-export interface LoginInput {
-  memberNick: string;
-  memberPassword: string;
-}

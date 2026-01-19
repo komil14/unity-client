@@ -76,7 +76,7 @@ export default function EventDetailPage() {
 
   const { data: likeData } = useCheckLikesBatchQuery(
     { likeRefIds: [eventId], likeGroup: "EVENT" },
-    { skip: !eventId }
+    { skip: !eventId },
   );
 
   const { data: trendingEvents } = useGetEventsQuery({
@@ -118,7 +118,7 @@ export default function EventDetailPage() {
       showToast(
         wasLiked
           ? "Event removed from your favorites!"
-          : "Event added to your favorites!"
+          : "Event added to your favorites!",
       );
     } catch (err) {
       // Revert on error
@@ -175,8 +175,8 @@ export default function EventDetailPage() {
   }
 
   const img = imageUrlFromFilename(data.eventImages?.[0]);
-  const upcoming = isUpcoming(data.eventDate);
-  const capacityRemaining = data.eventCapacity - data.eventJoined;
+  const upcoming = isUpcoming(data.eventDate || "");
+  const capacityRemaining = (data.eventCapacity || 0) - (data.eventJoined || 0);
 
   return (
     <div className="w-full min-h-screen bg-background">
@@ -262,7 +262,7 @@ export default function EventDetailPage() {
                     <div>
                       <div className="text-xs text-muted-foreground">Date</div>
                       <div className="text-sm font-semibold text-foreground">
-                        {formatDate(data.eventDate)}
+                        {formatDate(data.eventDate || "")}
                       </div>
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export default function EventDetailPage() {
                     <div>
                       <div className="text-xs text-muted-foreground">Time</div>
                       <div className="text-sm font-semibold text-foreground">
-                        {formatTime(data.eventDate)}
+                        {formatTime(data.eventDate || "")}
                       </div>
                     </div>
                   </div>
@@ -375,8 +375,8 @@ export default function EventDetailPage() {
                   {joinState.isLoading
                     ? "Applying…"
                     : capacityRemaining <= 0 && upcoming
-                    ? "Event Full"
-                    : "Apply to Join"}
+                      ? "Event Full"
+                      : "Apply to Join"}
                 </button>
               </div>
 
@@ -495,12 +495,12 @@ export default function EventDetailPage() {
                           {event.eventTitle}
                         </div>
                         <div className="text-xs text-muted-foreground mb-1">
-                          {formatDate(event.eventDate)}
+                          {formatDate(event.eventDate || "")}
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Heart
                             className={`h-3 w-3 ${
-                              event.eventLikes > 0
+                              (event.eventLikes || 0) > 0
                                 ? "fill-primary text-primary"
                                 : ""
                             }`}

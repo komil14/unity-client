@@ -6,3 +6,4 @@ export * from "./group";
 export * from "./comment";
 export * from "./like";
 export * from "./components";
+export * from "./api";

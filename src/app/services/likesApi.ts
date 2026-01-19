@@ -1,24 +1,18 @@
 import { api } from "./api";
+import type {
+  LikeGroup,
+  ToggleLikeInput,
+  ToggleLikeResponse,
+  CheckLikesBatchInput,
+  CheckLikesBatchResponse,
+} from "../../lib/types/api";
 
-export type LikeGroup = "MEMBER" | "EVENT" | "GROUP" | "ARTICLE" | "COMMENT";
-
-export type ToggleLikeInput = {
-  likeGroup: LikeGroup;
-  likeRefId: string;
-};
-
-export type ToggleLikeResponse = {
-  status: "liked" | "unliked";
-  data: unknown;
-};
-
-export type CheckLikesBatchInput = {
-  likeGroup: LikeGroup;
-  likeRefIds: string[];
-};
-
-export type CheckLikesBatchResponse = {
-  likedRefIds: string[];
+export type {
+  LikeGroup,
+  ToggleLikeInput,
+  ToggleLikeResponse,
+  CheckLikesBatchInput,
+  CheckLikesBatchResponse,
 };
 
 export const likesApi = api.injectEndpoints({
@@ -64,7 +58,7 @@ export const likesApi = api.injectEndpoints({
             type: "Like" as const,
             id: `${arg.likeGroup}:${id}`,
           })),
-      }
+      },
     ),
   }),
 });

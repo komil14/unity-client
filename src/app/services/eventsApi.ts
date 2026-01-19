@@ -1,52 +1,18 @@
 import { api } from "./api";
+import type {
+  MemberData,
+  EventDto,
+  GetEventsParams,
+  WeeklyPopularParams,
+  WeeklyPopularEventDto,
+} from "../../lib/types/api";
 
-export type MemberData = {
-  _id: string;
-  memberNick: string;
-  memberType: string;
-  memberStatus: string;
-  memberImage?: string;
-  memberDesc?: string;
-  isVerified?: boolean;
-};
-
-export type EventDto = {
-  _id: string;
-  eventTitle: string;
-  eventDesc: string;
-  eventLocation: string;
-  eventDate: string;
-  eventCapacity: number;
-  eventJoined: number;
-  eventImages: string[];
-  eventPoints: number;
-  memberId: string;
-  eventLikes: number;
-  eventViews: number;
-  createdAt: string;
-  updatedAt: string;
-  memberData?: MemberData;
-};
-
-export type GetEventsParams = {
-  page?: number;
-  limit?: number;
-  order?: string;
-  direction?: "asc" | "desc";
-  search?: string;
-  startDate?: string;
-  endDate?: string;
-  memberId?: string;
-};
-
-export type WeeklyPopularParams = {
-  days?: number;
-  limit?: number;
-};
-
-export type WeeklyPopularEventDto = EventDto & {
-  weeklyApplicants?: number;
-  weeklyApplyRate?: number;
+export type {
+  MemberData,
+  EventDto,
+  GetEventsParams,
+  WeeklyPopularParams,
+  WeeklyPopularEventDto,
 };
 
 export const eventsApi = api.injectEndpoints({

@@ -1,20 +1,7 @@
 import { api } from "./api";
+import type { ApplicationDto, JoinEventInput } from "../../lib/types/api";
 
-export type ApplicationDto = {
-  _id: string;
-  applicationStatus: string;
-  eventId: string;
-  memberId: string;
-  applicationNote?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  eventData?: any;
-};
-
-export type JoinEventInput = {
-  eventId: string;
-  applicationNote?: string;
-};
+export type { ApplicationDto, JoinEventInput };
 
 export const applicationsApi = api.injectEndpoints({
   endpoints: (build) => ({

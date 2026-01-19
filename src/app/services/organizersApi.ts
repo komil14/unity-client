@@ -1,43 +1,11 @@
 import { api } from "./api";
+import type {
+  OrganizerDto,
+  GetOrganizersParams,
+  OrganizerDetailDto,
+} from "../../lib/types/api";
 
-export type OrganizerDto = {
-  _id: string;
-  memberType: string;
-  memberStatus: string;
-  memberNick: string;
-  memberPhone?: string;
-  memberDesc?: string;
-  memberImage?: string;
-  bannerImage?: string;
-  memberViews?: number;
-  memberLikes?: number;
-  isVerified?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  eventsOrganizedCount?: number;
-  groupsOrganizedCount?: number;
-  // Top organizers aggregates
-  eventsCount?: number;
-  eventsLikesTotal?: number;
-  eventsViewsTotal?: number;
-  articlesCount?: number;
-  articleCommentsCount?: number;
-  topScore?: number;
-};
-
-export type GetOrganizersParams = {
-  page?: number;
-  limit?: number;
-  order?: string;
-  direction?: "asc" | "desc";
-  search?: string;
-  onlyActive?: boolean;
-};
-
-export type OrganizerDetailDto = OrganizerDto & {
-  organizedEvents?: any[];
-  organizedGroups?: any[];
-};
+export type { OrganizerDto, GetOrganizersParams, OrganizerDetailDto };
 
 export const organizersApi = api.injectEndpoints({
   endpoints: (build) => ({
@@ -90,8 +58,8 @@ export const organizersApi = api.injectEndpoints({
               (draft) => {
                 if (!draft) return;
                 (draft as any).memberViews = data.memberViews;
-              }
-            )
+              },
+            ),
           );
         } catch {
           // ignore
