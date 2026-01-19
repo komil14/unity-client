@@ -1,4 +1,4 @@
-import type { TabNavigationProps } from "../../../../lib/types";
+import type { TabNavigationProps } from "../../../lib/types";
 
 export default function TabNavigation({
   tabs,

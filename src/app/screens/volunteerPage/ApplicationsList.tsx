@@ -1,14 +1,27 @@
-import { Check, Calendar, MapPin } from "lucide-react";
-import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-import type { ApprovedApplicationsProps } from "../../../../lib/types";
+import { Clock, Check, X, Zap, Calendar, MapPin } from "lucide-react";
+import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import type { Application } from "../../../lib/types";
 
-export default function ApprovedApplications({
+interface ApplicationsListProps {
+  apps: Application[];
+  status: "pending" | "approved" | "rejected" | "completed";
+}
+
+export default function ApplicationsList({
   apps,
-}: ApprovedApplicationsProps) {
+  status,
+}: ApplicationsListProps) {
+  const statusIcons = {
+    pending: <Clock className="h-4 w-4 text-primary" />,
+    approved: <Check className="h-4 w-4 text-green-500" />,
+    rejected: <X className="h-4 w-4 text-red-500" />,
+    completed: <Zap className="h-4 w-4 text-purple-500" />,
+  };
+
   if (apps.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No approved applications yet.</p>
+        <p className="text-muted-foreground">No {status} applications yet.</p>
       </div>
     );
   }
@@ -40,7 +53,7 @@ export default function ApprovedApplications({
             {/* Event Info */}
             <div className="flex-1 space-y-2 min-w-0">
               <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
+                {statusIcons[status]}
                 <h3 className="font-semibold text-foreground truncate">
                   {app.eventData?.eventTitle || "Event"}
                 </h3>

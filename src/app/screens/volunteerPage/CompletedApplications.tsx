@@ -1,14 +1,14 @@
-import { Clock, Calendar, MapPin } from "lucide-react";
-import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-import type { PendingApplicationsProps } from "../../../../lib/types";
+import { Zap, Calendar, MapPin } from "lucide-react";
+import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import type { CompletedApplicationsProps } from "../../../lib/types";
 
-export default function PendingApplications({
+export default function CompletedApplications({
   apps,
-}: PendingApplicationsProps) {
+}: CompletedApplicationsProps) {
   if (apps.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No pending applications yet.</p>
+        <p className="text-muted-foreground">No completed applications yet.</p>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export default function PendingApplications({
             {/* Event Info */}
             <div className="flex-1 space-y-2 min-w-0">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
+                <Zap className="h-4 w-4 text-purple-500" />
                 <h3 className="font-semibold text-foreground truncate">
                   {app.eventData?.eventTitle || "Event"}
                 </h3>

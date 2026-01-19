@@ -1,14 +1,14 @@
-import { X, Calendar, MapPin } from "lucide-react";
-import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-import type { RejectedApplicationsProps } from "../../../../lib/types";
+import { Clock, Calendar, MapPin } from "lucide-react";
+import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import type { PendingApplicationsProps } from "../../../lib/types";
 
-export default function RejectedApplications({
+export default function PendingApplications({
   apps,
-}: RejectedApplicationsProps) {
+}: PendingApplicationsProps) {
   if (apps.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No rejected applications yet.</p>
+        <p className="text-muted-foreground">No pending applications yet.</p>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export default function RejectedApplications({
             {/* Event Info */}
             <div className="flex-1 space-y-2 min-w-0">
               <div className="flex items-center gap-2">
-                <X className="h-4 w-4 text-red-500" />
+                <Clock className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold text-foreground truncate">
                   {app.eventData?.eventTitle || "Event"}
                 </h3>

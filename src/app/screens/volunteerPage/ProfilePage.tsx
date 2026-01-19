@@ -11,7 +11,7 @@ import {
   RejectedApplications,
   CompletedApplications,
   SettingsForm,
-} from "./components";
+} from ".";
 import type { TabType, TabConfig } from "../../../lib/types";
 
 export default function ProfilePage() {

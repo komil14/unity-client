@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Upload } from "lucide-react";
-import { useUpdateProfileMutation } from "../../../services/authApi";
-import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-import { useToast } from "../../../../libs/components/ui/toast";
+import { useUpdateProfileMutation } from "../../services/authApi";
+import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { useToast } from "../../../libs/components/ui/toast";
 import type {
   SettingsFormProps,
   MemberUpdatePayload,
   ApiError,
-} from "../../../../lib/types";
+} from "../../../lib/types";
 
 export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
   const [updateProfile] = useUpdateProfileMutation();
