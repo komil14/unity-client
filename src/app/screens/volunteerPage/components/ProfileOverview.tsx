@@ -1,11 +1,6 @@
 import { Sparkles, Clock, Check, X, Zap } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-import type { ProfileStats, MemberData } from "./types";
-
-interface ProfileOverviewProps {
-  member: MemberData;
-  stats: ProfileStats;
-}
+import type { ProfileOverviewProps } from "../../../../lib/types";
 
 export default function ProfileOverview({
   member,

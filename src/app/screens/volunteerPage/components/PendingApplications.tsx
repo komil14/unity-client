@@ -1,9 +1,6 @@
 import { Clock, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-
-interface PendingApplicationsProps {
-  apps: any[];
-}
+import type { PendingApplicationsProps } from "../../../../lib/types";
 
 export default function PendingApplications({
   apps,
@@ -74,7 +71,9 @@ export default function PendingApplications({
             {/* Date */}
             <div className="flex-shrink-0 text-right">
               <p className="text-xs text-muted-foreground">
-                {new Date(app.createdAt).toLocaleDateString()}
+                {app.createdAt
+                  ? new Date(app.createdAt).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>

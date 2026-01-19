@@ -1,8 +1,9 @@
 import { Clock, Check, X, Zap, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
+import type { Application } from "../../../../lib/types";
 
 interface ApplicationsListProps {
-  apps: any[];
+  apps: Application[];
   status: "pending" | "approved" | "rejected" | "completed";
 }
 
@@ -83,7 +84,9 @@ export default function ApplicationsList({
             {/* Date */}
             <div className="flex-shrink-0 text-right">
               <p className="text-xs text-muted-foreground">
-                {new Date(app.createdAt).toLocaleDateString()}
+                {app.createdAt
+                  ? new Date(app.createdAt).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>

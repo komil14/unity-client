@@ -5,4 +5,4 @@ export { default as ApprovedApplications } from "./ApprovedApplications";
 export { default as RejectedApplications } from "./RejectedApplications";
 export { default as CompletedApplications } from "./CompletedApplications";
 export { default as SettingsForm } from "./SettingsForm";
-export * from "./types";
+export * from "../../../../lib/types/profileStats";

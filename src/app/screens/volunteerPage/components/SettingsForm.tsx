@@ -3,12 +3,11 @@ import { Upload } from "lucide-react";
 import { useUpdateProfileMutation } from "../../../services/authApi";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
 import { useToast } from "../../../../libs/components/ui/toast";
-import type { MemberData } from "./types";
-
-interface SettingsFormProps {
-  member: MemberData;
-  onUpdate: () => void;
-}
+import type {
+  SettingsFormProps,
+  MemberUpdatePayload,
+  ApiError,
+} from "../../../../lib/types";
 
 export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
   const [updateProfile] = useUpdateProfileMutation();
@@ -78,13 +77,17 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
       const formData = new FormData();
       formData.append("memberImage", file);
 
-      const result = await updateProfile(formData as any).unwrap();
+      // RTK Query handles FormData serialization, so we need to cast it
+      const result = await updateProfile(
+        formData as unknown as MemberUpdatePayload,
+      ).unwrap();
       console.log("Image upload successful:", result);
       onUpdate();
-    } catch (err: any) {
-      console.error("Image upload failed:", err);
+    } catch (err) {
+      const error = err as ApiError;
+      console.error("Image upload failed:", error);
       const errorMsg =
-        err?.data?.message || err?.message || "Failed to upload image";
+        error?.data?.message || error?.message || "Failed to upload image";
       showToast(errorMsg);
     }
   };
@@ -96,7 +99,7 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      const payload: any = {};
+      const payload: MemberUpdatePayload = {};
       if (formData.memberNick !== member.memberNick)
         payload.memberNick = formData.memberNick;
       if (formData.memberPhone !== member.memberPhone)
@@ -125,16 +128,17 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
       console.log("Result keys:", Object.keys(result));
 
       onUpdate();
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as ApiError;
       console.error("❌ Failed to save profile");
-      console.error("Error type:", typeof err);
-      console.error("Full error object:", err);
-      console.error("Error status:", err?.status);
-      console.error("Error data:", err?.data);
-      console.error("Error message:", err?.message);
+      console.error("Error type:", typeof error);
+      console.error("Full error object:", error);
+      console.error("Error status:", error?.status);
+      console.error("Error data:", error?.data);
+      console.error("Error message:", error?.message);
 
       const errorMsg =
-        err?.data?.message || err?.message || "Failed to update profile";
+        error?.data?.message || error?.message || "Failed to update profile";
       console.error("Final error message:", errorMsg);
       showToast(errorMsg);
     } finally {

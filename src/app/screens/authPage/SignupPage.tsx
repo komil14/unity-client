@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSignupMutation } from "../../services/authApi";
 import { Card } from "../../../libs/shared/ui";
+import type { MemberTypeFilter } from "../../../lib/types";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Signup failed.";
@@ -13,7 +14,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [signup, { isLoading }] = useSignupMutation();
 
-  const [memberType, setMemberType] = useState<"USER" | "ORG">("USER");
+  const [memberType, setMemberType] = useState<MemberTypeFilter>("USER");
   const [memberNick, setMemberNick] = useState("");
   const [memberPhone, setMemberPhone] = useState("");
   const [memberPassword, setMemberPassword] = useState("");

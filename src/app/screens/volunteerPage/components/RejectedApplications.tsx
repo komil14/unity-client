@@ -1,9 +1,6 @@
 import { X, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-
-interface RejectedApplicationsProps {
-  apps: any[];
-}
+import type { RejectedApplicationsProps } from "../../../../lib/types";
 
 export default function RejectedApplications({
   apps,
@@ -74,7 +71,9 @@ export default function RejectedApplications({
             {/* Date */}
             <div className="flex-shrink-0 text-right">
               <p className="text-xs text-muted-foreground">
-                {new Date(app.createdAt).toLocaleDateString()}
+                {app.createdAt
+                  ? new Date(app.createdAt).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>

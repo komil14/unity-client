@@ -10,8 +10,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-
-export type WhyTab = "volunteers" | "organizations" | "communities";
+import type { WhyTab } from "../../../lib/types";
 
 export default function WhyJoinSection({
   whyTab,

@@ -1,9 +1,6 @@
 import { Check, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
-
-interface ApprovedApplicationsProps {
-  apps: any[];
-}
+import type { ApprovedApplicationsProps } from "../../../../lib/types";
 
 export default function ApprovedApplications({
   apps,
@@ -74,7 +71,9 @@ export default function ApprovedApplications({
             {/* Date */}
             <div className="flex-shrink-0 text-right">
               <p className="text-xs text-muted-foreground">
-                {new Date(app.createdAt).toLocaleDateString()}
+                {app.createdAt
+                  ? new Date(app.createdAt).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </div>

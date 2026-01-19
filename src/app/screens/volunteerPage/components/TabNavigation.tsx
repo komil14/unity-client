@@ -1,10 +1,4 @@
-import type { TabType, TabConfig } from "./types";
-
-interface TabNavigationProps {
-  tabs: TabConfig[];
-  activeTab: TabType;
-  onTabChange: (tabId: TabType) => void;
-}
+import type { TabNavigationProps } from "../../../../lib/types";
 
 export default function TabNavigation({
   tabs,

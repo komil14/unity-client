@@ -11,9 +11,8 @@ import {
   RejectedApplications,
   CompletedApplications,
   SettingsForm,
-  type TabType,
-  type TabConfig,
 } from "./components";
+import type { TabType, TabConfig } from "../../../lib/types";
 
 export default function ProfilePage() {
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
