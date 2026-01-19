@@ -1,6 +1,6 @@
 import { Clock, Check, X, Zap, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
-import type { Application } from "../../../lib/types";
+import type { Application } from "../../../libs/types";
 
 interface ApplicationsListProps {
   apps: Application[];

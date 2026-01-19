@@ -10,7 +10,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import type { WhyTab } from "../../../lib/types";
+import type { WhyTab } from "../../../libs/types";
 
 export default function WhyJoinSection({
   whyTab,

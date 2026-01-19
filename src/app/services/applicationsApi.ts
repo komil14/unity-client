@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { ApplicationDto, JoinEventInput } from "../../lib/types/api";
+import type { ApplicationDto, JoinEventInput } from "../../libs/types/api";
 
 export type { ApplicationDto, JoinEventInput };
 

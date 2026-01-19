@@ -3,7 +3,7 @@ import type {
   OrganizerDto,
   GetOrganizersParams,
   OrganizerDetailDto,
-} from "../../lib/types/api";
+} from "../../libs/types/api";
 
 export type { OrganizerDto, GetOrganizersParams, OrganizerDetailDto };
 

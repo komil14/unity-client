@@ -1,6 +1,6 @@
 import { X, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
-import type { RejectedApplicationsProps } from "../../../lib/types";
+import type { RejectedApplicationsProps } from "../../../libs/types";
 
 export default function RejectedApplications({
   apps,

@@ -5,7 +5,7 @@ import type {
   LoginInput,
   SignupInput,
   UpdateProfileInput,
-} from "../../lib/types/api";
+} from "../../libs/types/api";
 
 export type {
   MemberDto,

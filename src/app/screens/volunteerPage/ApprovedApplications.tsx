@@ -1,6 +1,6 @@
 import { Check, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
-import type { ApprovedApplicationsProps } from "../../../lib/types";
+import type { ApprovedApplicationsProps } from "../../../libs/types";
 
 export default function ApprovedApplications({
   apps,

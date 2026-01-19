@@ -1,6 +1,6 @@
 import { Zap, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
-import type { CompletedApplicationsProps } from "../../../lib/types";
+import type { CompletedApplicationsProps } from "../../../libs/types";
 
 export default function CompletedApplications({
   apps,

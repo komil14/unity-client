@@ -5,7 +5,7 @@ import type {
   GetEventsParams,
   WeeklyPopularParams,
   WeeklyPopularEventDto,
-} from "../../lib/types/api";
+} from "../../libs/types/api";
 
 export type {
   MemberData,

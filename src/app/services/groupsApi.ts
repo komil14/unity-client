@@ -8,7 +8,7 @@ import type {
   JoinGroupResponse,
   CreateGroupInput,
   UpdateGroupInput,
-} from "../../lib/types/api";
+} from "../../libs/types/api";
 
 export type {
   MemberData,

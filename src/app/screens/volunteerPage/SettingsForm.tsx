@@ -7,7 +7,7 @@ import type {
   SettingsFormProps,
   MemberUpdatePayload,
   ApiError,
-} from "../../../lib/types";
+} from "../../../libs/types";
 
 export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
   const [updateProfile] = useUpdateProfileMutation();

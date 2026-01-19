@@ -5,7 +5,7 @@ import type {
   ToggleLikeResponse,
   CheckLikesBatchInput,
   CheckLikesBatchResponse,
-} from "../../lib/types/api";
+} from "../../libs/types/api";
 
 export type {
   LikeGroup,

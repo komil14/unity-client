@@ -1,6 +1,6 @@
 import { Clock, Calendar, MapPin } from "lucide-react";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
-import type { PendingApplicationsProps } from "../../../lib/types";
+import type { PendingApplicationsProps } from "../../../libs/types";
 
 export default function PendingApplications({
   apps,

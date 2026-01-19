@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSignupMutation } from "../../services/authApi";
 import { Card } from "../../../libs/shared/ui";
-import type { MemberTypeFilter } from "../../../lib/types";
+import type { MemberTypeFilter } from "../../../libs/types";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Signup failed.";

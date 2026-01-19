@@ -12,7 +12,7 @@ import {
   CompletedApplications,
   SettingsForm,
 } from ".";
-import type { TabType, TabConfig } from "../../../lib/types";
+import type { TabType, TabConfig } from "../../../libs/types";
 
 export default function ProfilePage() {
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
