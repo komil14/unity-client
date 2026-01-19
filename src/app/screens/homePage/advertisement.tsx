@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
 const VIDEOS = [
-  "/advertisment/video1.mp4",
-  "/advertisment/video2.mp4",
-  "/advertisment/video3.mp4",
-  "/advertisment/video4.mp4",
+  "/uploads/advertisment/video1.mp4",
+  "/uploads/advertisment/video2.mp4",
+  "/uploads/advertisment/video3.mp4",
+  "/uploads/advertisment/video4.mp4",
 ];
 
 export default function AdvertisementSection() {

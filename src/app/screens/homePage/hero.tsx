@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
 const VOLUNTEER_IMAGES = [
-  "/images/volunteers/01.jpg",
-  "/images/volunteers/02.jpg",
-  "/images/volunteers/03.jpg",
-  "/images/volunteers/04.jpg",
-  "/images/volunteers/05.jpg",
-  "/images/volunteers/06.jpg",
+  "/uploads/images/volunteers/01.jpg",
+  "/uploads/images/volunteers/02.jpg",
+  "/uploads/images/volunteers/03.jpg",
+  "/uploads/images/volunteers/04.jpg",
+  "/uploads/images/volunteers/05.jpg",
+  "/uploads/images/volunteers/06.jpg",
 ];
 
 function usePrefersReducedMotion() {
@@ -30,7 +30,7 @@ function VolunteerSlideshow({ images }: { images: string[] }) {
 
   const safeImages = useMemo(
     () => images.filter((src) => typeof src === "string" && src.length > 0),
-    [images]
+    [images],
   );
 
   useEffect(() => {
