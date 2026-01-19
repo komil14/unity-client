@@ -1,0 +1,138 @@
+import { Sparkles, Clock, Check, X, Zap } from "lucide-react";
+import { uploadUrlFromFilename } from "../../../../libs/shared/ui";
+import type { ProfileStats, MemberData } from "./types";
+
+interface ProfileOverviewProps {
+  member: MemberData;
+  stats: ProfileStats;
+}
+
+export default function ProfileOverview({
+  member,
+  stats,
+}: ProfileOverviewProps) {
+  const avatarInitial = member.memberNick
+    ? member.memberNick.charAt(0).toUpperCase()
+    : "U";
+
+  return (
+    <div className="rounded-2xl border border-border bg-card shadow-lg p-8">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+        {/* Left Section - Identity */}
+        <div className="flex items-center gap-6">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="h-32 w-32 rounded-full bg-muted border-4 border-border flex items-center justify-center overflow-hidden">
+              {member.memberImage ? (
+                <img
+                  src={uploadUrlFromFilename("members", member.memberImage)}
+                  alt={member.memberNick}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-5xl font-extrabold text-foreground">
+                  {avatarInitial}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+              {member.memberNick}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {member.memberPhone}
+            </p>
+            <div className="inline-flex items-center rounded-full bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
+              {member.memberType === "USER" ? "VOLUNTEER" : member.memberType}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section - Stats Grid */}
+        <div className="flex-1 w-full">
+          <div className="rounded-xl bg-muted/30 p-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {/* Points/Stars */}
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-foreground">
+                  {stats.totalPoints}
+                </div>
+                <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                  Stars
+                </div>
+              </div>
+
+              {/* Pending */}
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-foreground">
+                  {stats.pending}
+                </div>
+                <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                  Pending
+                </div>
+              </div>
+
+              {/* Approved */}
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Check className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-foreground">
+                  {stats.approved}
+                </div>
+                <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                  Approved
+                </div>
+              </div>
+
+              {/* Rejected */}
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <X className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-foreground">
+                  {stats.rejected}
+                </div>
+                <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                  Rejected
+                </div>
+              </div>
+
+              {/* Completed */}
+              <div className="rounded-xl bg-card border border-border shadow-sm p-4 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                </div>
+                <div className="text-2xl font-extrabold text-foreground">
+                  {stats.completed}
+                </div>
+                <div className="mt-2 text-xs font-semibold text-muted-foreground">
+                  Completed
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
