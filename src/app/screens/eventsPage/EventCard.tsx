@@ -80,9 +80,54 @@ export default function EventCard({
 
   const priceLabel = event.eventPoints ? `+${event.eventPoints} pts` : "Free";
 
-  return (
-    <Link to={`/events/${event._id}`} className="block h-full">
-      <div className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/40">
+  const handleLikeToggle = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      setShowLoginAlert(true);
+      return;
+    }
+
+    try {
+      // Optimistic update
+      const wasLiked = liked;
+      const newLiked = !liked;
+      setLiked(newLiked);
+      setLikesCount((prev) => Math.max(0, prev + (newLiked ? 1 : -1)));
+
+      const res = await toggleLike({
+        likeGroup: "EVENT",
+        likeRefId: event._id,
+      }).unwrap();
+
+      // Confirm with server response
+      const confirmed = res.status === "liked";
+      setLiked(confirmed);
+
+      // Revert count if server doesn't match optimistic update
+      if (confirmed !== newLiked) {
+        setLikesCount((prev) => Math.max(0, prev + (confirmed ? 1 : -1)));
+      }
+
+      showToast(
+        confirmed
+          ? "Event added to your favorites!"
+          : "Event removed from your favorites!",
+      );
+    } catch (err: any) {
+      // Revert optimistic update on error
+      setLiked(!liked);
+      setLikesCount((prev) => Math.max(0, prev + (liked ? 1 : -1)));
+
+      const status = err?.status;
+      if (status === 401 || status === 403) {
+        navigate("/login");
+      } else {
+        showToast("Failed to update favorite. Please try again.", "error");
+      }
+    }
+  };
         <div className="relative">
           <div className="relative aspect-video w-full overflow-hidden">
             {img ? (
@@ -166,56 +211,31 @@ export default function EventCard({
             <div className="mt-auto flex items-center justify-between gap-2 pt-3">
               <button
                 type="button"
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-2 text-sm text-foreground"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-2 text-sm text-foreground hover:bg-background/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 disabled={toggleState.isLoading}
-                onClick={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-
-                  if (!isAuthenticated) {
-                    setShowLoginAlert(true);
-                    return;
-                  }
-
-                  try {
-                    const res = await toggleLike({
-                      likeGroup: "EVENT",
-                      likeRefId: event._id,
-                    }).unwrap();
-
-                    setLiked(res.status === "liked");
-
-                    setLikesCount((prev) => {
-                      const delta = res.status === "liked" ? 1 : -1;
-                      return Math.max(0, prev + delta);
-                    });
-
-                    // Show success toast
-                    showToast(
-                      res.status === "liked"
-                        ? "Event added to your favorites!"
-                        : "Event removed from your favorites!",
-                    );
-                  } catch (err: any) {
-                    const status = err?.status;
-                    if (status === 401 || status === 403) {
-                      navigate("/login");
-                    }
-                  }
-                }}
-                aria-label="Likes"
+                onClick={handleLikeToggle}
+                aria-label={liked ? `Remove from favorites (${likesCount} likes)` : `Add to favorites (${likesCount} likes)`}
                 aria-pressed={liked}
               >
                 <Heart
-                  className="h-4 w-4 text-destructive flex-shrink-0"
+                  className="h-4 w-4 text-destructive flex-shrink-0 transition-all"
                   fill={liked ? "currentColor" : "none"}
                 />
                 <span className="text-xs font-semibold">{likesCount}</span>
               </button>
 
+              <Link
+                to={`/events/${event._id}`}
+                className="inline-flex flex-1 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-primary/10 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`View ${event.eventTitle} details`}
+              >
+                View Details
+              </Link>
+
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 onClick={async (e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -231,12 +251,13 @@ export default function EventCard({
                     }
                     if (navigator.clipboard) {
                       await navigator.clipboard.writeText(url);
+                      showToast("Event link copied to clipboard!");
                     }
                   } catch {
                     // no-op
                   }
                 }}
-                aria-label="Share"
+                aria-label={`Share ${event.eventTitle}`}
               >
                 <Share2 className="h-4 w-4 flex-shrink-0" />
               </button>

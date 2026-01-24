@@ -114,7 +114,7 @@ export default function EventsPage() {
         dispatch(setSearchAction(value));
       }, 400);
     },
-    [dispatch]
+    [dispatch],
   );
 
   // Date validation
@@ -237,7 +237,7 @@ export default function EventsPage() {
   const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
   const { data: likesData } = useCheckLikesBatchQuery(
     { likeGroup: "EVENT", likeRefIds: eventIds },
-    { skip: eventIds.length === 0 }
+    { skip: eventIds.length === 0 },
   );
 
   const likedSet = useMemo(() => {
@@ -286,7 +286,7 @@ export default function EventsPage() {
     const year = calendarMonth.getFullYear();
     const month = calendarMonth.getMonth();
     const selectedDate = new Date(year, month, day);
-    const dateString = selectedDate.toISOString().split("T")[0];
+    const dateString = formatLocalDate(selectedDate);
 
     if (isStartDate) {
       dispatch(setStartDate(dateString));
@@ -298,8 +298,15 @@ export default function EventsPage() {
   };
 
   // Date preset handlers
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const setToday = () => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = formatLocalDate(new Date());
     dispatch(setStartDate(today));
     dispatch(setEndDate(today));
   };
@@ -311,18 +318,18 @@ export default function EventsPage() {
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    
-    dispatch(setStartDate(monday.toISOString().split("T")[0]));
-    dispatch(setEndDate(sunday.toISOString().split("T")[0]));
+
+    dispatch(setStartDate(formatLocalDate(monday)));
+    dispatch(setEndDate(formatLocalDate(sunday)));
   };
 
   const setThisMonth = () => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
-    dispatch(setStartDate(firstDay.toISOString().split("T")[0]));
-    dispatch(setEndDate(lastDay.toISOString().split("T")[0]));
+
+    dispatch(setStartDate(formatLocalDate(firstDay)));
+    dispatch(setEndDate(formatLocalDate(lastDay)));
   };
 
   const isToday = (day: number | null) => {
@@ -398,6 +405,31 @@ export default function EventsPage() {
             {/* Start Date Calendar Popover */}
             {showStartCalendar && (
               <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-[9999] w-80">
+                {/* Quick Presets */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <button
+                    onClick={setToday}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to today"
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={setThisWeek}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to this week"
+                  >
+                    This Week
+                  </button>
+                  <button
+                    onClick={setThisMonth}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to this month"
+                  >
+                    This Month
+                  </button>
+                </div>
+
                 {/* Month Navigation */}
                 <div className="flex items-center justify-between mb-4">
                   <button
@@ -483,6 +515,31 @@ export default function EventsPage() {
             {/* End Date Calendar Popover */}
             {showEndCalendar && (
               <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-[9999] w-80">
+                {/* Quick Presets */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <button
+                    onClick={setToday}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to today"
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={setThisWeek}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to this week"
+                  >
+                    This Week
+                  </button>
+                  <button
+                    onClick={setThisMonth}
+                    className="h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors"
+                    title="Set dates to this month"
+                  >
+                    This Month
+                  </button>
+                </div>
+
                 {/* Month Navigation */}
                 <div className="flex items-center justify-between mb-4">
                   <button
@@ -551,31 +608,6 @@ export default function EventsPage() {
             )}
           </div>
 
-          {/* Date Presets */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={setToday}
-              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
-              title="Set dates to today"
-            >
-              Today
-            </button>
-            <button
-              onClick={setThisWeek}
-              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
-              title="Set dates to this week"
-            >
-              This Week
-            </button>
-            <button
-              onClick={setThisMonth}
-              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
-              title="Set dates to this month"
-            >
-              This Month
-            </button>
-          </div>
-
           {/* Sort Dropdown */}
           <div className="relative">
             <select
@@ -611,7 +643,11 @@ export default function EventsPage() {
                 : "border-border bg-background/40 text-foreground hover:bg-background/60"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             onClick={() => dispatch(setShowLikedOnlyAction(!showLikedOnly))}
-            title={isAuthenticated ? "Show only liked events" : "Login to view liked events"}
+            title={
+              isAuthenticated
+                ? "Show only liked events"
+                : "Login to view liked events"
+            }
           >
             <Heart
               className={`h-4 w-4 ${showLikedOnly ? "fill-current" : ""}`}
@@ -713,7 +749,8 @@ export default function EventsPage() {
             Failed to load events
           </h3>
           <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
-            Something went wrong while fetching events. Please check your connection and try again.
+            Something went wrong while fetching events. Please check your
+            connection and try again.
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -729,14 +766,18 @@ export default function EventsPage() {
             <Calendar className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            {showLikedOnly ? "No liked events" : search ? "No events match your search" : "No events found"}
+            {showLikedOnly
+              ? "No liked events"
+              : search
+                ? "No events match your search"
+                : "No events found"}
           </h3>
           <p className="text-sm text-muted-foreground text-center max-w-md">
             {showLikedOnly
               ? "You haven't liked any events yet. Browse events and tap ❤️ to save them here!"
               : search
-              ? "Try different keywords or adjust your filters to find events."
-              : "Check back later for upcoming events from verified organizations."}
+                ? "Try different keywords or adjust your filters to find events."
+                : "Check back later for upcoming events from verified organizations."}
           </p>
         </div>
       ) : !filteredData?.length ? (
@@ -748,7 +789,8 @@ export default function EventsPage() {
             No liked events match your filters
           </h3>
           <p className="text-sm text-muted-foreground text-center max-w-md">
-            None of your liked events match the current filters. Try adjusting your search or date range.
+            None of your liked events match the current filters. Try adjusting
+            your search or date range.
           </p>
         </div>
       ) : (
