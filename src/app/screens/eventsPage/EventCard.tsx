@@ -127,7 +127,7 @@ function EventCard({
   return (
     <>
       <Link to={`/events/${event._id}`} className="group block h-full">
-        <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card text-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-h-[480px]">
+        <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-card text-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-h-[480px]">
           <div
             className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             aria-hidden
