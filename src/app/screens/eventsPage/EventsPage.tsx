@@ -391,10 +391,7 @@ export default function EventsPage() {
   }, []);
 
   return (
-    <div
-      ref={pageTopRef}
-      style={{ fontFamily: "'Airbnb Cereal App', sans-serif" }}
-    >
+    <div ref={pageTopRef}>
       <div className="mb-4">
         <h1 className="m-0 text-2xl font-extrabold tracking-tight text-foreground">
           Events
