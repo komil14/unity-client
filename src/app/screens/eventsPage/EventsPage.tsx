@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
+import { useCheckAuthQuery } from "../../services/authApi";
 import EventCard from "./EventCard";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -32,6 +33,8 @@ import {
   Users,
   X,
   Heart,
+  AlertCircle,
+  RotateCw,
 } from "lucide-react";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
@@ -62,6 +65,8 @@ function viewsEqual(a: EventsPageState, b: EventsPageState) {
 export default function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
+  const { data: authData } = useCheckAuthQuery();
+  const isAuthenticated = Boolean(authData?.member?._id);
 
   const filters = useAppSelector(selectEventsFilters);
   const ordering = useAppSelector(selectEventsOrdering);
@@ -79,9 +84,69 @@ export default function EventsPage() {
   const startDateRef = useRef<HTMLDivElement>(null);
   const endDateRef = useRef<HTMLDivElement>(null);
 
+  // Local search input for debouncing
+  const [searchInput, setSearchInput] = useState(search);
+  const searchDebounceRef = useRef<number | null>(null);
+
+  // Date validation warning
+  const [dateError, setDateError] = useState<string | null>(null);
+
+  // Scroll container ref
+  const pageTopRef = useRef<HTMLDivElement>(null);
+
   const lastSyncedParamsRef = useRef<string | null>(null);
   const lastExternalUrlRef = useRef<string | null>(null);
   const isInitialMount = useRef(true);
+
+  // Sync local search input with Redux
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // Debounced search handler
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+      searchDebounceRef.current = setTimeout(() => {
+        dispatch(setSearchAction(value));
+      }, 400);
+    },
+    [dispatch]
+  );
+
+  // Date validation
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (start > end) {
+        setDateError("Start date must be before end date");
+      } else {
+        setDateError(null);
+      }
+    } else {
+      setDateError(null);
+    }
+  }, [startDate, endDate]);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    if (!isInitialMount.current && page > 1) {
+      pageTopRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [page]);
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   const viewFromUrl = useMemo(() => {
     const urlOrder = searchParams.get("order") || "createdAt";
@@ -232,6 +297,34 @@ export default function EventsPage() {
     }
   };
 
+  // Date preset handlers
+  const setToday = () => {
+    const today = new Date().toISOString().split("T")[0];
+    dispatch(setStartDate(today));
+    dispatch(setEndDate(today));
+  };
+
+  const setThisWeek = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    dispatch(setStartDate(monday.toISOString().split("T")[0]));
+    dispatch(setEndDate(sunday.toISOString().split("T")[0]));
+  };
+
+  const setThisMonth = () => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    dispatch(setStartDate(firstDay.toISOString().split("T")[0]));
+    dispatch(setEndDate(lastDay.toISOString().split("T")[0]));
+  };
+
   const isToday = (day: number | null) => {
     if (!day) return false;
     const today = new Date();
@@ -264,7 +357,7 @@ export default function EventsPage() {
   }, []);
 
   return (
-    <div>
+    <div ref={pageTopRef}>
       <div className="mb-4">
         <h1 className="m-0 text-2xl font-extrabold tracking-tight text-foreground">
           Events
@@ -279,8 +372,8 @@ export default function EventsPage() {
           {/* Search Input */}
           <div className="relative min-w-[260px] flex-1">
             <input
-              value={search}
-              onChange={(e) => dispatch(setSearchAction(e.target.value))}
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search events..."
               className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
@@ -458,6 +551,31 @@ export default function EventsPage() {
             )}
           </div>
 
+          {/* Date Presets */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={setToday}
+              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
+              title="Set dates to today"
+            >
+              Today
+            </button>
+            <button
+              onClick={setThisWeek}
+              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
+              title="Set dates to this week"
+            >
+              This Week
+            </button>
+            <button
+              onClick={setThisMonth}
+              className="h-11 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm text-foreground hover:bg-background/60 transition-colors"
+              title="Set dates to this month"
+            >
+              This Month
+            </button>
+          </div>
+
           {/* Sort Dropdown */}
           <div className="relative">
             <select
@@ -486,13 +604,14 @@ export default function EventsPage() {
           {/* Liked Events Toggle */}
           <button
             type="button"
+            disabled={!isAuthenticated}
             className={`inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border px-4 font-semibold transition-colors ${
               showLikedOnly
                 ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
                 : "border-border bg-background/40 text-foreground hover:bg-background/60"
-            }`}
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
             onClick={() => dispatch(setShowLikedOnlyAction(!showLikedOnly))}
-            title="Show only liked events"
+            title={isAuthenticated ? "Show only liked events" : "Login to view liked events"}
           >
             <Heart
               className={`h-4 w-4 ${showLikedOnly ? "fill-current" : ""}`}
@@ -532,6 +651,14 @@ export default function EventsPage() {
             Clear
           </button>
         </div>
+
+        {/* Date Validation Error */}
+        {dateError && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{dateError}</span>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -578,16 +705,51 @@ export default function EventsPage() {
           </div>
         </div>
       ) : isError ? (
-        <div style={{ color: "var(--danger)" }}>Failed to load events.</div>
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 mb-4">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Failed to load events
+          </h3>
+          <p className="text-sm text-muted-foreground mb-6 text-center max-w-md">
+            Something went wrong while fetching events. Please check your connection and try again.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            <RotateCw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
       ) : !data?.length ? (
-        <div style={{ color: "var(--text-muted)" }}>
-          {showLikedOnly
-            ? "You haven't liked any events yet."
-            : "No events found."}
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+            <Calendar className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            {showLikedOnly ? "No liked events" : search ? "No events match your search" : "No events found"}
+          </h3>
+          <p className="text-sm text-muted-foreground text-center max-w-md">
+            {showLikedOnly
+              ? "You haven't liked any events yet. Browse events and tap ❤️ to save them here!"
+              : search
+              ? "Try different keywords or adjust your filters to find events."
+              : "Check back later for upcoming events from verified organizations."}
+          </p>
         </div>
       ) : !filteredData?.length ? (
-        <div style={{ color: "var(--text-muted)" }}>
-          No liked events found. Start liking events to see them here!
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+            <Heart className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            No liked events match your filters
+          </h3>
+          <p className="text-sm text-muted-foreground text-center max-w-md">
+            None of your liked events match the current filters. Try adjusting your search or date range.
+          </p>
         </div>
       ) : (
         <>
