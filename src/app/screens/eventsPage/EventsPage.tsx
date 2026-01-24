@@ -39,11 +39,16 @@ import {
 
 // Common style constants for better readability
 const STYLES = {
-  button: "inline-flex items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
-  filterButton: "h-11 rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
-  input: "h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
-  presetButton: "h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-  paginationButton: "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  button:
+    "inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  filterButton:
+    "h-11 rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  input:
+    "h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  presetButton:
+    "h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+  paginationButton:
+    "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
 } as const;
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
@@ -386,7 +391,10 @@ export default function EventsPage() {
   }, []);
 
   return (
-    <div ref={pageTopRef}>
+    <div
+      ref={pageTopRef}
+      style={{ fontFamily: "'Airbnb Cereal App', sans-serif" }}
+    >
       <div className="mb-4">
         <h1 className="m-0 text-2xl font-extrabold tracking-tight text-foreground">
           Events
@@ -828,7 +836,7 @@ export default function EventsPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
               gap: 16,
             }}
           >

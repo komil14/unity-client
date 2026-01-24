@@ -3,11 +3,11 @@ import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
-  DollarSign,
   Eye,
   Heart,
   MapPin,
   Share2,
+  StarsIcon,
   Users,
 } from "lucide-react";
 
@@ -78,7 +78,7 @@ function EventCard({
     setLikesCount(event.eventLikes || 0);
   }, [event.eventLikes]);
 
-  const priceLabel = event.eventPoints ? `+${event.eventPoints} pts` : "Free";
+  const pointLabel = event.eventPoints ? `+${event.eventPoints} pts` : "No pts";
 
   const handleLikeToggle = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -90,7 +90,6 @@ function EventCard({
     }
 
     try {
-      // Optimistic update
       const newLiked = !liked;
       setLiked(newLiked);
       setLikesCount((prev) => Math.max(0, prev + (newLiked ? 1 : -1)));
@@ -100,11 +99,9 @@ function EventCard({
         likeRefId: event._id,
       }).unwrap();
 
-      // Confirm with server response
       const confirmed = res.status === "liked";
       setLiked(confirmed);
 
-      // Revert count if server doesn't match optimistic update
       if (confirmed !== newLiked) {
         setLikesCount((prev) => Math.max(0, prev + (confirmed ? 1 : -1)));
       }
@@ -115,7 +112,6 @@ function EventCard({
           : "Event removed from your favorites!",
       );
     } catch (err: any) {
-      // Revert optimistic update on error
       setLiked(!liked);
       setLikesCount((prev) => Math.max(0, prev + (liked ? 1 : -1)));
 
@@ -129,92 +125,122 @@ function EventCard({
   };
 
   return (
-    <Link to={`/events/${event._id}`} className="block h-full">
-      <div className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/40">
-        <div className="relative">
-          <div className="relative aspect-video w-full overflow-hidden">
-            {img ? (
-              <img
-                src={img}
-                alt={event.eventTitle}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="h-full w-full bg-muted" />
-            )}
+    <>
+      <Link to={`/events/${event._id}`} className="group block h-full">
+        <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card text-foreground shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-h-[480px]">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            aria-hidden
+          >
+            <div className="absolute -inset-x-12 -bottom-10 h-24 bg-gradient-to-r from-primary/20 via-emerald-400/15 to-amber-300/20 blur-3xl" />
+          </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/20 to-transparent" />
+          {/* Image */}
+          <div className="relative overflow-hidden">
+            <div className="relative aspect-[16/10] w-full bg-muted">
+              {img ? (
+                <img
+                  src={img}
+                  alt={event.eventTitle}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Users className="h-12 w-12 text-muted-foreground/60" />
+                </div>
+              )}
 
-            <div className="absolute left-2 top-2">
-              <div className="inline-flex items-center rounded-full border border-border bg-background/60 px-2 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur">
-                {upcoming ? "UPCOMING" : "PAST"}
-              </div>
-            </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-transform duration-500 group-hover:scale-140" />
 
-            <div className="absolute right-2 top-2">
-              <div className="inline-flex items-center gap-1 rounded-full border border-border bg-background/60 px-2 py-0.5 text-[10px] font-semibold text-foreground backdrop-blur">
-                <DollarSign className="h-3 w-3" />
-                {priceLabel}
+              <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border shadow-sm  backdrop-blur-sm ${
+                    upcoming
+                      ? "bg-primary/70 border-emerald-400/50 text-white"
+                      : "bg-slate-700/70 border-slate-600/30 text-slate-100"
+                  }`}
+                >
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${upcoming ? "bg-white animate-pulse" : "bg-slate-200"}`}
+                  />
+                  {upcoming ? "Open" : "Closed"}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-1 flex-col p-3">
-            <div
-              className="text-sm font-extrabold tracking-tight text-foreground"
-              style={clampStyle(1)}
-              title={event.eventTitle}
-            >
-              {event.eventTitle}
-            </div>
-
-            <div className="mt-2">
-              <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                #Event
+          {/* Body */}
+          <div className="flex flex-1 flex-col gap-4 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <h3
+                className="text-base sm:text-lg font-semibold leading-tight tracking-tight"
+                style={clampStyle(2)}
+                title={event.eventTitle}
+              >
+                {event.eventTitle}
+              </h3>
+              <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-3 py-1 text-[11px] font-semibold">
+                Volunteer
               </span>
             </div>
 
-            <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <MapPin className="h-3 w-3 flex-shrink-0" />
-                <span className="min-w-0 flex-1 truncate">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-muted-foreground items-center">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="leading-snug text-sm font-medium text-foreground">
                   {event.eventLocation}
                 </span>
               </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 flex-shrink-0" />
-                <span className="truncate text-xs">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+                <span className="leading-snug text-sm font-medium text-foreground">
                   {formatDateTime(event.eventDate || "")}
                 </span>
               </div>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <div className="flex items-center justify-center gap-1 rounded-[var(--radius-lg)] border border-border bg-background/30 px-2 py-2">
-                <Eye className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                <span className="text-xs font-semibold text-foreground">
-                  {event.eventViews}
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-1 rounded-[var(--radius-lg)] border border-border bg-background/30 px-2 py-2">
-                <Users className="h-3.5 w-3.5 text-primary flex-shrink-0" />
-                <span className="text-xs font-semibold text-foreground">
+            <div className="flex flex-wrap gap-3 text-xs font-semibold text-foreground justify-center">
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 border border-border px-3 py-1">
+                <Users className="h-3.5 w-4 text-primary" />
+                {event.eventJoined} / {event.eventCapacity}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 border border-border px-3 py-1">
+                <Eye className="h-3.5 w-4 text-primary" />
+                {event.eventViews}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 border border-border px-3 py-1">
+                <StarsIcon className="h-3.5 w-4 text-primary" />
+                {pointLabel}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Capacity</span>
+                <span className="font-semibold text-foreground">
                   {event.eventJoined}/{event.eventCapacity}
                 </span>
               </div>
-            </div>
-
-            <div className="mt-2 rounded-[var(--radius-lg)] border border-border bg-background/20 p-2 text-xs text-muted-foreground">
-              <div className="truncate" title={event.eventDesc}>
-                {event.eventDesc}
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden border border-border/60">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-primary to-primary/80 transition-all duration-500"
+                  style={{
+                    width: `${(() => {
+                      const capacity = Math.max(event.eventCapacity || 0, 0);
+                      const joined = Math.max(event.eventJoined || 0, 0);
+                      if (capacity === 0) return 0;
+                      return Math.min((joined / capacity) * 100, 100);
+                    })()}%`,
+                  }}
+                />
               </div>
             </div>
 
-            <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+            <div className="mt-auto flex items-center gap-2">
               <button
                 type="button"
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-2 text-sm text-foreground hover:bg-background/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-semibold text-foreground transition-transform transition-colors duration-200 hover:bg-background/80 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 disabled={toggleState.isLoading}
                 onClick={handleLikeToggle}
                 aria-label={
@@ -225,24 +251,23 @@ function EventCard({
                 aria-pressed={liked}
               >
                 <Heart
-                  className="h-4 w-4 text-destructive flex-shrink-0 transition-all"
-                  fill={liked ? "currentColor" : "none"}
+                  className={`h-4 w-4 flex-shrink-0 ${liked ? "text-rose-500 fill-rose-500" : "text-muted-foreground"}`}
                 />
-                <span className="text-xs font-semibold">{likesCount}</span>
+                {event.eventLikes}
               </button>
 
               <Link
                 to={`/events/${event._id}`}
-                className="inline-flex flex-1 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-primary/10 px-2 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-transform transition-colors duration-200 hover:bg-primary/90 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 onClick={(e) => e.stopPropagation()}
-                aria-label={`View ${event.eventTitle} details`}
+                aria-label={`Apply to ${event.eventTitle}`}
               >
-                View
+                Apply
               </Link>
 
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-foreground transition-transform transition-colors duration-200 hover:bg-background/80 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 onClick={async (e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -271,7 +296,7 @@ function EventCard({
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       <AlertDialog
         isOpen={showLoginAlert}
@@ -285,7 +310,7 @@ function EventCard({
         confirmText="Login Now"
         cancelText="Maybe Later"
       />
-    </Link>
+    </>
   );
 }
 

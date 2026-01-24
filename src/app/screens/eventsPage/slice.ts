@@ -9,7 +9,7 @@ const initialState: EventsPageState = {
   direction: "desc",
   showLikedOnly: false,
   page: 1,
-  limit: 10,
+  limit: 8,
 };
 
 const eventsPageSlice = createSlice({
@@ -54,7 +54,7 @@ const eventsPageSlice = createSlice({
       state.direction = "desc";
       state.showLikedOnly = false;
       state.page = 1;
-      state.limit = 10;
+      state.limit = 8;
     },
     hydrateFromUrl(_state, action: PayloadAction<EventsPageState>) {
       return action.payload;
