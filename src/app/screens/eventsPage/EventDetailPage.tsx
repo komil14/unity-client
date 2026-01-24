@@ -94,6 +94,13 @@ export default function EventDetailPage() {
     viewEvent(eventId);
   }, [eventId, viewEvent]);
 
+  // Initialize likes count from event data
+  useEffect(() => {
+    if (data?.eventLikes !== undefined) {
+      setLikesCount(data.eventLikes);
+    }
+  }, [data?.eventLikes]);
+
   useEffect(() => {
     if (likeData) {
       setIsLiked(likeData.likedRefIds.includes(eventId));
@@ -109,40 +116,53 @@ export default function EventDetailPage() {
       return;
     }
 
+    // Optimistic update
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
-    setLikesCount((prev) => (wasLiked ? prev - 1 : prev + 1));
+    setLikesCount((prev) => (wasLiked ? Math.max(0, prev - 1) : prev + 1));
 
     try {
-      await toggleLike({ likeRefId: eventId, likeGroup: "EVENT" }).unwrap();
+      const res = await toggleLike({ likeRefId: eventId, likeGroup: "EVENT" }).unwrap();
+
+      // Confirm with server response
+      const confirmed = res.status === "liked";
+      setIsLiked(confirmed);
 
       // Show success toast
       showToast(
-        wasLiked
-          ? "Event removed from your favorites!"
-          : "Event added to your favorites!",
+        confirmed
+          ? "Event added to your favorites!"
+          : "Event removed from your favorites!",
       );
-    } catch (err) {
+    } catch (err: any) {
       // Revert on error
       setIsLiked(wasLiked);
-      setLikesCount((prev) => (wasLiked ? prev + 1 : prev - 1));
+      setLikesCount((prev) => (wasLiked ? Math.max(0, prev + 1) : Math.max(0, prev - 1)));
+      
+      const status = err?.status;
+      if (status === 401 || status === 403) {
+        navigate("/login");
+      } else {
+        showToast("Failed to update favorite. Please try again.", "error");
+      }
     }
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
         await navigator.share({
           title: data?.eventTitle || "Event",
-          url: window.location.href,
+          url,
         });
-      } catch (err) {
-        console.log("Share cancelled");
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        showToast("Event link copied to clipboard!");
       }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+    } catch (err) {
+      // User cancelled share or clipboard failed
+      console.log("Share cancelled or failed", err);
     }
   };
 
@@ -329,14 +349,28 @@ export default function EventDetailPage() {
                   {/* Like Button */}
                   <button
                     onClick={handleLike}
-                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                    disabled={!isAuthenticated}
+                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                       isLiked
-                        ? "bg-primary text-white"
+                        ? "bg-primary text-white hover:bg-primary/90"
                         : "bg-muted text-foreground hover:bg-muted/80"
                     }`}
+                    aria-label={
+                      isLiked
+                        ? `Remove from favorites (${likesCount} likes)`
+                        : `Add to favorites (${likesCount} likes)`
+                    }
+                    aria-pressed={isLiked}
+                    title={
+                      !isAuthenticated
+                        ? "Login to like this event"
+                        : isLiked
+                        ? "Unlike this event"
+                        : "Like this event"
+                    }
                   >
                     <Heart
-                      className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`}
+                      className={`h-4 w-4 transition-all ${isLiked ? "fill-current" : ""}`}
                     />
                     <span>{likesCount}</span>
                   </button>
