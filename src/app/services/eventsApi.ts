@@ -51,6 +51,37 @@ export const eventsApi = api.injectEndpoints({
             ]
           : [{ type: "Event" as const, id: "POPULAR_WEEKLY" }],
     }),
+
+    viewEvent: build.mutation<{ eventViews: number }, string>({
+      query: (id) => ({
+        url: `/event/view/${id}`,
+        method: "POST",
+      }),
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          // Update the cached getEventById data in real-time
+          dispatch(
+            eventsApi.util.updateQueryData(
+              "getEventById",
+              id,
+              (draft) => {
+                if (!draft) return;
+                (draft as any).eventViews = data.eventViews;
+              },
+            ),
+          );
+        } catch {
+          // ignore
+        }
+      },
+      invalidatesTags: (_result, _err, id) => [
+        { type: "Event" as const, id },
+        { type: "Event" as const, id: "LIST" },
+        { type: "Event" as const, id: "POPULAR_WEEKLY" },
+      ],
+    }),
   }),
 });
 
@@ -58,4 +89,5 @@ export const {
   useGetEventsQuery,
   useGetEventByIdQuery,
   useGetWeeklyPopularEventsQuery,
+  useViewEventMutation,
 } = eventsApi;

@@ -16,6 +16,7 @@ import { useCheckAuthQuery } from "../../services/authApi";
 import {
   useGetEventByIdQuery,
   useGetEventsQuery,
+  useViewEventMutation,
 } from "../../services/eventsApi";
 import { useJoinEventMutation } from "../../services/applicationsApi";
 import {
@@ -65,6 +66,7 @@ export default function EventDetailPage() {
 
   const [joinEvent, joinState] = useJoinEventMutation();
   const [toggleLike] = useToggleLikeMutation();
+  const [viewEvent] = useViewEventMutation();
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
@@ -86,11 +88,11 @@ export default function EventDetailPage() {
     direction: "desc",
   });
 
+  // Track view when event detail page loads
   useEffect(() => {
-    if (data) {
-      setLikesCount(data.eventLikes || 0);
-    }
-  }, [data?.eventLikes]);
+    if (!eventId) return;
+    viewEvent(eventId);
+  }, [eventId, viewEvent]);
 
   useEffect(() => {
     if (likeData) {

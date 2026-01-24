@@ -1,7 +1,8 @@
 import { useState } from "react";
 
 import HeroSection from "./hero";
-import WhyJoinSection, { type WhyTab } from "./whyJoin";
+import WhyJoinSection from "./whyJoin";
+import type { WhyTab } from "../../../libs/types";
 import PopularEventsSection from "./popularEvents";
 import TrendingEventsSection from "./trendingEvents";
 import TopOrganizersSection from "./topOrganizers";
