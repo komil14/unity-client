@@ -63,14 +63,10 @@ export const eventsApi = api.injectEndpoints({
 
           // Update the cached getEventById data in real-time
           dispatch(
-            eventsApi.util.updateQueryData(
-              "getEventById",
-              id,
-              (draft) => {
-                if (!draft) return;
-                (draft as any).eventViews = data.eventViews;
-              },
-            ),
+            eventsApi.util.updateQueryData("getEventById", id, (draft) => {
+              if (!draft) return;
+              (draft as any).eventViews = data.eventViews;
+            }),
           );
         } catch {
           // ignore
