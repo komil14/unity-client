@@ -342,7 +342,7 @@ export default function EventsPage() {
     );
   };
 
-  // Close calendar on outside click
+  // Close calendar on outside click or ESC key
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -359,8 +359,19 @@ export default function EventsPage() {
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowStartCalendar(false);
+        setShowEndCalendar(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
@@ -382,7 +393,8 @@ export default function EventsPage() {
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search events..."
-              className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Search events by name or description"
+              className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
             />
           </div>
 
@@ -394,7 +406,9 @@ export default function EventsPage() {
                 setShowEndCalendar(false);
                 setCalendarMonth(startDate ? new Date(startDate) : new Date());
               }}
-              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors"
+              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              aria-label="Select start date for event filtering"
+              aria-expanded={showStartCalendar}
             >
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>
@@ -506,7 +520,9 @@ export default function EventsPage() {
                 setShowStartCalendar(false);
                 setCalendarMonth(endDate ? new Date(endDate) : new Date());
               }}
-              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors"
+              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              aria-label="Select end date for event filtering"
+              aria-expanded={showEndCalendar}
             >
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>{endDate ? formatDateDisplay(endDate) : "End Date"}</span>
@@ -621,8 +637,8 @@ export default function EventsPage() {
                 dispatch(setOrderAction(nextOrder));
                 dispatch(setDirectionAction(nextDirection));
               }}
-              className="h-11 w-[170px] appearance-none rounded-[var(--radius-lg)] border border-border bg-background/40 px-3 pr-9 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="Sort by"
+              className="h-11 w-[170px] appearance-none rounded-[var(--radius-lg)] border border-border bg-background/40 px-3 pr-9 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              aria-label="Sort events by"
             >
               {ORDER_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -641,13 +657,15 @@ export default function EventsPage() {
               showLikedOnly
                 ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
                 : "border-border bg-background/40 text-foreground hover:bg-background/60"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            } disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0`}
             onClick={() => dispatch(setShowLikedOnlyAction(!showLikedOnly))}
             title={
               isAuthenticated
                 ? "Show only liked events"
                 : "Login to view liked events"
             }
+            aria-label={`${showLikedOnly ? "Hide" : "Show"} liked events only`}
+            aria-pressed={showLikedOnly}
           >
             <Heart
               className={`h-4 w-4 ${showLikedOnly ? "fill-current" : ""}`}
@@ -658,11 +676,11 @@ export default function EventsPage() {
           {/* Direction Toggle */}
           <button
             type="button"
-            className="inline-flex h-11 w-12 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60"
+            className="inline-flex h-11 w-12 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
             onClick={() =>
               dispatch(setDirectionAction(direction === "asc" ? "desc" : "asc"))
             }
-            aria-label="Toggle sort direction"
+            aria-label={`Toggle sort direction: currently ${direction === "asc" ? "ascending" : "descending"}`}
             title={direction === "asc" ? "Ascending" : "Descending"}
           >
             {direction === "asc" ? (
@@ -675,13 +693,14 @@ export default function EventsPage() {
           {/* Clear Button */}
           <button
             type="button"
-            className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60"
+            className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
             onClick={() => {
               dispatch(resetFilters());
               setCalendarMonth(new Date());
               setShowStartCalendar(false);
               setShowEndCalendar(false);
             }}
+            aria-label="Clear all filters"
           >
             <X className="h-4 w-4" />
             Clear
@@ -816,8 +835,8 @@ export default function EventsPage() {
             <button
               onClick={() => dispatch(setPageAction(Math.max(1, page - 1)))}
               disabled={page === 1}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
-              aria-label="Previous page"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              aria-label="Go to previous page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -836,11 +855,13 @@ export default function EventsPage() {
                   <button
                     key={pageNum}
                     onClick={() => dispatch(setPageAction(pageNum))}
-                    className={`h-10 w-10 rounded-lg border transition-colors ${
+                    className={`h-10 w-10 rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 ${
                       pageNum === page
                         ? "border-primary bg-primary/20 text-primary font-semibold"
                         : "border-border bg-background/40 text-foreground hover:bg-background/60"
                     }`}
+                    aria-label={`Go to page ${pageNum}`}
+                    aria-current={pageNum === page ? "page" : undefined}
                   >
                     {pageNum}
                   </button>
@@ -851,8 +872,8 @@ export default function EventsPage() {
             <button
               onClick={() => dispatch(setPageAction(page + 1))}
               disabled={filteredData.length < limit}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
-              aria-label="Next page"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              aria-label="Go to next page"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

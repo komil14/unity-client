@@ -91,7 +91,6 @@ export default function EventCard({
 
     try {
       // Optimistic update
-      const wasLiked = liked;
       const newLiked = !liked;
       setLiked(newLiked);
       setLikesCount((prev) => Math.max(0, prev + (newLiked ? 1 : -1)));
@@ -128,6 +127,10 @@ export default function EventCard({
       }
     }
   };
+
+  return (
+    <Link to={`/events/${event._id}`} className="block h-full">
+      <div className="flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card/40">
         <div className="relative">
           <div className="relative aspect-video w-full overflow-hidden">
             {img ? (
@@ -214,7 +217,11 @@ export default function EventCard({
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-background/40 px-3 py-2 text-sm text-foreground hover:bg-background/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 disabled={toggleState.isLoading}
                 onClick={handleLikeToggle}
-                aria-label={liked ? `Remove from favorites (${likesCount} likes)` : `Add to favorites (${likesCount} likes)`}
+                aria-label={
+                  liked
+                    ? `Remove from favorites (${likesCount} likes)`
+                    : `Add to favorites (${likesCount} likes)`
+                }
                 aria-pressed={liked}
               >
                 <Heart
@@ -226,11 +233,11 @@ export default function EventCard({
 
               <Link
                 to={`/events/${event._id}`}
-                className="inline-flex flex-1 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-primary/10 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
+                className="inline-flex flex-1 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-primary/10 px-2 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring"
                 onClick={(e) => e.stopPropagation()}
                 aria-label={`View ${event.eventTitle} details`}
               >
-                View Details
+                View
               </Link>
 
               <button
