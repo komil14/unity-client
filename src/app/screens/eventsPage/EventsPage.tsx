@@ -37,6 +37,15 @@ import {
   RotateCw,
 } from "lucide-react";
 
+// Common style constants for better readability
+const STYLES = {
+  button: "inline-flex items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  filterButton: "h-11 rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  input: "h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+  presetButton: "h-8 px-2 rounded-lg border border-border bg-background/40 text-xs font-medium text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+  paginationButton: "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
+} as const;
+
 const ORDER_OPTIONS: { label: string; value: string }[] = [
   { label: "Event Date", value: "eventDate" },
   { label: "Newest", value: "createdAt" },
@@ -240,18 +249,20 @@ export default function EventsPage() {
     { skip: eventIds.length === 0 },
   );
 
+  // Create a Set of liked event IDs for O(1) lookup performance
   const likedSet = useMemo(() => {
     const ids = likesData?.likedRefIds ?? [];
     return new Set(ids);
   }, [likesData]);
 
-  // Filter to show only liked events if showLikedOnly is true
+  // Apply client-side filtering for "liked only" mode
+  // This allows showing liked events without additional API calls
   const filteredData = useMemo(() => {
     if (!showLikedOnly) return data;
     return data?.filter((event) => likedSet.has(event._id)) ?? [];
   }, [data, showLikedOnly, likedSet]);
 
-  // Calendar helpers
+  // Calendar helpers - generate days grid for month view
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -261,7 +272,7 @@ export default function EventsPage() {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    // Add previous month's trailing days
+    // Add previous month's trailing days (empty slots)
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
@@ -394,7 +405,7 @@ export default function EventsPage() {
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search events..."
               aria-label="Search events by name or description"
-              className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              className={STYLES.input}
             />
           </div>
 
@@ -406,7 +417,7 @@ export default function EventsPage() {
                 setShowEndCalendar(false);
                 setCalendarMonth(startDate ? new Date(startDate) : new Date());
               }}
-              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              className={`flex items-center gap-2 px-4 text-sm ${STYLES.filterButton}`}
               aria-label="Select start date for event filtering"
               aria-expanded={showStartCalendar}
             >
@@ -419,7 +430,7 @@ export default function EventsPage() {
             {/* Start Date Calendar Popover */}
             {showStartCalendar && (
               <div className="absolute top-full mt-2 left-0 bg-card rounded-xl shadow-2xl border border-border p-4 z-[9999] w-80">
-                {/* Quick Presets */}
+                {/* Quick date range presets for common selections */}
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <button
                     onClick={setToday}
@@ -520,7 +531,7 @@ export default function EventsPage() {
                 setShowStartCalendar(false);
                 setCalendarMonth(endDate ? new Date(endDate) : new Date());
               }}
-              className="flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-sm text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              className={`flex items-center gap-2 px-4 text-sm ${STYLES.filterButton}`}
               aria-label="Select end date for event filtering"
               aria-expanded={showEndCalendar}
             >
@@ -693,7 +704,7 @@ export default function EventsPage() {
           {/* Clear Button */}
           <button
             type="button"
-            className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+            className={STYLES.button}
             onClick={() => {
               dispatch(resetFilters());
               setCalendarMonth(new Date());
@@ -835,7 +846,7 @@ export default function EventsPage() {
             <button
               onClick={() => dispatch(setPageAction(Math.max(1, page - 1)))}
               disabled={page === 1}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              className={`${STYLES.paginationButton} disabled:opacity-50 disabled:cursor-not-allowed`}
               aria-label="Go to previous page"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -872,7 +883,7 @@ export default function EventsPage() {
             <button
               onClick={() => dispatch(setPageAction(page + 1))}
               disabled={filteredData.length < limit}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
+              className={`${STYLES.paginationButton} disabled:opacity-50 disabled:cursor-not-allowed`}
               aria-label="Go to next page"
             >
               <ChevronRight className="h-4 w-4" />

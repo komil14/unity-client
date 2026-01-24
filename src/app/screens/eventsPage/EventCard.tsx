@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import type { CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -51,7 +51,7 @@ function formatDateTime(value: string): string {
   return `${datePart}, ${timePart}`;
 }
 
-export default function EventCard({
+function EventCard({
   event,
   likedByMe,
 }: {
@@ -288,3 +288,6 @@ export default function EventCard({
     </Link>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders when parent updates
+export default memo(EventCard);
