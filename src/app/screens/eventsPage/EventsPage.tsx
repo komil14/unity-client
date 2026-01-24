@@ -3,6 +3,25 @@ import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import EventCard from "./EventCard";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  selectEventsFilters,
+  selectEventsOrdering,
+  selectEventsPagination,
+  selectEventsView,
+} from "./selectors";
+import {
+  hydrateFromUrl,
+  resetFilters,
+  setDirection as setDirectionAction,
+  setEndDate,
+  setOrder as setOrderAction,
+  setPage as setPageAction,
+  setSearch as setSearchAction,
+  setShowLikedOnly as setShowLikedOnlyAction,
+  setStartDate,
+} from "./slice";
+import type { EventsPageState } from "../../../libs/types";
 import {
   Calendar,
   ChevronDown,
@@ -27,31 +46,31 @@ function defaultDirectionForOrder(order: string): "asc" | "desc" {
   return "desc";
 }
 
+function viewsEqual(a: EventsPageState, b: EventsPageState) {
+  return (
+    a.search === b.search &&
+    a.startDate === b.startDate &&
+    a.endDate === b.endDate &&
+    a.showLikedOnly === b.showLikedOnly &&
+    a.order === b.order &&
+    a.direction === b.direction &&
+    a.page === b.page &&
+    a.limit === b.limit
+  );
+}
+
 export default function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const dispatch = useAppDispatch();
 
-  const initialOrder = searchParams.get("order") || "createdAt";
-  const [order, setOrder] = useState(initialOrder);
+  const filters = useAppSelector(selectEventsFilters);
+  const ordering = useAppSelector(selectEventsOrdering);
+  const pagination = useAppSelector(selectEventsPagination);
+  const view = useAppSelector(selectEventsView);
 
-  const initialDirection =
-    (searchParams.get("direction") as "asc" | "desc" | null) ||
-    defaultDirectionForOrder(initialOrder);
-  const [direction, setDirection] = useState<"asc" | "desc">(initialDirection);
-
-  const initialSearch = searchParams.get("search") || "";
-  const [search, setSearch] = useState(initialSearch);
-
-  const initialStartDate = searchParams.get("startDate") || "";
-  const [startDate, setStartDate] = useState(initialStartDate);
-
-  const initialEndDate = searchParams.get("endDate") || "";
-  const [endDate, setEndDate] = useState(initialEndDate);
-
-  const initialLiked = searchParams.get("liked") === "true";
-  const [showLikedOnly, setShowLikedOnly] = useState(initialLiked);
-
-  const initialPage = parseInt(searchParams.get("page") || "1", 10);
-  const [page, setPage] = useState(initialPage);
+  const { search, startDate, endDate, showLikedOnly } = filters;
+  const { order, direction } = ordering;
+  const { page, limit } = pagination;
 
   // Calendar popover states
   const [showStartCalendar, setShowStartCalendar] = useState(false);
@@ -60,30 +79,52 @@ export default function EventsPage() {
   const startDateRef = useRef<HTMLDivElement>(null);
   const endDateRef = useRef<HTMLDivElement>(null);
 
-  // Keep component state in sync if the user navigates with browser history.
-  useEffect(() => {
-    const nextOrder = searchParams.get("order") || "createdAt";
-    const nextSearch = searchParams.get("search") || "";
-    const nextStartDate = searchParams.get("startDate") || "";
-    const nextEndDate = searchParams.get("endDate") || "";
-    const nextLiked = searchParams.get("liked") === "true";
-    const nextPage = parseInt(searchParams.get("page") || "1", 10);
-    const nextDirection =
+  const lastSyncedParamsRef = useRef<string | null>(null);
+  const lastExternalUrlRef = useRef<string | null>(null);
+  const isInitialMount = useRef(true);
+
+  const viewFromUrl = useMemo(() => {
+    const urlOrder = searchParams.get("order") || "createdAt";
+    const urlDirection =
       (searchParams.get("direction") as "asc" | "desc" | null) ||
-      defaultDirectionForOrder(nextOrder);
+      defaultDirectionForOrder(urlOrder);
 
-    setOrder(nextOrder);
-    setSearch(nextSearch);
-    setStartDate(nextStartDate);
-    setEndDate(nextEndDate);
-    setShowLikedOnly(nextLiked);
-    setPage(nextPage);
-    setDirection(nextDirection);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+    return {
+      search: searchParams.get("search") || "",
+      startDate: searchParams.get("startDate") || "",
+      endDate: searchParams.get("endDate") || "",
+      showLikedOnly: searchParams.get("liked") === "true",
+      order: urlOrder,
+      direction: urlDirection,
+      page: parseInt(searchParams.get("page") || "1", 10) || 1,
+      limit,
+    } satisfies EventsPageState;
+  }, [limit, searchParams]);
 
-  // Push changes into the URL (single source of truth for shareable filters)
+  // Hydrate Redux from URL, and respond to browser back/forward
   useEffect(() => {
+    const urlString = searchParams.toString();
+
+    if (isInitialMount.current) {
+      dispatch(hydrateFromUrl(viewFromUrl));
+      lastSyncedParamsRef.current = urlString;
+      lastExternalUrlRef.current = urlString;
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (urlString !== lastSyncedParamsRef.current) {
+      lastExternalUrlRef.current = urlString;
+      if (!viewsEqual(view, viewFromUrl)) {
+        dispatch(hydrateFromUrl(viewFromUrl));
+      }
+    }
+  }, [dispatch, searchParams, view, viewFromUrl]);
+
+  // Sync Redux state into URL (avoids loops by comparing last external URL)
+  useEffect(() => {
+    if (isInitialMount.current) return;
+
     const next = new URLSearchParams();
     const trimmed = search.trim();
 
@@ -93,31 +134,38 @@ export default function EventsPage() {
     if (order !== "createdAt") next.set("order", order);
     if (showLikedOnly) next.set("liked", "true");
     if (page > 1) next.set("page", String(page));
+
     const defaultDir = defaultDirectionForOrder(order);
     if (direction !== defaultDir) next.set("direction", direction);
 
-    setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, startDate, endDate, order, direction, showLikedOnly, page]);
-
-  // Reset page to 1 when filters change
-  useEffect(() => {
-    setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, startDate, endDate, order, direction, showLikedOnly]);
+    const nextString = next.toString();
+    if (nextString !== lastExternalUrlRef.current) {
+      lastSyncedParamsRef.current = nextString;
+      setSearchParams(next, { replace: true });
+    }
+  }, [
+    direction,
+    endDate,
+    order,
+    page,
+    search,
+    setSearchParams,
+    showLikedOnly,
+    startDate,
+  ]);
 
   const query = useMemo(() => {
     const trimmed = search.trim();
     return {
       page,
-      limit: 10,
+      limit,
       order,
       direction,
       search: trimmed ? trimmed : undefined,
       startDate: startDate ? startDate : undefined,
       endDate: endDate ? endDate : undefined,
     };
-  }, [order, direction, search, startDate, endDate, page]);
+  }, [direction, endDate, limit, order, page, search, startDate]);
 
   const { data, isLoading, isError } = useGetEventsQuery(query);
 
@@ -176,10 +224,10 @@ export default function EventsPage() {
     const dateString = selectedDate.toISOString().split("T")[0];
 
     if (isStartDate) {
-      setStartDate(dateString);
+      dispatch(setStartDate(dateString));
       setShowStartCalendar(false);
     } else {
-      setEndDate(dateString);
+      dispatch(setEndDate(dateString));
       setShowEndCalendar(false);
     }
   };
@@ -232,7 +280,7 @@ export default function EventsPage() {
           <div className="relative min-w-[260px] flex-1">
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => dispatch(setSearchAction(e.target.value))}
               placeholder="Search events..."
               className="h-11 w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
@@ -416,13 +464,12 @@ export default function EventsPage() {
               value={order}
               onChange={(e) => {
                 const nextOrder = e.target.value;
-                setOrder(nextOrder);
-                setDirection((prev) => {
-                  const defaultDir = defaultDirectionForOrder(nextOrder);
-                  return prev === defaultDirectionForOrder(order)
-                    ? defaultDir
-                    : prev;
-                });
+                const nextDirection =
+                  direction === defaultDirectionForOrder(order)
+                    ? defaultDirectionForOrder(nextOrder)
+                    : direction;
+                dispatch(setOrderAction(nextOrder));
+                dispatch(setDirectionAction(nextDirection));
               }}
               className="h-11 w-[170px] appearance-none rounded-[var(--radius-lg)] border border-border bg-background/40 px-3 pr-9 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Sort by"
@@ -444,7 +491,7 @@ export default function EventsPage() {
                 ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
                 : "border-border bg-background/40 text-foreground hover:bg-background/60"
             }`}
-            onClick={() => setShowLikedOnly(!showLikedOnly)}
+            onClick={() => dispatch(setShowLikedOnlyAction(!showLikedOnly))}
             title="Show only liked events"
           >
             <Heart
@@ -457,7 +504,9 @@ export default function EventsPage() {
           <button
             type="button"
             className="inline-flex h-11 w-12 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 text-foreground hover:bg-background/60"
-            onClick={() => setDirection((d) => (d === "asc" ? "desc" : "asc"))}
+            onClick={() =>
+              dispatch(setDirectionAction(direction === "asc" ? "desc" : "asc"))
+            }
             aria-label="Toggle sort direction"
             title={direction === "asc" ? "Ascending" : "Descending"}
           >
@@ -473,14 +522,10 @@ export default function EventsPage() {
             type="button"
             className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 font-semibold text-foreground hover:bg-background/60"
             onClick={() => {
-              setSearch("");
-              setStartDate("");
-              setEndDate("");
-              setOrder("createdAt");
-              setShowLikedOnly(false);
-              setPage(1);
-              setDirection(defaultDirectionForOrder("createdAt"));
-              setSearchParams(new URLSearchParams(), { replace: true });
+              dispatch(resetFilters());
+              setCalendarMonth(new Date());
+              setShowStartCalendar(false);
+              setShowEndCalendar(false);
             }}
           >
             <X className="h-4 w-4" />
@@ -565,7 +610,7 @@ export default function EventsPage() {
           {/* Pagination Controls */}
           <div className="mt-8 flex items-center justify-center gap-2">
             <button
-              onClick={() => setPage(Math.max(1, page - 1))}
+              onClick={() => dispatch(setPageAction(Math.max(1, page - 1)))}
               disabled={page === 1}
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
               aria-label="Previous page"
@@ -579,14 +624,14 @@ export default function EventsPage() {
                 // Don't show page numbers less than 1
                 if (pageNum < 1) return null;
                 // If current page has full results (10), only show up to current+1 (we don't know beyond that)
-                if (filteredData.length >= 10 && pageNum > page + 1)
+                if (filteredData.length >= limit && pageNum > page + 1)
                   return null;
                 // If current page has fewer than 10 results, it's the last page - don't show beyond it
-                if (filteredData.length < 10 && pageNum > page) return null;
+                if (filteredData.length < limit && pageNum > page) return null;
                 return (
                   <button
                     key={pageNum}
-                    onClick={() => setPage(pageNum)}
+                    onClick={() => dispatch(setPageAction(pageNum))}
                     className={`h-10 w-10 rounded-lg border transition-colors ${
                       pageNum === page
                         ? "border-primary bg-primary/20 text-primary font-semibold"
@@ -600,8 +645,8 @@ export default function EventsPage() {
             </div>
 
             <button
-              onClick={() => setPage(page + 1)}
-              disabled={filteredData.length < 10}
+              onClick={() => dispatch(setPageAction(page + 1))}
+              disabled={filteredData.length < limit}
               className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background/40 text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background/60 transition-colors"
               aria-label="Next page"
             >
