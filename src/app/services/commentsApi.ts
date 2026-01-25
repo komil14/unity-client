@@ -20,7 +20,9 @@ export interface CommentDto {
 
 export interface CommentInput {
   commentContent: string;
-  articleId: string;
+  // Accept either eventId or articleId; backend reuses articleId for both
+  eventId?: string;
+  articleId?: string;
 }
 
 export interface GetCommentsParams {
@@ -31,6 +33,7 @@ export interface GetCommentsParams {
 }
 
 export const commentsApi = api.injectEndpoints({
+  overrideExisting: false,
   endpoints: (build) => ({
     getComments: build.query<CommentDto[], GetCommentsParams | void>({
       query: (params) => {
@@ -55,28 +58,24 @@ export const commentsApi = api.injectEndpoints({
     }),
 
     createComment: build.mutation<CommentDto, CommentInput>({
-      query: (input) => ({
-        url: "/comment/create",
-        method: "POST",
-        body: input,
-      }),
-      async onQueryStarted({ articleId }, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          // Invalidate comments list for this event/article
-          dispatch(
-            commentsApi.util.invalidateTags([
-              { type: "Comment", id: articleId },
-            ]),
-          );
-        } catch {
-          // ignore
+      query: ({ commentContent, eventId, articleId }) => {
+        const targetId = eventId ?? articleId;
+        if (!targetId) {
+          throw new Error("Either eventId or articleId must be provided");
         }
+        return {
+          url: "/comment/create",
+          method: "POST",
+          // Backend expects `articleId`; reuse eventId when provided
+          body: {
+            commentContent,
+            articleId: targetId,
+          },
+        };
       },
-      invalidatesTags: (result) =>
-        result
-          ? [{ type: "Comment", id: result.articleId }]
-          : [{ type: "Comment", id: "LIST" }],
+      invalidatesTags: (_result, _err, { eventId, articleId }) => [
+        { type: "Comment", id: eventId ?? articleId ?? "LIST" },
+      ],
     }),
   }),
 });

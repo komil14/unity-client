@@ -10,6 +10,14 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Event", "Me", "Application", "Group", "Organizer", "Like"],
+  tagTypes: [
+    "Event",
+    "Me",
+    "Application",
+    "Group",
+    "Organizer",
+    "Like",
+    "Comment",
+  ],
   endpoints: () => ({}),
 });
