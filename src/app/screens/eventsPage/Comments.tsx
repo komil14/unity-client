@@ -10,6 +10,7 @@ import {
 import { useCheckAuthQuery } from "../../services/authApi";
 import { useToast } from "../../../libs/components/ui/toast";
 import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
 interface CommentsProps {
   eventId: string;
@@ -48,6 +49,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
   const [totalCount, setTotalCount] = useState(0);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<CommentDto | null>(null);
   const [page, setPage] = useState(1);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -55,7 +57,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
   const { data, isLoading, isError, isFetching } = useGetCommentsQuery({
     eventId,
     page,
-    limit: 10,
+    limit: 7,
   });
 
   // Create comment mutation
@@ -137,6 +139,11 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
     setCommentList((prev) =>
       prev.map((c) => (c._id === updated._id ? { ...c, ...updated } : c)),
     );
+  };
+
+  const removeLocalComment = (commentId: string) => {
+    setCommentList((prev) => prev.filter((c) => c._id !== commentId));
+    setTotalCount((prev) => Math.max(0, prev - 1));
   };
 
   return (
@@ -365,26 +372,10 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                       className="text-muted-foreground hover:text-destructive transition-colors p-1"
                       title="Delete comment"
                       aria-label="Delete comment"
-                      onClick={async () => {
-                        const confirmed = window.confirm(
-                          "Delete this comment?",
-                        );
-                        if (!confirmed) return;
-                        try {
-                          await deleteComment({
-                            commentId: comment._id,
-                            eventId,
-                          }).unwrap();
-                          showToast("Comment deleted");
-                          setPage(1);
-                        } catch (err: any) {
-                          const msg =
-                            err?.data?.message || "Failed to delete comment";
-                          showToast(msg, "error");
-                        }
-                      }}
+                      onClick={() => setDeleteTarget(comment)}
                     >
-                      {deleteState.isLoading ? (
+                      {deleteState.isLoading &&
+                      deleteTarget?._id === comment._id ? (
                         <Loader className="h-4 w-4 animate-spin" />
                       ) : (
                         <Trash2 className="h-4 w-4" />
@@ -399,17 +390,57 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
       </div>
 
       {/* Pagination */}
-      {hasMore && (
-        <div className="mt-6 flex justify-center">
-          <button
-            onClick={() => setPage((p) => p + 1)}
-            disabled={isFetching}
-            className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isFetching ? "Loading..." : "Load More Comments"}
-          </button>
+      {(hasMore || page > 1) && (
+        <div className="mt-6 flex justify-center gap-3">
+          {page > 1 && (
+            <button
+              onClick={() => {
+                setPage(1);
+                setCommentList([]);
+              }}
+              disabled={isFetching}
+              className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Show Fewer
+            </button>
+          )}
+          {hasMore && (
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={isFetching}
+              className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isFetching ? "Loading..." : "Load More Comments"}
+            </button>
+          )}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          try {
+            const deletedId = deleteTarget._id;
+            await deleteComment({
+              commentId: deletedId,
+              eventId,
+            }).unwrap();
+            removeLocalComment(deletedId);
+            showToast("Comment deleted");
+            setDeleteTarget(null);
+          } catch (err: any) {
+            const msg = err?.data?.message || "Failed to delete comment";
+            showToast(msg, "error");
+          }
+        }}
+        title="Delete this comment?"
+        description="This will remove your comment from the event. You can’t undo this action."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
