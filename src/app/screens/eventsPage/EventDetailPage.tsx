@@ -92,6 +92,26 @@ export default function EventDetailPage() {
     { skip: !eventId },
   );
 
+  // Fetch events by same organizer (ongoing only)
+  const { data: organizerEvents } = useGetEventsQuery(
+    {
+      page: 1,
+      limit: 4,
+      memberId: data?.memberId,
+    },
+    { skip: !data?.memberId || !eventId },
+  );
+
+  // Fetch events at same location (ongoing only)
+  const { data: locationEvents } = useGetEventsQuery(
+    {
+      page: 1,
+      limit: 4,
+      eventLocation: data?.eventLocation,
+    },
+    { skip: !data?.eventLocation || !eventId },
+  );
+
   const { data: trendingEvents } = useGetEventsQuery({
     page: 1,
     limit: 4,
@@ -258,6 +278,29 @@ export default function EventDetailPage() {
   const handleNextImage = () => {
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
+
+  // Combine similar events: 2 by organizer + 2 by location, or 4 by organizer if not enough location events
+  const similarEvents = (() => {
+    if (!data) return [];
+    
+    const filteredOrganizerEvents = (organizerEvents || [])
+      .filter((e) => e._id !== eventId && isUpcoming(e.eventDate || ""))
+      .slice(0, 4);
+    
+    const filteredLocationEvents = (locationEvents || [])
+      .filter((e) => e._id !== eventId && e.memberId !== data.memberId && isUpcoming(e.eventDate || ""))
+      .slice(0, 2);
+    
+    // Prefer 2 organizer + 2 location, otherwise fill with organizer events
+    if (filteredLocationEvents.length >= 2) {
+      return [
+        ...filteredOrganizerEvents.slice(0, 2),
+        ...filteredLocationEvents.slice(0, 2),
+      ];
+    }
+    
+    return filteredOrganizerEvents.slice(0, 4);
+  })();
 
   return (
     <div className="w-full min-h-screen bg-background">
@@ -793,6 +836,56 @@ export default function EventDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Similar Events */}
+            {similarEvents && similarEvents.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <h3 className="flex items-center gap-2 text-base font-bold text-foreground mb-4">
+                  <Users className="h-4 w-4" />
+                  Similar Events
+                </h3>
+
+                <div className="space-y-3">
+                  {similarEvents.map((event) => (
+                    <Link
+                      key={event._id}
+                      to={`/events/${event._id}`}
+                      className="flex gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                    >
+                      <div className="aspect-square w-16 overflow-hidden bg-muted flex-shrink-0 rounded-lg border border-border">
+                        {event.eventImages?.[0] ? (
+                          <img
+                            src={imageUrlFromFilename(event.eventImages[0])}
+                            alt={event.eventTitle}
+                            className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gradient-to-br from-muted to-muted/50" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground line-clamp-2 mb-1">
+                          {event.eventTitle}
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          {formatDate(event.eventDate || "")}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Heart
+                            className={`h-3 w-3 ${
+                              (event.eventLikes || 0) > 0
+                                ? "fill-primary text-primary"
+                                : ""
+                            }`}
+                          />
+                          <span>{event.eventLikes || 0}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Trending Events */}
             {trendingEvents && trendingEvents.length > 0 && (

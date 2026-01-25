@@ -57,7 +57,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
   const { data, isLoading, isError, isFetching } = useGetCommentsQuery({
     eventId,
     page,
-    limit: 7,
+    limit: 4,
   });
 
   // Create comment mutation
