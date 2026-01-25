@@ -28,6 +28,7 @@ import {
 import { imageUrlFromFilename } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
+import Comments from "./Comments";
 
 function formatDate(value: string): string {
   const date = new Date(value);
@@ -522,6 +523,9 @@ export default function EventDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Comments Section */}
+            <Comments eventId={eventId} eventTitle={data.eventTitle} />
           </div>
 
           {/* Right Column - Sidebar (30%) */}
