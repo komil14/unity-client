@@ -351,7 +351,9 @@ export default function OrganizerDashboard() {
       label: "Settings",
       icon: <Settings className="h-4 w-4" />,
     },
+    
   ];
+
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
@@ -542,6 +544,39 @@ export default function OrganizerDashboard() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="relative inline-flex">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            className="h-9 w-9"
+                            title="Live alerts: applicants, capacity milestones, likes"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                            </svg>
+                          </Button>
+                          <span
+                            className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <span className="text-xs sm:text-sm text-muted-foreground">
+                          Live alerts show as toasts
+                        </span>
+                      </div>
+
                       <div className="relative flex-1 min-w-[220px]">
                         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <input
