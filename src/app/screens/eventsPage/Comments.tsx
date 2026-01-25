@@ -133,6 +133,12 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
     }
   };
 
+  const updateLocalComment = (updated: CommentDto) => {
+    setCommentList((prev) =>
+      prev.map((c) => (c._id === updated._id ? { ...c, ...updated } : c)),
+    );
+  };
+
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       {/* Header */}
@@ -270,7 +276,12 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                       {comment.memberData?.memberNick}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {formatCommentDate(comment.createdAt)}
+                      {formatCommentDate(
+                        comment.updatedAt || comment.createdAt,
+                      )}
+                      {comment.updatedAt !== comment.createdAt
+                        ? " · edited"
+                        : ""}
                     </span>
                   </div>
                   {isEditing ? (
@@ -298,14 +309,14 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                               return;
                             }
                             try {
-                              await updateComment({
+                              const updated = await updateComment({
                                 commentId: comment._id,
                                 commentContent: trimmed,
                                 eventId,
                               }).unwrap();
+                              updateLocalComment(updated);
                               showToast("Comment updated");
                               setEditingId(null);
-                              setPage(1);
                             } catch (err: any) {
                               const msg =
                                 err?.data?.message ||
