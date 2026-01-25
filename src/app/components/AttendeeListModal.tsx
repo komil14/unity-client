@@ -4,20 +4,36 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertDialog } from "@/components/AlertDialog";
+} from "../../libs/components/ui/dialog";
+import { Button } from "../../libs/components/ui/button";
+import { Badge } from "../../libs/components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "../../libs/components/ui/avatar";
+import { ScrollArea } from "../../libs/components/ui/scroll-area";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../libs/components/ui/tabs";
+import { AlertDialog } from "../../libs/components/ui/alert-dialog";
 import {
   useGetEventAttendeesQuery,
   useApproveApplicationMutation,
   useRejectApplicationMutation,
 } from "../services/applicationsApi";
-import { Check, X, MessageCircle, User, Clock, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Check,
+  X,
+  MessageCircle,
+  User,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
+import { useToast } from "../../libs/components/ui/toast";
 
 interface AttendeeListModalProps {
   eventId: string;
@@ -32,7 +48,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [selectedTab, setSelectedTab] = useState("pending");
   const [confirmAction, setConfirmAction] = useState<{
     type: "approve" | "reject";
@@ -42,7 +58,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
   const { data: attendees = [], isLoading } = useGetEventAttendeesQuery(
     { eventId, limit: 100 },
-    { skip: !isOpen }
+    { skip: !isOpen },
   );
 
   const [approveApplication, { isLoading: isApproving }] =
@@ -51,13 +67,13 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
     useRejectApplicationMutation();
 
   const pendingAttendees = attendees.filter(
-    (a) => a.applicationStatus === "PENDING"
+    (a) => a.applicationStatus === "PENDING",
   );
   const approvedAttendees = attendees.filter(
-    (a) => a.applicationStatus === "APPROVED"
+    (a) => a.applicationStatus === "APPROVED",
   );
   const rejectedAttendees = attendees.filter(
-    (a) => a.applicationStatus === "REJECTED"
+    (a) => a.applicationStatus === "REJECTED",
   );
 
   const handleApprove = async () => {
@@ -68,17 +84,12 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
         applicationId: confirmAction.applicationId,
       }).unwrap();
 
-      toast({
-        title: "Application Approved",
-        description: `${confirmAction.memberName} has been approved for this event.`,
-      });
+      showToast(
+        `${confirmAction.memberName} has been approved for this event.`,
+      );
       setConfirmAction(null);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to approve application. Please try again.",
-        variant: "destructive",
-      });
+      showToast("Failed to approve application. Please try again.", "error");
     }
   };
 
@@ -90,17 +101,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
         applicationId: confirmAction.applicationId,
       }).unwrap();
 
-      toast({
-        title: "Application Rejected",
-        description: `${confirmAction.memberName}'s application has been rejected.`,
-      });
+      showToast(`${confirmAction.memberName}'s application has been rejected.`);
       setConfirmAction(null);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reject application. Please try again.",
-        variant: "destructive",
-      });
+      showToast("Failed to reject application. Please try again.", "error");
     }
   };
 
@@ -108,21 +112,30 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
     switch (status) {
       case "PENDING":
         return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+          <Badge
+            variant="outline"
+            className="bg-yellow-50 text-yellow-700 border-yellow-300"
+          >
             <Clock className="w-3 h-3 mr-1" />
             Pending
           </Badge>
         );
       case "APPROVED":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+          <Badge
+            variant="outline"
+            className="bg-green-50 text-green-700 border-green-300"
+          >
             <CheckCircle className="w-3 h-3 mr-1" />
             Approved
           </Badge>
         );
       case "REJECTED":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-700 border-red-300"
+          >
             <X className="w-3 h-3 mr-1" />
             Rejected
           </Badge>
@@ -240,10 +253,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                   variant="ghost"
                   className="text-purple-600 hover:bg-purple-50"
                   onClick={() => {
-                    toast({
-                      title: "Coming Soon",
-                      description: "Messaging feature will be available soon.",
-                    });
+                    showToast(
+                      "Messaging feature will be available soon.",
+                      "info",
+                    );
                   }}
                 >
                   <MessageCircle className="w-4 h-4" />
@@ -267,7 +280,11 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
             <p className="text-sm text-gray-600 mt-1">{eventTitle}</p>
           </DialogHeader>
 
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <Tabs
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="pending" className="relative">
                 Pending
@@ -310,7 +327,8 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="text-sm text-gray-600">
-              Total Applicants: <span className="font-semibold">{attendees.length}</span>
+              Total Applicants:{" "}
+              <span className="font-semibold">{attendees.length}</span>
             </div>
             <Button onClick={onClose} variant="outline">
               Close
@@ -322,7 +340,9 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
       <AlertDialog
         isOpen={confirmAction !== null}
         onClose={() => setConfirmAction(null)}
-        onConfirm={confirmAction?.type === "approve" ? handleApprove : handleReject}
+        onConfirm={
+          confirmAction?.type === "approve" ? handleApprove : handleReject
+        }
         title={`${confirmAction?.type === "approve" ? "Approve" : "Reject"} Application`}
         description={`Are you sure you want to ${confirmAction?.type} ${confirmAction?.memberName}'s application?`}
         confirmText={confirmAction?.type === "approve" ? "Approve" : "Reject"}

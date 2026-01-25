@@ -14,10 +14,30 @@ import {
   Edit,
   MapPin,
   Clock,
+  MoreVertical,
+  Trash2,
+  Copy,
+  Share2,
+  UserCheck,
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
-import { useGetEventsQuery } from "../../services/eventsApi";
+import {
+  useGetEventsQuery,
+  useDeleteEventMutation,
+  useDuplicateEventMutation,
+} from "../../services/eventsApi";
 import { eventImageUrlFromFilename } from "../../../libs/shared/ui";
+import AttendeeListModal from "../../components/AttendeeListModal";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
+import { useToast } from "../../../libs/components/ui/toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../../libs/components/ui/dropdown-menu";
+import { Button } from "../../../libs/components/ui/button";
 
 type TabType = "events" | "analytics" | "settings";
 
@@ -30,8 +50,21 @@ interface TabConfig {
 
 export default function OrganizerDashboard() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
   const [activeTab, setActiveTab] = useState<TabType>("events");
+  const [attendeeModal, setAttendeeModal] = useState<{
+    eventId: string;
+    eventTitle: string;
+  } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    eventId: string;
+    eventTitle: string;
+  } | null>(null);
+
+  const [deleteEvent] = useDeleteEventMutation();
+  const [duplicateEvent, { isLoading: isDuplicating }] =
+    useDuplicateEventMutation();
 
   const member = authData?.member;
   const isOrganizer = member?.memberType === "ORG";
@@ -87,6 +120,34 @@ export default function OrganizerDashboard() {
       avgCapacity: Math.round(avgCapacity),
     };
   }, [myEvents]);
+
+  // Event Action Handlers
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+
+    try {
+      await deleteEvent(deleteConfirm.eventId).unwrap();
+      showToast(`${deleteConfirm.eventTitle} has been successfully deleted.`);
+      setDeleteConfirm(null);
+    } catch (error) {
+      showToast("Failed to delete event. Please try again.", "error");
+    }
+  };
+
+  const handleDuplicate = async (eventId: string, eventTitle: string) => {
+    try {
+      await duplicateEvent(eventId).unwrap();
+      showToast(`A copy of "${eventTitle}" has been created.`);
+    } catch (error) {
+      showToast("Failed to duplicate event. Please try again.", "error");
+    }
+  };
+
+  const handleShare = (eventId: string) => {
+    const eventUrl = `${window.location.origin}/events/${eventId}`;
+    navigator.clipboard.writeText(eventUrl);
+    showToast("Event link has been copied to clipboard.");
+  };
 
   if (authLoading || eventsLoading) {
     return (
@@ -357,15 +418,86 @@ export default function OrganizerDashboard() {
                                   </span>
                                 )}
                               </div>
-                              <button
-                                onClick={() =>
-                                  navigate(`/events/${event._id}/edit`)
-                                }
-                                className="p-2 rounded-lg hover:bg-muted transition-colors"
-                                title="Edit event"
-                              >
-                                <Edit className="h-5 w-5 text-muted-foreground" />
-                              </button>
+
+                              {/* Action Menu */}
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setAttendeeModal({
+                                      eventId: event._id,
+                                      eventTitle: event.eventTitle || "Event",
+                                    })
+                                  }
+                                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                                >
+                                  <UserCheck className="h-4 w-4 mr-2" />
+                                  Manage Applicants
+                                  {applicantsCount > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
+                                      {applicantsCount}
+                                    </span>
+                                  )}
+                                </Button>
+
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="end"
+                                    className="w-48"
+                                  >
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        navigate(`/events/${event._id}/edit`)
+                                      }
+                                    >
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit Event
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleDuplicate(
+                                          event._id,
+                                          event.eventTitle || "Event",
+                                        )
+                                      }
+                                      disabled={isDuplicating}
+                                    >
+                                      <Copy className="h-4 w-4 mr-2" />
+                                      Duplicate
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleShare(event._id)}
+                                    >
+                                      <Share2 className="h-4 w-4 mr-2" />
+                                      Share Link
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        setDeleteConfirm({
+                                          eventId: event._id,
+                                          eventTitle:
+                                            event.eventTitle || "Event",
+                                        })
+                                      }
+                                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete Event
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
                             </div>
 
                             <p className="text-sm text-muted-foreground line-clamp-2">
@@ -506,6 +638,27 @@ export default function OrganizerDashboard() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      {attendeeModal && (
+        <AttendeeListModal
+          eventId={attendeeModal.eventId}
+          eventTitle={attendeeModal.eventTitle}
+          isOpen={true}
+          onClose={() => setAttendeeModal(null)}
+        />
+      )}
+
+      <AlertDialog
+        isOpen={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={handleDelete}
+        title="Delete Event"
+        description={`Are you sure you want to delete "${deleteConfirm?.eventTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }
