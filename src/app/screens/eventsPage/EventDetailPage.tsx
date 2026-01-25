@@ -23,6 +23,8 @@ import {
 import {
   useJoinEventMutation,
   useGetEventAttendeesQuery,
+  useCheckApplicationStatusQuery,
+  useCancelApplicationMutation,
 } from "../../services/applicationsApi";
 import {
   useToggleLikeMutation,
@@ -78,6 +80,7 @@ export default function EventDetailPage() {
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [attendeeLimit, setAttendeeLimit] = useState(8);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const { showToast } = useToast();
 
   const { data, isLoading, isError } = useGetEventByIdQuery(eventId, {
@@ -101,6 +104,13 @@ export default function EventDetailPage() {
       { eventId, limit: attendeeLimit },
       { skip: !eventId },
     );
+
+  const { data: applicationStatus, refetch: refetchApplicationStatus } =
+    useCheckApplicationStatusQuery(eventId, {
+      skip: !eventId || !isAuthenticated,
+    });
+
+  const [cancelApplication, cancelState] = useCancelApplicationMutation();
 
   // Track view when event detail page loads
   useEffect(() => {
@@ -229,6 +239,11 @@ export default function EventDetailPage() {
   const directionsUrl = locationQuery
     ? `https://www.google.com/maps/dir/?api=1&destination=${locationQuery}`
     : undefined;
+
+  const applicationStatusLabel = applicationStatus?.applicationStatus;
+  const alreadyApplied = Boolean(applicationStatusLabel);
+  const canCancel =
+    applicationStatusLabel === "PENDING" || applicationStatusLabel === "APPROVED";
 
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
@@ -489,27 +504,58 @@ export default function EventDetailPage() {
                   </div>
                 </div>
 
-                {/* Apply to Join Button */}
-                <button
-                  type="button"
-                  disabled={
-                    joinState.isLoading || !upcoming || capacityRemaining <= 0
-                  }
-                  onClick={async () => {
-                    try {
-                      await joinEvent({ eventId }).unwrap();
-                    } catch (err) {
-                      console.error("Failed to apply:", err);
+                {/* Apply / Status / Cancel */}
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={
+                      joinState.isLoading ||
+                      !upcoming ||
+                      capacityRemaining <= 0 ||
+                      alreadyApplied
                     }
-                  }}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
-                >
-                  {joinState.isLoading
-                    ? "Applying…"
-                    : capacityRemaining <= 0 && upcoming
-                      ? "Event Full"
-                      : "Apply to Join"}
-                </button>
+                    onClick={async () => {
+                      try {
+                        await joinEvent({ eventId }).unwrap();
+                        showToast("Application submitted successfully!");
+                        refetchApplicationStatus();
+                      } catch (err: any) {
+                        const msg =
+                          err?.data?.message || "Failed to apply. Please try again.";
+                        showToast(msg, "error");
+                        console.error("Failed to apply:", err);
+                      }
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+                  >
+                    {joinState.isLoading
+                      ? "Applying…"
+                      : !upcoming
+                        ? "Event Closed"
+                        : capacityRemaining <= 0
+                          ? "Event Full"
+                          : alreadyApplied
+                            ? "Already Applied"
+                            : "Apply to Join"}
+                  </button>
+
+                  {applicationStatusLabel && (
+                    <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold bg-muted text-foreground border border-border">
+                      Status: {applicationStatusLabel}
+                    </span>
+                  )}
+
+                  {canCancel && (
+                    <button
+                      type="button"
+                      onClick={() => setShowCancelConfirm(true)}
+                      disabled={cancelState.isLoading}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {cancelState.isLoading ? "Canceling…" : "Cancel"}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Feedback Messages */}
@@ -805,6 +851,27 @@ export default function EventDetailPage() {
         confirmText="Go to Login"
         cancelText="Maybe Later"
         variant="primary"
+      />
+
+      {/* Cancel Application Dialog */}
+      <AlertDialog
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={async () => {
+          try {
+            await cancelApplication({ eventId }).unwrap();
+            showToast("Application canceled");
+            setShowCancelConfirm(false);
+            refetchApplicationStatus();
+          } catch (err: any) {
+            const msg = err?.data?.message || "Failed to cancel application";
+            showToast(msg, "error");
+          }
+        }}
+        title="Cancel your application?"
+        description="This will withdraw you from the event. You can re-apply later if spots remain."
+        confirmText="Yes, cancel"
+        cancelText="Keep Application"
       />
     </div>
   );

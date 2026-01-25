@@ -26,6 +26,28 @@ export const applicationsApi = api.injectEndpoints({
       providesTags: [{ type: "Application", id: "MY" }],
     }),
 
+    checkApplicationStatus: build.query<ApplicationDto | null, string>({
+      query: (eventId) => `/application/check/${eventId}`,
+      providesTags: (_result, _err, eventId) => [
+        { type: "Application", id: `STATUS-${eventId}` },
+      ],
+    }),
+
+    cancelApplication: build.mutation<ApplicationDto, { eventId: string }>(
+      {
+        query: ({ eventId }) => ({
+          url: `/application/cancel/${eventId}`,
+          method: "POST",
+        }),
+        invalidatesTags: (_result, _err, { eventId }) => [
+          { type: "Application", id: "MY" },
+          { type: "Application", id: `STATUS-${eventId}` },
+          { type: "Event", id: eventId },
+          { type: "Event", id: "LIST" },
+        ],
+      },
+    ),
+
     getEventAttendees: build.query<
       EventAttendeeDto[],
       { eventId: string; limit?: number }
@@ -45,4 +67,6 @@ export const {
   useJoinEventMutation,
   useGetMyApplicationsQuery,
   useGetEventAttendeesQuery,
+  useCheckApplicationStatusQuery,
+  useCancelApplicationMutation,
 } = applicationsApi;
