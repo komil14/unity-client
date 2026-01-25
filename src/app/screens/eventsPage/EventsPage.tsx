@@ -669,7 +669,7 @@ export default function EventsPage() {
           <button
             type="button"
             disabled={!isAuthenticated}
-            className={`inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border px-4 font-semibold transition-colors ${
+            className={`inline-flex h-11 items-center gap-2 rounded-[var(--radius-lg)] border px-4 transition-colors ${
               showLikedOnly
                 ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
                 : "border-border bg-background/40 text-foreground hover:bg-background/60"

@@ -11,6 +11,8 @@ import {
   Share2,
   BadgeCheck,
   Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
 import {
@@ -70,6 +72,7 @@ export default function EventDetailPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { showToast } = useToast();
 
   const { data, isLoading, isError } = useGetEventByIdQuery(eventId, {
@@ -122,7 +125,10 @@ export default function EventDetailPage() {
     setLikesCount((prev) => (wasLiked ? Math.max(0, prev - 1) : prev + 1));
 
     try {
-      const res = await toggleLike({ likeRefId: eventId, likeGroup: "EVENT" }).unwrap();
+      const res = await toggleLike({
+        likeRefId: eventId,
+        likeGroup: "EVENT",
+      }).unwrap();
 
       // Confirm with server response
       const confirmed = res.status === "liked";
@@ -137,8 +143,10 @@ export default function EventDetailPage() {
     } catch (err: any) {
       // Revert on error
       setIsLiked(wasLiked);
-      setLikesCount((prev) => (wasLiked ? Math.max(0, prev + 1) : Math.max(0, prev - 1)));
-      
+      setLikesCount((prev) =>
+        wasLiked ? Math.max(0, prev + 1) : Math.max(0, prev - 1),
+      );
+
       const status = err?.status;
       if (status === 401 || status === 403) {
         navigate("/login");
@@ -200,6 +208,20 @@ export default function EventDetailPage() {
   const upcoming = isUpcoming(data.eventDate || "");
   const capacityRemaining = (data.eventCapacity || 0) - (data.eventJoined || 0);
 
+  // Handle image gallery navigation
+  const images = (data.eventImages || []).map((img) =>
+    imageUrlFromFilename(img),
+  );
+  const totalImages = images.length;
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
+  };
+
   return (
     <div className="w-full min-h-screen bg-background">
       {/* Top Bar with Back and Create Event buttons */}
@@ -236,14 +258,66 @@ export default function EventDetailPage() {
           <div className="space-y-6">
             {/* Hero Section - Flex Container */}
             <div className="flex flex-col md:flex-row gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
-              {/* Left Side - Image with Badges */}
-              <div className="relative w-full md:w-1/2 aspect-[4/3] overflow-hidden rounded-xl">
-                {img ? (
-                  <img
-                    src={img}
-                    alt={data.eventTitle}
-                    className="h-full w-full object-cover"
-                  />
+              {/* Left Side - Image Gallery with Badges */}
+              <div className="relative w-full md:w-1/2 aspect-[4/3] overflow-hidden rounded-xl group">
+                {images.length > 0 ? (
+                  <>
+                    <img
+                      src={images[currentImageIndex]}
+                      alt={`${data.eventTitle} - Image ${currentImageIndex + 1}`}
+                      className="h-full w-full object-cover transition-transform duration-300"
+                    />
+
+                    {/* Navigation Arrows - Only show if multiple images */}
+                    {totalImages > 1 && (
+                      <>
+                        <button
+                          onClick={handlePrevImage}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                          aria-label="Previous image"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={handleNextImage}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-full bg-black/50 hover:bg-black/70 text-white"
+                          aria-label="Next image"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Image Counter */}
+                    {totalImages > 1 && (
+                      <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg backdrop-blur">
+                        {currentImageIndex + 1} / {totalImages}
+                      </div>
+                    )}
+
+                    {/* Image Thumbnails - Bottom */}
+                    {totalImages > 1 && (
+                      <div className="absolute bottom-4 left-4 right-12 flex gap-2 overflow-x-auto">
+                        {images.map((image, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentImageIndex(idx)}
+                            className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                              idx === currentImageIndex
+                                ? "border-primary"
+                                : "border-transparent opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <img
+                              src={image}
+                              alt={`Thumbnail ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-muted to-muted/50" />
                 )}
@@ -261,8 +335,8 @@ export default function EventDetailPage() {
                   </div>
                 </div>
 
-                {/* Points Badge - Bottom Right */}
-                <div className="absolute bottom-4 right-4">
+                {/* Points Badge - Top Right */}
+                <div className="absolute top-4 right-4">
                   <div className="inline-flex items-center rounded-full bg-primary/90 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
                     {data.eventPoints ? `+${data.eventPoints} pts` : "Free"}
                   </div>
@@ -365,8 +439,8 @@ export default function EventDetailPage() {
                       !isAuthenticated
                         ? "Login to like this event"
                         : isLiked
-                        ? "Unlike this event"
-                        : "Like this event"
+                          ? "Unlike this event"
+                          : "Like this event"
                     }
                   >
                     <Heart

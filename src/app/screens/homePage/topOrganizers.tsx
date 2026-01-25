@@ -78,7 +78,7 @@ export default function TopOrganizersSection() {
                   to={`/organizers/${org._id}`}
                   className="group block h-full"
                 >
-                  <div className="flex h-full flex-col rounded-[var(--radius-lg)] border border-border bg-background/30 p-3 transition-colors hover:bg-background/40">
+                  <div className="flex h-full flex-col rounded-xl border border-border bg-background/30 p-3 transition-colors hover:bg-background/40">
                     <div className="flex items-start gap-3">
                       <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border bg-muted flex-shrink-0">
                         {avatarImg ? (
