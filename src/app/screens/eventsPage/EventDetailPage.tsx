@@ -261,10 +261,23 @@ export default function EventDetailPage() {
     : undefined;
 
   const applicationStatusLabel = applicationStatus?.applicationStatus;
-  const alreadyApplied = Boolean(applicationStatusLabel);
-  const canCancel =
+  const activeApplication =
     applicationStatusLabel === "PENDING" ||
     applicationStatusLabel === "APPROVED";
+  const alreadyApplied = activeApplication;
+  const canCancel = activeApplication;
+
+  // Debug logging
+  console.log("Event Detail Debug:", {
+    eventId,
+    isAuthenticated,
+    isOrganizer,
+    upcoming,
+    capacityRemaining,
+    alreadyApplied,
+    applicationStatusLabel,
+    applicationStatus,
+  });
 
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
@@ -491,6 +504,57 @@ export default function EventDetailPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Application Status */}
+                  {applicationStatusLabel && (
+                    <div
+                      className={`flex items-center gap-3 rounded-lg border p-3 ${
+                        applicationStatusLabel === "PENDING"
+                          ? "bg-yellow-500/5 border-yellow-500/30"
+                          : applicationStatusLabel === "APPROVED"
+                            ? "bg-green-500/5 border-green-500/30"
+                            : applicationStatusLabel === "REJECTED"
+                              ? "bg-red-500/5 border-red-500/30"
+                              : "bg-gray-500/5 border-gray-500/30"
+                      }`}
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
+                        <span className="relative flex h-3 w-3">
+                          {applicationStatusLabel === "PENDING" && (
+                            <>
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                            </>
+                          )}
+                          {applicationStatusLabel === "APPROVED" && (
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                          )}
+                          {applicationStatusLabel === "REJECTED" && (
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                          )}
+                          {applicationStatusLabel === "CANCELED" && (
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-gray-500"></span>
+                          )}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">Application Status</div>
+                        <div
+                          className={`text-sm font-bold ${
+                            applicationStatusLabel === "PENDING"
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : applicationStatusLabel === "APPROVED"
+                                ? "text-green-600 dark:text-green-400"
+                                : applicationStatusLabel === "REJECTED"
+                                  ? "text-red-600 dark:text-red-400"
+                                  : "text-gray-600 dark:text-gray-400"
+                          }`}
+                        >
+                          {applicationStatusLabel}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -553,7 +617,7 @@ export default function EventDetailPage() {
                   </div>
                 </div>
 
-                {/* Apply / Status / Cancel */}
+                {/* Apply / Cancel */}
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -567,15 +631,20 @@ export default function EventDetailPage() {
                     }
                     onClick={async () => {
                       try {
-                        await joinEvent({ eventId }).unwrap();
+                        console.log("Attempting to join event:", eventId);
+                        const result = await joinEvent({ eventId }).unwrap();
+                        console.log("Join successful:", result);
                         showToast("Application submitted successfully!");
-                        refetchApplicationStatus();
+                        // Refetch to update status
+                        setTimeout(() => {
+                          refetchApplicationStatus();
+                        }, 500);
                       } catch (err: any) {
+                        console.error("Full error object:", err);
                         const msg =
                           err?.data?.message ||
                           "Failed to apply. Please try again.";
                         showToast(msg, "error");
-                        console.error("Failed to apply:", err);
                       }
                     }}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
@@ -595,20 +664,14 @@ export default function EventDetailPage() {
                                 : "Apply to Join"}
                   </button>
 
-                  {applicationStatusLabel && (
-                    <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold bg-muted text-foreground border border-border">
-                      Status: {applicationStatusLabel}
-                    </span>
-                  )}
-
                   {canCancel && (
                     <button
                       type="button"
                       onClick={() => setShowCancelConfirm(true)}
                       disabled={cancelState.isLoading}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-destructive px-4 py-3 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      {cancelState.isLoading ? "Canceling…" : "Cancel"}
+                      {cancelState.isLoading ? "Canceling…" : "Cancel Application"}
                     </button>
                   )}
                 </div>
@@ -624,8 +687,8 @@ export default function EventDetailPage() {
               {joinState.isError && (
                 <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive text-center">
                   {isOrganizer
-                    ? "Organizers cannot apply for events"
-                    : "Failed to apply. Please login first."}
+                    ? "Organizers cannot apply for events."
+                    : "Failed to apply. Please try again."}
                 </div>
               )}
             </div>
