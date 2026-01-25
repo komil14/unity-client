@@ -20,7 +20,10 @@ import {
   useGetEventsQuery,
   useViewEventMutation,
 } from "../../services/eventsApi";
-import { useJoinEventMutation } from "../../services/applicationsApi";
+import {
+  useJoinEventMutation,
+  useGetEventAttendeesQuery,
+} from "../../services/applicationsApi";
 import {
   useToggleLikeMutation,
   useCheckLikesBatchQuery,
@@ -74,6 +77,7 @@ export default function EventDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [attendeeLimit, setAttendeeLimit] = useState(8);
   const { showToast } = useToast();
 
   const { data, isLoading, isError } = useGetEventByIdQuery(eventId, {
@@ -91,6 +95,12 @@ export default function EventDetailPage() {
     order: "eventViews",
     direction: "desc",
   });
+
+  const { data: attendees, isLoading: attendeesLoading } =
+    useGetEventAttendeesQuery(
+      { eventId, limit: attendeeLimit },
+      { skip: !eventId },
+    );
 
   // Track view when event detail page loads
   useEffect(() => {
@@ -208,6 +218,10 @@ export default function EventDetailPage() {
   const img = imageUrlFromFilename(data.eventImages?.[0]);
   const upcoming = isUpcoming(data.eventDate || "");
   const capacityRemaining = (data.eventCapacity || 0) - (data.eventJoined || 0);
+  const totalAttendeesCount = data.eventJoined || 0;
+  const hasMoreAttendees =
+    totalAttendeesCount > attendeeLimit &&
+    (attendees?.length || 0) >= attendeeLimit;
 
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
@@ -577,6 +591,107 @@ export default function EventDetailPage() {
                 </Link>
               </div>
             )}
+
+            {/* Attendees Card */}
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="flex items-center gap-2 text-base font-bold text-foreground">
+                  <Users className="h-4 w-4" />
+                  Attendees
+                </h3>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {totalAttendeesCount} going
+                </span>
+              </div>
+
+              {attendeesLoading ? (
+                <div className="flex justify-center py-6">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted border-t-primary" />
+                </div>
+              ) : attendees && attendees.length > 0 ? (
+                <div className="space-y-4">
+                  {/* Avatar Stack */}
+                  <div className="flex -space-x-3">
+                    {attendees.slice(0, 5).map((attendee) => (
+                      <div
+                        key={attendee._id}
+                        className="h-10 w-10 rounded-full border-2 border-card bg-muted overflow-hidden flex items-center justify-center text-xs font-semibold text-foreground"
+                        title={attendee.memberData?.memberNick}
+                      >
+                        {attendee.memberData?.memberImage ? (
+                          <img
+                            src={imageUrlFromFilename(
+                              attendee.memberData.memberImage,
+                            )}
+                            alt={attendee.memberData?.memberNick}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          attendee.memberData?.memberNick
+                            ?.charAt(0)
+                            .toUpperCase()
+                        )}
+                      </div>
+                    ))}
+                    {totalAttendeesCount > 5 && (
+                      <div className="h-10 w-10 rounded-full border-2 border-card bg-muted text-xs font-semibold text-muted-foreground flex items-center justify-center">
+                        +{Math.max(0, totalAttendeesCount - 5)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* List */}
+                  <div className="space-y-3">
+                    {attendees.map((attendee) => (
+                      <Link
+                        key={attendee._id}
+                        to={`/profile/${attendee.memberData?._id}`}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/60 transition-colors"
+                      >
+                        <div className="h-10 w-10 rounded-full overflow-hidden bg-muted border border-border flex-shrink-0">
+                          {attendee.memberData?.memberImage ? (
+                            <img
+                              src={imageUrlFromFilename(
+                                attendee.memberData.memberImage,
+                              )}
+                              alt={attendee.memberData.memberNick}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-xs font-semibold text-foreground">
+                              {attendee.memberData?.memberNick
+                                ?.charAt(0)
+                                .toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-foreground truncate">
+                            {attendee.memberData?.memberNick}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Approved attendee
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {hasMoreAttendees && (
+                    <button
+                      onClick={() => setAttendeeLimit((prev) => prev + 8)}
+                      className="w-full mt-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                    >
+                      Show more attendees
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  No approved attendees yet.
+                </div>
+              )}
+            </div>
 
             {/* Trending Events */}
             {trendingEvents && trendingEvents.length > 0 && (

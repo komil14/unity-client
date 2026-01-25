@@ -40,6 +40,15 @@ export interface JoinEventInput {
   applicationNote?: string;
 }
 
+export interface EventAttendeeDto {
+  _id: string;
+  applicationStatus: string;
+  memberId: string;
+  eventId: string;
+  createdAt: string;
+  memberData: MemberData;
+}
+
 // ============ EVENTS API ============
 export interface MemberData {
   _id: string;
