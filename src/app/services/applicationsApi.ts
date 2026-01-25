@@ -33,20 +33,18 @@ export const applicationsApi = api.injectEndpoints({
       ],
     }),
 
-    cancelApplication: build.mutation<ApplicationDto, { eventId: string }>(
-      {
-        query: ({ eventId }) => ({
-          url: `/application/cancel/${eventId}`,
-          method: "POST",
-        }),
-        invalidatesTags: (_result, _err, { eventId }) => [
-          { type: "Application", id: "MY" },
-          { type: "Application", id: `STATUS-${eventId}` },
-          { type: "Event", id: eventId },
-          { type: "Event", id: "LIST" },
-        ],
-      },
-    ),
+    cancelApplication: build.mutation<ApplicationDto, { eventId: string }>({
+      query: ({ eventId }) => ({
+        url: `/application/cancel/${eventId}`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _err, { eventId }) => [
+        { type: "Application", id: "MY" },
+        { type: "Application", id: `STATUS-${eventId}` },
+        { type: "Event", id: eventId },
+        { type: "Event", id: "LIST" },
+      ],
+    }),
 
     getEventAttendees: build.query<
       EventAttendeeDto[],
@@ -60,6 +58,34 @@ export const applicationsApi = api.injectEndpoints({
         { type: "Application", id: `ATTENDEES-${eventId}` },
       ],
     }),
+
+    approveApplication: build.mutation<
+      ApplicationDto,
+      { applicationId: string }
+    >({
+      query: ({ applicationId }) => ({
+        url: `/application/approve/${applicationId}`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _err, { applicationId }) => [
+        { type: "Application", id: applicationId },
+        { type: "Application", id: "LIST" },
+      ],
+    }),
+
+    rejectApplication: build.mutation<
+      ApplicationDto,
+      { applicationId: string }
+    >({
+      query: ({ applicationId }) => ({
+        url: `/application/reject/${applicationId}`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _err, { applicationId }) => [
+        { type: "Application", id: applicationId },
+        { type: "Application", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -69,4 +95,6 @@ export const {
   useGetEventAttendeesQuery,
   useCheckApplicationStatusQuery,
   useCancelApplicationMutation,
+  useApproveApplicationMutation,
+  useRejectApplicationMutation,
 } = applicationsApi;

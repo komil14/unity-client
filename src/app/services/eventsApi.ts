@@ -122,6 +122,62 @@ export const eventsApi = api.injectEndpoints({
         { type: "Event", id: "POPULAR_WEEKLY" },
       ],
     }),
+
+    updateEvent: build.mutation<
+      EventDto,
+      { id: string; data: Partial<CreateEventInput> }
+    >({
+      query: ({ id, data }) => {
+        const formData = new FormData();
+        if (data.eventTitle) formData.append("eventTitle", data.eventTitle);
+        if (data.eventDesc) formData.append("eventDesc", data.eventDesc);
+        if (data.eventLocation)
+          formData.append("eventLocation", data.eventLocation);
+        if (data.eventDate) formData.append("eventDate", data.eventDate);
+        if (data.eventCapacity !== undefined)
+          formData.append("eventCapacity", String(data.eventCapacity));
+        if (data.eventPoints !== undefined)
+          formData.append("eventPoints", String(data.eventPoints));
+        if (data.eventImages && data.eventImages.length > 0) {
+          data.eventImages.forEach((file) =>
+            formData.append("eventImages", file),
+          );
+        }
+
+        return {
+          url: `/event/update/${id}`,
+          method: "PATCH",
+          body: formData,
+        };
+      },
+      invalidatesTags: (_result, _err, { id }) => [
+        { type: "Event", id },
+        { type: "Event", id: "LIST" },
+        { type: "Event", id: "POPULAR_WEEKLY" },
+      ],
+    }),
+
+    deleteEvent: build.mutation<{ message: string }, string>({
+      query: (id) => ({
+        url: `/event/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "Event", id: "LIST" },
+        { type: "Event", id: "POPULAR_WEEKLY" },
+      ],
+    }),
+
+    duplicateEvent: build.mutation<EventDto, string>({
+      query: (id) => ({
+        url: `/event/duplicate/${id}`,
+        method: "POST",
+      }),
+      invalidatesTags: [
+        { type: "Event", id: "LIST" },
+        { type: "Event", id: "POPULAR_WEEKLY" },
+      ],
+    }),
   }),
 });
 
@@ -131,4 +187,7 @@ export const {
   useGetWeeklyPopularEventsQuery,
   useViewEventMutation,
   useCreateEventMutation,
+  useUpdateEventMutation,
+  useDeleteEventMutation,
+  useDuplicateEventMutation,
 } = eventsApi;
