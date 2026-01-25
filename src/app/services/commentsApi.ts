@@ -18,6 +18,14 @@ export interface CommentDto {
   };
 }
 
+export interface CommentsResponse {
+  data: CommentDto[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
 export interface CommentInput {
   commentContent: string;
   // Accept either eventId or articleId; backend reuses articleId for both
@@ -35,7 +43,7 @@ export interface GetCommentsParams {
 export const commentsApi = api.injectEndpoints({
   overrideExisting: false,
   endpoints: (build) => ({
-    getComments: build.query<CommentDto[], GetCommentsParams | void>({
+    getComments: build.query<CommentsResponse, GetCommentsParams | void>({
       query: (params) => {
         const queryParams = new URLSearchParams();
         if (params?.eventId) queryParams.append("eventId", params.eventId);
@@ -49,7 +57,7 @@ export const commentsApi = api.injectEndpoints({
           params: Object.fromEntries(queryParams),
         };
       },
-      providesTags: (result, _err, params) => [
+      providesTags: (_result, _err, params) => [
         {
           type: "Comment",
           id: params?.eventId || params?.articleId || "LIST",
@@ -77,7 +85,44 @@ export const commentsApi = api.injectEndpoints({
         { type: "Comment", id: eventId ?? articleId ?? "LIST" },
       ],
     }),
+
+    updateComment: build.mutation<
+      CommentDto,
+      {
+        commentId: string;
+        commentContent: string;
+        eventId?: string;
+        articleId?: string;
+      }
+    >({
+      query: ({ commentId, commentContent }) => ({
+        url: `/comment/${commentId}`,
+        method: "PATCH",
+        body: { commentContent },
+      }),
+      invalidatesTags: (_result, _err, { eventId, articleId }) => [
+        { type: "Comment", id: eventId ?? articleId ?? "LIST" },
+      ],
+    }),
+
+    deleteComment: build.mutation<
+      CommentDto,
+      { commentId: string; eventId?: string; articleId?: string }
+    >({
+      query: ({ commentId }) => ({
+        url: `/comment/${commentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _err, { eventId, articleId }) => [
+        { type: "Comment", id: eventId ?? articleId ?? "LIST" },
+      ],
+    }),
   }),
 });
 
-export const { useGetCommentsQuery, useCreateCommentMutation } = commentsApi;
+export const {
+  useGetCommentsQuery,
+  useCreateCommentMutation,
+  useUpdateCommentMutation,
+  useDeleteCommentMutation,
+} = commentsApi;

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Trash2, MessageSquare, Loader } from "lucide-react";
+import { Send, Trash2, MessageSquare, Loader, Edit3 } from "lucide-react";
 import {
   useGetCommentsQuery,
   useCreateCommentMutation,
+  useUpdateCommentMutation,
+  useDeleteCommentMutation,
   type CommentDto,
 } from "../../services/commentsApi";
 import { useCheckAuthQuery } from "../../services/authApi";
@@ -41,15 +43,16 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
   const currentUserId = authData?.member?._id;
 
   const [commentText, setCommentText] = useState("");
+  const [commentList, setCommentList] = useState<CommentDto[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const [page, setPage] = useState(1);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch comments for this event
-  const {
-    data: comments = [],
-    isLoading,
-    isError,
-  } = useGetCommentsQuery({
+  const { data, isLoading, isError, isFetching } = useGetCommentsQuery({
     eventId,
     page,
     limit: 10,
@@ -57,6 +60,35 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
 
   // Create comment mutation
   const [createComment, createState] = useCreateCommentMutation();
+  const [updateComment, updateState] = useUpdateCommentMutation();
+  const [deleteComment, deleteState] = useDeleteCommentMutation();
+
+  useEffect(() => {
+    setPage(1);
+    setCommentList([]);
+    setHasMore(false);
+    setTotalCount(0);
+    setEditingId(null);
+    setEditText("");
+  }, [eventId]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    setHasMore(data.hasMore);
+    setTotalCount(data.total);
+
+    setCommentList((prev) => {
+      if (page === 1) return data.data;
+
+      const existing = new Set(prev.map((c) => c._id));
+      const merged = [...prev];
+      data.data.forEach((c) => {
+        if (!existing.has(c._id)) merged.push(c);
+      });
+      return merged;
+    });
+  }, [data, page]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -88,7 +120,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
     try {
       await createComment({
         commentContent: trimmedText,
-        articleId: eventId, // API uses articleId for both articles and events
+        eventId,
       }).unwrap();
 
       setCommentText("");
@@ -108,7 +140,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
         <MessageSquare className="h-5 w-5 text-primary" />
         <h2 className="text-2xl font-extrabold text-foreground">Comments</h2>
         <span className="ml-auto text-sm font-semibold text-muted-foreground">
-          {comments.length} {comments.length === 1 ? "comment" : "comments"}
+          {totalCount} {totalCount === 1 ? "comment" : "comments"}
         </span>
       </div>
 
@@ -196,7 +228,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
           <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             Failed to load comments. Please try again.
           </div>
-        ) : comments.length === 0 ? (
+        ) : commentList.length === 0 ? (
           <div className="text-center py-8">
             <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground">
@@ -204,67 +236,166 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
             </p>
           </div>
         ) : (
-          comments.map((comment) => (
-            <div
-              key={comment._id}
-              className="flex gap-3 pb-4 border-b border-border last:border-b-0 last:pb-0"
-            >
-              {/* Commenter Avatar */}
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
-                {comment.memberData?.memberImage ? (
-                  <img
-                    src={uploadUrlFromFilename(
-                      "members",
-                      comment.memberData.memberImage,
-                    )}
-                    alt={comment.memberData.memberNick}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-xs font-bold text-foreground">
-                    {comment.memberData?.memberNick?.charAt(0).toUpperCase()}
-                  </span>
+          commentList.map((comment) => {
+            const isOwner = currentUserId === comment.memberId;
+            const isEditing = editingId === comment._id;
+
+            return (
+              <div
+                key={comment._id}
+                className="flex gap-3 pb-4 border-b border-border last:border-b-0 last:pb-0"
+              >
+                {/* Commenter Avatar */}
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
+                  {comment.memberData?.memberImage ? (
+                    <img
+                      src={uploadUrlFromFilename(
+                        "members",
+                        comment.memberData.memberImage,
+                      )}
+                      alt={comment.memberData.memberNick}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold text-foreground">
+                      {comment.memberData?.memberNick?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Comment Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="font-semibold text-sm text-foreground">
+                      {comment.memberData?.memberNick}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatCommentDate(comment.createdAt)}
+                    </span>
+                  </div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={3}
+                        maxLength={1000}
+                        className="w-full resize-none rounded-lg border border-border bg-background/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            const trimmed = editText.trim();
+                            if (!trimmed) {
+                              showToast("Comment cannot be empty", "error");
+                              return;
+                            }
+                            if (trimmed.length > 1000) {
+                              showToast(
+                                "Comment must be less than 1000 characters",
+                                "error",
+                              );
+                              return;
+                            }
+                            try {
+                              await updateComment({
+                                commentId: comment._id,
+                                commentContent: trimmed,
+                                eventId,
+                              }).unwrap();
+                              showToast("Comment updated");
+                              setEditingId(null);
+                              setPage(1);
+                            } catch (err: any) {
+                              const msg =
+                                err?.data?.message ||
+                                "Failed to update comment";
+                              showToast(msg, "error");
+                            }
+                          }}
+                          disabled={updateState.isLoading}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {updateState.isLoading ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditText("");
+                          }}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-foreground leading-relaxed break-words">
+                      {comment.commentContent}
+                    </p>
+                  )}
+                </div>
+
+                {/* Action Buttons - Only for own comments */}
+                {isOwner && !isEditing && (
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <button
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      title="Edit comment"
+                      aria-label="Edit comment"
+                      onClick={() => {
+                        setEditingId(comment._id);
+                        setEditText(comment.commentContent);
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      title="Delete comment"
+                      aria-label="Delete comment"
+                      onClick={async () => {
+                        const confirmed = window.confirm(
+                          "Delete this comment?",
+                        );
+                        if (!confirmed) return;
+                        try {
+                          await deleteComment({
+                            commentId: comment._id,
+                            eventId,
+                          }).unwrap();
+                          showToast("Comment deleted");
+                          setPage(1);
+                        } catch (err: any) {
+                          const msg =
+                            err?.data?.message || "Failed to delete comment";
+                          showToast(msg, "error");
+                        }
+                      }}
+                    >
+                      {deleteState.isLoading ? (
+                        <Loader className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
-
-              {/* Comment Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-semibold text-sm text-foreground">
-                    {comment.memberData?.memberNick}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatCommentDate(comment.createdAt)}
-                  </span>
-                </div>
-                <p className="text-sm text-foreground leading-relaxed break-words">
-                  {comment.commentContent}
-                </p>
-              </div>
-
-              {/* Delete Button - Only for own comments */}
-              {currentUserId === comment.memberId && (
-                <button
-                  className="flex-shrink-0 text-muted-foreground hover:text-destructive transition-colors p-1"
-                  title="Delete comment"
-                  aria-label="Delete comment"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
       {/* Pagination */}
-      {comments.length >= 10 && (
+      {hasMore && (
         <div className="mt-6 flex justify-center">
           <button
             onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-semibold text-foreground transition-colors"
+            disabled={isFetching}
+            className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-semibold text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Load More Comments
+            {isFetching ? "Loading..." : "Load More Comments"}
           </button>
         </div>
       )}
