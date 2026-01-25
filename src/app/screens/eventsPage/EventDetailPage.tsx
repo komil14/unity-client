@@ -107,7 +107,7 @@ export default function EventDetailPage() {
     {
       page: 1,
       limit: 4,
-      eventLocation: data?.eventLocation,
+      search: data?.eventLocation,
     },
     { skip: !data?.eventLocation || !eventId },
   );
@@ -263,7 +263,8 @@ export default function EventDetailPage() {
   const applicationStatusLabel = applicationStatus?.applicationStatus;
   const alreadyApplied = Boolean(applicationStatusLabel);
   const canCancel =
-    applicationStatusLabel === "PENDING" || applicationStatusLabel === "APPROVED";
+    applicationStatusLabel === "PENDING" ||
+    applicationStatusLabel === "APPROVED";
 
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
@@ -282,15 +283,20 @@ export default function EventDetailPage() {
   // Combine similar events: 2 by organizer + 2 by location, or 4 by organizer if not enough location events
   const similarEvents = (() => {
     if (!data) return [];
-    
+
     const filteredOrganizerEvents = (organizerEvents || [])
       .filter((e) => e._id !== eventId && isUpcoming(e.eventDate || ""))
       .slice(0, 4);
-    
+
     const filteredLocationEvents = (locationEvents || [])
-      .filter((e) => e._id !== eventId && e.memberId !== data.memberId && isUpcoming(e.eventDate || ""))
+      .filter(
+        (e) =>
+          e._id !== eventId &&
+          e.memberId !== data.memberId &&
+          isUpcoming(e.eventDate || ""),
+      )
       .slice(0, 2);
-    
+
     // Prefer 2 organizer + 2 location, otherwise fill with organizer events
     if (filteredLocationEvents.length >= 2) {
       return [
@@ -298,7 +304,7 @@ export default function EventDetailPage() {
         ...filteredLocationEvents.slice(0, 2),
       ];
     }
-    
+
     return filteredOrganizerEvents.slice(0, 4);
   })();
 
@@ -570,7 +576,8 @@ export default function EventDetailPage() {
                         refetchApplicationStatus();
                       } catch (err: any) {
                         const msg =
-                          err?.data?.message || "Failed to apply. Please try again.";
+                          err?.data?.message ||
+                          "Failed to apply. Please try again.";
                         showToast(msg, "error");
                         console.error("Failed to apply:", err);
                       }
