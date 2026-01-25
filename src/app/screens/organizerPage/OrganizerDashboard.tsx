@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Calendar,
@@ -19,6 +19,9 @@ import {
   Copy,
   Share2,
   UserCheck,
+  Search,
+  Filter,
+  ArrowUpDown,
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
 import {
@@ -61,6 +64,18 @@ export default function OrganizerDashboard() {
     eventId: string;
     eventTitle: string;
   } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "upcoming" | "past" | "draft"
+  >("active");
+  const [sortBy, setSortBy] = useState<
+    "date" | "views" | "likes" | "applicants" | "capacity"
+  >("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const prevMetricsRef = useRef<
+    Record<string, { joined: number; likes: number; capacity: number }>
+  >({});
 
   const [deleteEvent] = useDeleteEventMutation();
   const [duplicateEvent, { isLoading: isDuplicating }] =
@@ -76,6 +91,88 @@ export default function OrganizerDashboard() {
   );
 
   const myEvents = eventsData?.items || [];
+
+  const filteredEvents = useMemo(() => {
+    const now = new Date();
+    const search = searchTerm.trim().toLowerCase();
+
+    const filtered = myEvents.filter((event) => {
+      const titleMatches = (event.eventTitle || "")
+        .toLowerCase()
+        .includes(search);
+
+      if (!titleMatches) return false;
+
+      const statusRaw = (event.eventStatus || "").toString().toUpperCase();
+      const eventDate = event.eventDate ? new Date(event.eventDate) : null;
+
+      switch (statusFilter) {
+        case "draft":
+          return statusRaw === "DRAFT";
+        case "past":
+          return eventDate ? eventDate < now : false;
+        case "upcoming":
+          return eventDate ? eventDate > now : false;
+        case "active":
+          return (
+            statusRaw !== "CANCELED" &&
+            statusRaw !== "DELETE" &&
+            (statusRaw === "ACTIVE" || !eventDate || eventDate >= now)
+          );
+        default:
+          return true;
+      }
+    });
+
+    const getCapacityPercent = (event: (typeof myEvents)[number]) => {
+      const joined = event.eventJoined || 0;
+      const capacity = event.eventCapacity || 1;
+      return (joined / capacity) * 100;
+    };
+
+    const sorted = [...filtered].sort((a, b) => {
+      const dir = sortDir === "asc" ? 1 : -1;
+      const dateA = a.eventDate ? new Date(a.eventDate).getTime() : 0;
+      const dateB = b.eventDate ? new Date(b.eventDate).getTime() : 0;
+
+      const valueA = (() => {
+        switch (sortBy) {
+          case "views":
+            return a.eventViews || 0;
+          case "likes":
+            return a.eventLikes || 0;
+          case "applicants":
+            return a.eventJoined || 0;
+          case "capacity":
+            return getCapacityPercent(a);
+          case "date":
+          default:
+            return dateA;
+        }
+      })();
+
+      const valueB = (() => {
+        switch (sortBy) {
+          case "views":
+            return b.eventViews || 0;
+          case "likes":
+            return b.eventLikes || 0;
+          case "applicants":
+            return b.eventJoined || 0;
+          case "capacity":
+            return getCapacityPercent(b);
+          case "date":
+          default:
+            return dateB;
+        }
+      })();
+
+      if (valueA === valueB) return 0;
+      return valueA > valueB ? dir : -dir;
+    });
+
+    return sorted;
+  }, [myEvents, searchTerm, statusFilter, sortBy, sortDir]);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -120,6 +217,53 @@ export default function OrganizerDashboard() {
       avgCapacity: Math.round(avgCapacity),
     };
   }, [myEvents]);
+
+  // Lightweight real-time style notifications based on data changes
+  useEffect(() => {
+    if (!myEvents.length) return;
+
+    const prev = prevMetricsRef.current;
+    const hasPrev = Object.keys(prev).length > 0;
+
+    myEvents.forEach((event) => {
+      const joined = event.eventJoined || 0;
+      const likes = event.eventLikes || 0;
+      const capacity =
+        ((event.eventJoined || 0) / (event.eventCapacity || 1)) * 100;
+
+      const prevEntry = prev[event._id];
+
+      if (hasPrev && prevEntry) {
+        // New applicants
+        const deltaApplicants = joined - prevEntry.joined;
+        if (deltaApplicants > 0) {
+          showToast(
+            `${deltaApplicants} new applicant${deltaApplicants > 1 ? "s" : ""} for ${event.eventTitle || "your event"}`,
+          );
+        }
+
+        // Capacity milestones
+        if (capacity >= 50 && prevEntry.capacity < 50) {
+          showToast(`${event.eventTitle || "Event"} reached 50% capacity`);
+        }
+        if (capacity >= 100 && prevEntry.capacity < 100) {
+          showToast(`${event.eventTitle || "Event"} is now fully booked!`);
+        }
+
+        // Like spike
+        const deltaLikes = likes - prevEntry.likes;
+        if (deltaLikes > 0) {
+          showToast(
+            `${event.eventTitle || "Event"} received ${deltaLikes} new like${deltaLikes > 1 ? "s" : ""}`,
+          );
+        }
+      }
+
+      prev[event._id] = { joined, likes, capacity };
+    });
+
+    prevMetricsRef.current = prev;
+  }, [myEvents, showToast]);
 
   // Event Action Handlers
   const handleDelete = async () => {
@@ -375,189 +519,279 @@ export default function OrganizerDashboard() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-4">
-                  {myEvents.map((event) => {
-                    const eventDate = event.eventDate
-                      ? new Date(event.eventDate)
-                      : new Date();
-                    const isPast = eventDate < new Date();
-                    const applicantsCount = event.eventJoined || 0;
-                    const capacityPercent =
-                      (applicantsCount / (event.eventCapacity || 1)) * 100;
+                <div className="space-y-4">
+                  {/* Filters / Sorting / Search */}
+                  <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {["active", "upcoming", "past", "draft", "all"].map(
+                        (status) => (
+                          <Button
+                            key={status}
+                            size="sm"
+                            variant={
+                              statusFilter === status ? "default" : "outline"
+                            }
+                            onClick={() => setStatusFilter(status as any)}
+                            className="capitalize"
+                          >
+                            <Filter className="h-4 w-4 mr-1" />
+                            {status}
+                          </Button>
+                        ),
+                      )}
+                    </div>
 
-                    return (
-                      <div
-                        key={event._id}
-                        className="rounded-xl border border-border bg-background p-6 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex flex-col lg:flex-row gap-6">
-                          {/* Event Image */}
-                          {event.eventImages?.[0] && (
-                            <img
-                              src={eventImageUrlFromFilename(
-                                event.eventImages[0],
-                              )}
-                              alt={event.eventTitle}
-                              className="w-full lg:w-48 h-32 object-cover rounded-lg"
-                            />
-                          )}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                      <div className="relative flex-1 min-w-[220px]">
+                        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          placeholder="Search your events"
+                          className="w-full rounded-lg border border-border bg-background pl-10 pr-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
 
-                          {/* Event Details */}
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                <Link
-                                  to={`/events/${event._id}`}
-                                  className="text-xl font-bold text-foreground hover:text-primary transition-colors"
-                                >
-                                  {event.eventTitle}
-                                </Link>
-                                {isPast && (
-                                  <span className="ml-3 text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                                    Past Event
-                                  </span>
-                                )}
-                              </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-muted-foreground">
+                          Sort
+                        </label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) =>
+                            setSortBy(
+                              e.target.value as
+                                | "date"
+                                | "views"
+                                | "likes"
+                                | "applicants"
+                                | "capacity",
+                            )
+                          }
+                          className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        >
+                          <option value="date">Date</option>
+                          <option value="views">Views</option>
+                          <option value="likes">Likes</option>
+                          <option value="applicants">Applicants</option>
+                          <option value="capacity">Capacity Fill</option>
+                        </select>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          onClick={() =>
+                            setSortDir((prev) =>
+                              prev === "asc" ? "desc" : "asc",
+                            )
+                          }
+                          className="h-10 w-10"
+                          title={`Sort ${sortDir === "asc" ? "Ascending" : "Descending"}`}
+                        >
+                          <ArrowUpDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
 
-                              {/* Action Menu */}
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    setAttendeeModal({
-                                      eventId: event._id,
-                                      eventTitle: event.eventTitle || "Event",
-                                    })
-                                  }
-                                  className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                                >
-                                  <UserCheck className="h-4 w-4 mr-2" />
-                                  Manage Applicants
-                                  {applicantsCount > 0 && (
-                                    <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                                      {applicantsCount}
-                                    </span>
+                  {filteredEvents.length === 0 ? (
+                    <div className="text-center py-10 rounded-xl border border-dashed border-border bg-muted/30">
+                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                        No events match your filters
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Adjust search, filters, or sorting to see events.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-4">
+                      {filteredEvents.map((event) => {
+                        const eventDate = event.eventDate
+                          ? new Date(event.eventDate)
+                          : new Date();
+                        const isPast = eventDate < new Date();
+                        const applicantsCount = event.eventJoined || 0;
+                        const capacityPercent =
+                          (applicantsCount / (event.eventCapacity || 1)) * 100;
+
+                        return (
+                          <div
+                            key={event._id}
+                            className="rounded-xl border border-border bg-background p-6 hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex flex-col lg:flex-row gap-6">
+                              {/* Event Image */}
+                              {event.eventImages?.[0] && (
+                                <img
+                                  src={eventImageUrlFromFilename(
+                                    event.eventImages[0],
                                   )}
-                                </Button>
+                                  alt={event.eventTitle}
+                                  className="w-full lg:w-48 h-32 object-cover rounded-lg"
+                                />
+                              )}
 
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                              {/* Event Details */}
+                              <div className="flex-1 space-y-3">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <Link
+                                      to={`/events/${event._id}`}
+                                      className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+                                    >
+                                      {event.eventTitle}
+                                    </Link>
+                                    {isPast && (
+                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                                        Past Event
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Action Menu */}
+                                  <div className="flex items-center gap-2">
                                     <Button
                                       size="sm"
-                                      variant="ghost"
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-48"
-                                  >
-                                    <DropdownMenuItem
+                                      variant="outline"
                                       onClick={() =>
-                                        navigate(`/events/${event._id}/edit`)
-                                      }
-                                    >
-                                      <Edit className="h-4 w-4 mr-2" />
-                                      Edit Event
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleDuplicate(
-                                          event._id,
-                                          event.eventTitle || "Event",
-                                        )
-                                      }
-                                      disabled={isDuplicating}
-                                    >
-                                      <Copy className="h-4 w-4 mr-2" />
-                                      Duplicate
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => handleShare(event._id)}
-                                    >
-                                      <Share2 className="h-4 w-4 mr-2" />
-                                      Share Link
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        setDeleteConfirm({
+                                        setAttendeeModal({
                                           eventId: event._id,
                                           eventTitle:
                                             event.eventTitle || "Event",
                                         })
                                       }
-                                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                      className="text-purple-600 border-purple-300 hover:bg-purple-50"
                                     >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Delete Event
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
+                                      <UserCheck className="h-4 w-4 mr-2" />
+                                      Manage Applicants
+                                      {applicantsCount > 0 && (
+                                        <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
+                                          {applicantsCount}
+                                        </span>
+                                      )}
+                                    </Button>
 
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {event.eventDesc}
-                            </p>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-8 w-8 p-0"
+                                        >
+                                          <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="end"
+                                        className="w-48"
+                                      >
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            navigate(
+                                              `/events/${event._id}/edit`,
+                                            )
+                                          }
+                                        >
+                                          <Edit className="h-4 w-4 mr-2" />
+                                          Edit Event
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleDuplicate(
+                                              event._id,
+                                              event.eventTitle || "Event",
+                                            )
+                                          }
+                                          disabled={isDuplicating}
+                                        >
+                                          <Copy className="h-4 w-4 mr-2" />
+                                          Duplicate
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => handleShare(event._id)}
+                                        >
+                                          <Share2 className="h-4 w-4 mr-2" />
+                                          Share Link
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            setDeleteConfirm({
+                                              eventId: event._id,
+                                              eventTitle:
+                                                event.eventTitle || "Event",
+                                            })
+                                          }
+                                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete Event
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
 
-                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                {eventDate.toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                {event.eventLocation}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4" />
-                                {applicantsCount} / {event.eventCapacity}{" "}
-                                volunteers
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Eye className="h-4 w-4" />
-                                {event.eventViews || 0} views
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Heart className="h-4 w-4" />
-                                {event.eventLikes || 0} likes
-                              </div>
-                            </div>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {event.eventDesc}
+                                </p>
 
-                            {/* Capacity Bar */}
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>Volunteer Capacity</span>
-                                <span>{Math.round(capacityPercent)}%</span>
-                              </div>
-                              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full transition-all ${
-                                    capacityPercent >= 100
-                                      ? "bg-green-600"
-                                      : capacityPercent >= 75
-                                        ? "bg-yellow-600"
-                                        : "bg-primary"
-                                  }`}
-                                  style={{
-                                    width: `${Math.min(capacityPercent, 100)}%`,
-                                  }}
-                                />
+                                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    {eventDate.toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4" />
+                                    {event.eventLocation}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-4 w-4" />
+                                    {applicantsCount} / {event.eventCapacity}{" "}
+                                    volunteers
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Eye className="h-4 w-4" />
+                                    {event.eventViews || 0} views
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Heart className="h-4 w-4" />
+                                    {event.eventLikes || 0} likes
+                                  </div>
+                                </div>
+
+                                {/* Capacity Bar */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>Volunteer Capacity</span>
+                                    <span>{Math.round(capacityPercent)}%</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full transition-all ${
+                                        capacityPercent >= 100
+                                          ? "bg-green-600"
+                                          : capacityPercent >= 75
+                                            ? "bg-yellow-600"
+                                            : "bg-primary"
+                                      }`}
+                                      style={{
+                                        width: `${Math.min(capacityPercent, 100)}%`,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
