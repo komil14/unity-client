@@ -222,6 +222,13 @@ export default function EventDetailPage() {
   const hasMoreAttendees =
     totalAttendeesCount > attendeeLimit &&
     (attendees?.length || 0) >= attendeeLimit;
+  const locationQuery = encodeURIComponent(data.eventLocation || "");
+  const mapEmbedUrl = locationQuery
+    ? `https://www.google.com/maps?q=${locationQuery}&output=embed`
+    : undefined;
+  const directionsUrl = locationQuery
+    ? `https://www.google.com/maps/dir/?api=1&destination=${locationQuery}`
+    : undefined;
 
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
@@ -536,6 +543,48 @@ export default function EventDetailPage() {
                   {data.eventDesc}
                 </div>
               </div>
+            </div>
+
+            {/* Location Map */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-extrabold text-foreground">
+                  Location
+                </h2>
+                {directionsUrl && (
+                  <a
+                    href={directionsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-semibold text-primary hover:underline"
+                  >
+                    Get Directions
+                  </a>
+                )}
+              </div>
+
+              {mapEmbedUrl ? (
+                <div className="space-y-3">
+                  <div className="aspect-video rounded-xl overflow-hidden border border-border">
+                    <iframe
+                      title="Event location map"
+                      src={mapEmbedUrl}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-full w-full border-0"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {data.eventLocation}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Location map unavailable. Address:{" "}
+                  {data.eventLocation || "N/A"}
+                </div>
+              )}
             </div>
 
             {/* Comments Section */}
