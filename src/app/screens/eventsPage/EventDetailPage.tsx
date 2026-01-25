@@ -30,7 +30,10 @@ import {
   useToggleLikeMutation,
   useCheckLikesBatchQuery,
 } from "../../services/likesApi";
-import { imageUrlFromFilename } from "../../../libs/shared/ui";
+import {
+  memberImageUrlFromFilename,
+  eventImageUrlFromFilename,
+} from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
 import Comments from "./Comments";
@@ -245,7 +248,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const img = imageUrlFromFilename(data.eventImages?.[0]);
+  // const img = eventImageUrlFromFilename(data.eventImages?.[0]);
   const upcoming = isUpcoming(data.eventDate || "");
   const capacityRemaining = (data.eventCapacity || 0) - (data.eventJoined || 0);
   const totalAttendeesCount = data.eventJoined || 0;
@@ -267,21 +270,9 @@ export default function EventDetailPage() {
   const alreadyApplied = activeApplication;
   const canCancel = activeApplication;
 
-  // Debug logging
-  console.log("Event Detail Debug:", {
-    eventId,
-    isAuthenticated,
-    isOrganizer,
-    upcoming,
-    capacityRemaining,
-    alreadyApplied,
-    applicationStatusLabel,
-    applicationStatus,
-  });
-
   // Handle image gallery navigation
   const images = (data.eventImages || []).map((img) =>
-    imageUrlFromFilename(img),
+    eventImageUrlFromFilename(img),
   );
   const totalImages = images.length;
 
@@ -355,6 +346,13 @@ export default function EventDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
           {/* Left Column - Main Content (70%) */}
           <div className="space-y-6">
+            {/* Event Title */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h1 className="text-4xl font-extrabold tracking-tight text-foreground break-words">
+                {data.eventTitle}
+              </h1>
+            </div>
+
             {/* Hero Section - Flex Container */}
             <div className="flex flex-col md:flex-row gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
               {/* Left Side - Image Gallery with Badges */}
@@ -426,8 +424,8 @@ export default function EventDetailPage() {
                   <div
                     className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold backdrop-blur ${
                       upcoming
-                        ? "bg-blue-500/90 text-white"
-                        : "bg-gray-500/90 text-white"
+                        ? "bg-primary/90 text-white"
+                        : "bg-gray-500/70 text-white"
                     }`}
                   >
                     {upcoming ? "UPCOMING" : "PAST"}
@@ -444,10 +442,6 @@ export default function EventDetailPage() {
 
               {/* Right Side - Event Details */}
               <div className="flex-1 space-y-4">
-                <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-                  {data.eventTitle}
-                </h1>
-
                 <div className="space-y-3">
                   {/* Date */}
                   <div className="flex items-center gap-3">
@@ -538,7 +532,9 @@ export default function EventDetailPage() {
                         </span>
                       </div>
                       <div>
-                        <div className="text-xs text-muted-foreground">Application Status</div>
+                        <div className="text-xs text-muted-foreground">
+                          Application Status
+                        </div>
                         <div
                           className={`text-sm font-bold ${
                             applicationStatusLabel === "PENDING"
@@ -671,7 +667,9 @@ export default function EventDetailPage() {
                       disabled={cancelState.isLoading}
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-destructive px-4 py-3 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                      {cancelState.isLoading ? "Canceling…" : "Cancel Application"}
+                      {cancelState.isLoading
+                        ? "Canceling…"
+                        : "Cancel Application"}
                     </button>
                   )}
                 </div>
@@ -772,7 +770,7 @@ export default function EventDetailPage() {
                   <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border bg-muted flex-shrink-0">
                     {data.memberData.memberImage ? (
                       <img
-                        src={imageUrlFromFilename(data.memberData.memberImage)}
+                        src={memberImageUrlFromFilename(data.memberData.memberImage)}
                         alt={data.memberData.memberNick}
                         className="h-full w-full object-cover"
                       />
@@ -832,7 +830,7 @@ export default function EventDetailPage() {
                       >
                         {attendee.memberData?.memberImage ? (
                           <img
-                            src={imageUrlFromFilename(
+                            src={memberImageUrlFromFilename(
                               attendee.memberData.memberImage,
                             )}
                             alt={attendee.memberData?.memberNick}
@@ -863,7 +861,7 @@ export default function EventDetailPage() {
                         <div className="h-10 w-10 rounded-full overflow-hidden bg-muted border border-border flex-shrink-0">
                           {attendee.memberData?.memberImage ? (
                             <img
-                              src={imageUrlFromFilename(
+                              src={memberImageUrlFromFilename(
                                 attendee.memberData.memberImage,
                               )}
                               alt={attendee.memberData.memberNick}
@@ -923,7 +921,7 @@ export default function EventDetailPage() {
                       <div className="aspect-square w-16 overflow-hidden bg-muted flex-shrink-0 rounded-lg border border-border">
                         {event.eventImages?.[0] ? (
                           <img
-                            src={imageUrlFromFilename(event.eventImages[0])}
+                            src={eventImageUrlFromFilename(event.eventImages[0])}
                             alt={event.eventTitle}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                           />
@@ -973,7 +971,7 @@ export default function EventDetailPage() {
                       <div className="aspect-square w-16 overflow-hidden bg-muted flex-shrink-0 rounded-lg border border-border">
                         {event.eventImages?.[0] ? (
                           <img
-                            src={imageUrlFromFilename(event.eventImages[0])}
+                            src={eventImageUrlFromFilename(event.eventImages[0])}
                             alt={event.eventTitle}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                           />

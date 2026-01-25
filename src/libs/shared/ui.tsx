@@ -29,6 +29,19 @@ export function uploadUrlFromFilename(
   return `/uploads/${folder}/${filename}`;
 }
 
+// Explicit helpers for clarity in components
+export function memberImageUrlFromFilename(
+  filename?: string,
+): string | undefined {
+  return uploadUrlFromFilename("members", filename);
+}
+
+export function eventImageUrlFromFilename(
+  filename?: string,
+): string | undefined {
+  return uploadUrlFromFilename("events", filename);
+}
+
 export function clampText(text: string, max = 160): string {
   if (!text) return "";
   const clean = text.replace(/\s+/g, " ").trim();

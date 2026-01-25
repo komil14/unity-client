@@ -14,7 +14,7 @@ import {
 import type { EventDto } from "../../services/eventsApi";
 import { useToggleLikeMutation } from "../../services/likesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
-import { imageUrlFromFilename } from "../../../libs/shared/ui";
+import { eventImageUrlFromFilename } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
 
@@ -63,7 +63,7 @@ function EventCard({
   const { data: authData } = useCheckAuthQuery();
   const isAuthenticated = Boolean(authData?.member?._id);
   const { showToast } = useToast();
-  const img = imageUrlFromFilename(event.eventImages?.[0]);
+  const img = eventImageUrlFromFilename(event.eventImages?.[0]);
   const upcoming = isUpcoming(event.eventDate || "");
 
   const [likesCount, setLikesCount] = useState<number>(event.eventLikes || 0);
