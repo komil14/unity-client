@@ -515,6 +515,12 @@ export default function EventDetailPage() {
                       alreadyApplied
                     }
                     onClick={async () => {
+                      // Check if user is authenticated
+                      if (!isAuthenticated) {
+                        setShowLoginAlert(true);
+                        return;
+                      }
+
                       try {
                         await joinEvent({ eventId }).unwrap();
                         showToast("Application submitted successfully!");
