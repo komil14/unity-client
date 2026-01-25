@@ -1,4 +1,4 @@
-import { Heart, X } from "lucide-react";
+import { Heart, X, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface AlertDialogProps {
@@ -9,7 +9,7 @@ interface AlertDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: "default" | "primary" | "warning";
+  variant?: "default" | "primary" | "warning" | "destructive";
 }
 
 export function AlertDialog({
@@ -20,6 +20,7 @@ export function AlertDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  variant = "default",
 }: AlertDialogProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -38,6 +39,39 @@ export function AlertDialog({
     onConfirm?.();
     onClose();
   };
+
+  // Determine icon and colors based on variant
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "destructive":
+        return {
+          iconBg: "bg-destructive/10",
+          iconColor: "text-destructive",
+          icon: AlertTriangle,
+          buttonBg: "bg-destructive hover:bg-destructive/90",
+          buttonText: "text-destructive-foreground",
+        };
+      case "warning":
+        return {
+          iconBg: "bg-yellow-500/10",
+          iconColor: "text-yellow-600",
+          icon: AlertTriangle,
+          buttonBg: "bg-yellow-600 hover:bg-yellow-600/90",
+          buttonText: "text-white",
+        };
+      default:
+        return {
+          iconBg: "bg-primary/10",
+          iconColor: "text-primary fill-primary",
+          icon: Heart,
+          buttonBg: "bg-primary hover:bg-primary/90",
+          buttonText: "text-white",
+        };
+    }
+  };
+
+  const styles = getVariantStyles();
+  const Icon = styles.icon;
 
   return (
     <>
@@ -70,8 +104,10 @@ export function AlertDialog({
 
             {/* Header with Icon */}
             <div className="px-6 pt-8 pb-4 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Heart className="h-8 w-8 text-primary fill-primary" />
+              <div
+                className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${styles.iconBg}`}
+              >
+                <Icon className={`h-8 w-8 ${styles.iconColor}`} />
               </div>
               <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
                 {title}
@@ -95,7 +131,7 @@ export function AlertDialog({
                 {onConfirm && (
                   <button
                     onClick={handleConfirm}
-                    className="flex-1 h-10 px-4 rounded-lg font-semibold text-sm text-white bg-primary hover:bg-primary/90 transition-colors shadow-sm"
+                    className={`flex-1 h-10 px-4 rounded-lg font-semibold text-sm ${styles.buttonText} ${styles.buttonBg} transition-colors shadow-sm`}
                   >
                     {confirmText}
                   </button>

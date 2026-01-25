@@ -6,6 +6,7 @@ import { ToastProvider } from "@/libs/components/ui/toast";
 import HomePage from "./screens/homePage";
 import EventsPage from "./screens/eventsPage/EventsPage.tsx";
 import EventDetailPage from "./screens/eventsPage/EventDetailPage.tsx";
+import CreateEventPage from "./screens/eventsPage/CreateEventPage.tsx";
 import GroupsPage from "./screens/groupPage/GroupsPage.tsx";
 import GroupDetailPage from "./screens/groupPage/GroupDetailPage.tsx";
 import OrganizersPage from "./screens/organizerPage/OrganizersPage.tsx";
@@ -40,6 +41,7 @@ function App() {
           <Route element={<HomeLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/create" element={<CreateEventPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
             <Route path="/groups" element={<GroupsPage />} />
             <Route path="/groups/:id" element={<GroupDetailPage />} />

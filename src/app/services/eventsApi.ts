@@ -8,6 +8,16 @@ import type {
   WeeklyPopularEventDto,
 } from "../../libs/types/api";
 
+export interface CreateEventInput {
+  eventTitle: string;
+  eventDesc: string;
+  eventLocation: string;
+  eventDate: string; // ISO string
+  eventCapacity: number;
+  eventPoints?: number;
+  eventImages?: File[];
+}
+
 export type {
   MemberData,
   EventDto,
@@ -83,6 +93,35 @@ export const eventsApi = api.injectEndpoints({
         { type: "Event" as const, id: "POPULAR_WEEKLY" },
       ],
     }),
+
+    createEvent: build.mutation<EventDto, CreateEventInput>({
+      query: (body) => {
+        const formData = new FormData();
+        formData.append("eventTitle", body.eventTitle);
+        formData.append("eventDesc", body.eventDesc);
+        formData.append("eventLocation", body.eventLocation);
+        formData.append("eventDate", body.eventDate);
+        formData.append("eventCapacity", String(body.eventCapacity));
+        if (body.eventPoints !== undefined && body.eventPoints !== null) {
+          formData.append("eventPoints", String(body.eventPoints));
+        }
+        if (body.eventImages && body.eventImages.length > 0) {
+          body.eventImages.forEach((file) =>
+            formData.append("eventImages", file),
+          );
+        }
+
+        return {
+          url: "/event/create",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: [
+        { type: "Event", id: "LIST" },
+        { type: "Event", id: "POPULAR_WEEKLY" },
+      ],
+    }),
   }),
 });
 
@@ -91,4 +130,5 @@ export const {
   useGetEventByIdQuery,
   useGetWeeklyPopularEventsQuery,
   useViewEventMutation,
+  useCreateEventMutation,
 } = eventsApi;

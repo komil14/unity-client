@@ -155,14 +155,14 @@ function EventCard({
 
               <div className="absolute left-3 top-3 flex flex-wrap gap-2">
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border shadow-sm  backdrop-blur-sm ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold border shadow-sm  backdrop-blur-sm ${
                     upcoming
                       ? "bg-primary/70 border-emerald-400/50 text-white"
                       : "bg-slate-700/70 border-slate-600/30 text-slate-100"
                   }`}
                 >
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${upcoming ? "bg-white animate-pulse" : "bg-slate-200"}`}
+                    className={`h-2 w-2 rounded-full ${upcoming ? "bg-white animate-pulse" : "bg-slate-600"}`}
                   />
                   {upcoming ? "Open" : "Closed"}
                 </span>
