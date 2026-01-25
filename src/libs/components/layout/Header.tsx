@@ -68,8 +68,8 @@ export default function Header() {
         cn(
           "text-sm font-medium transition-colors duration-300",
           isActive
-            ? "text-foreground font-semibold underline underline-offset-6"
-            : "text-muted-foreground hover:text-foreground"
+            ? "text-primary font-semibold underline underline-offset-6"
+            : "text-muted-foreground hover:text-primary"
         ),
     []
   );
@@ -81,8 +81,8 @@ export default function Header() {
           to="/"
           className="flex items-center gap-2 sm:gap-3 hover:scale-95 transition-transform duration-300"
         >
-          <Logo className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
-          <span className="text-lg sm:text-xl font-semibold tracking-wide text-foreground">
+          <Logo className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-primary" />
+          <span className="text-lg sm:text-xl font-semibold tracking-wide text-primary">
             UNITY
           </span>
         </Link>

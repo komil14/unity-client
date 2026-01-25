@@ -853,9 +853,8 @@ export default function EventDetailPage() {
                   {/* List */}
                   <div className="space-y-3">
                     {attendees.map((attendee) => (
-                      <Link
+                      <div
                         key={attendee._id}
-                        to={`/profile/${attendee.memberData?._id}`}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/60 transition-colors"
                       >
                         <div className="h-10 w-10 rounded-full overflow-hidden bg-muted border border-border flex-shrink-0">
@@ -883,7 +882,7 @@ export default function EventDetailPage() {
                             Approved attendee
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
 
