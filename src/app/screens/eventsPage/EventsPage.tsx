@@ -175,7 +175,7 @@ export default function EventsPage() {
       showLikedOnly: searchParams.get("liked") === "true",
       order: urlOrder,
       direction: urlDirection,
-      page: parseInt(searchParams.get("page") || "1", 10) || 1,
+      page: parseInt(searchParams.get("page") || "1", 8) || 1,
       limit,
     } satisfies EventsPageState;
   }, [limit, searchParams]);
@@ -248,7 +248,10 @@ export default function EventsPage() {
 
   const { data, isLoading, isError } = useGetEventsQuery(query);
 
-  const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
+  const eventIds = useMemo(
+    () => data?.items?.map((e) => e._id) ?? [],
+    [data?.items],
+  );
   const { data: likesData } = useCheckLikesBatchQuery(
     { likeGroup: "EVENT", likeRefIds: eventIds },
     { skip: eventIds.length === 0 },
@@ -263,9 +266,41 @@ export default function EventsPage() {
   // Apply client-side filtering for "liked only" mode
   // This allows showing liked events without additional API calls
   const filteredData = useMemo(() => {
-    if (!showLikedOnly) return data;
-    return data?.filter((event) => likedSet.has(event._id)) ?? [];
-  }, [data, showLikedOnly, likedSet]);
+    if (!showLikedOnly) return data?.items;
+    return data?.items?.filter((event) => likedSet.has(event._id)) ?? [];
+  }, [data?.items, showLikedOnly, likedSet]);
+
+  const totalPages = useMemo(() => data?.totalPages ?? 1, [data?.totalPages]);
+
+  const pageNumbers = useMemo(() => {
+    const total = totalPages;
+    const maxButtons = 5;
+    if (total <= maxButtons) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const start = Math.max(1, Math.min(page - 2, total - maxButtons + 1));
+    const end = Math.min(total, start + maxButtons - 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [page, totalPages]);
+
+  // Prevent navigating to empty pages when the backend has no further results
+  useEffect(() => {
+    if (isLoading) return;
+
+    const maxPage = Math.max(1, totalPages);
+
+    // Clamp page to available pages from server
+    if (page > maxPage) {
+      dispatch(setPageAction(maxPage));
+      return;
+    }
+
+    // Prevent navigating to empty pages when filters reduce results on the current page
+    if (page > 1 && (!filteredData || filteredData.length === 0)) {
+      dispatch(setPageAction(Math.max(1, page - 1)));
+    }
+  }, [dispatch, filteredData, isLoading, page, totalPages]);
 
   // Calendar helpers - generate days grid for month view
   const getDaysInMonth = (date: Date) => {
@@ -795,7 +830,7 @@ export default function EventsPage() {
             Retry
           </button>
         </div>
-      ) : !data?.length ? (
+      ) : !data?.items?.length ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
             <Calendar className="h-8 w-8 text-muted-foreground" />
@@ -858,36 +893,26 @@ export default function EventsPage() {
             </button>
 
             <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const pageNum = page - 2 + i;
-                // Don't show page numbers less than 1
-                if (pageNum < 1) return null;
-                // If current page has full results (10), only show up to current+1 (we don't know beyond that)
-                if (filteredData.length >= limit && pageNum > page + 1)
-                  return null;
-                // If current page has fewer than 10 results, it's the last page - don't show beyond it
-                if (filteredData.length < limit && pageNum > page) return null;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => dispatch(setPageAction(pageNum))}
-                    className={`h-10 w-10 rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 ${
-                      pageNum === page
-                        ? "border-primary bg-primary/20 text-primary font-semibold"
-                        : "border-border bg-background/40 text-foreground hover:bg-background/60"
-                    }`}
-                    aria-label={`Go to page ${pageNum}`}
-                    aria-current={pageNum === page ? "page" : undefined}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              {pageNumbers.map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => dispatch(setPageAction(pageNum))}
+                  className={`h-10 w-10 rounded-lg border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 ${
+                    pageNum === page
+                      ? "border-primary bg-primary/20 text-primary font-semibold"
+                      : "border-border bg-background/40 text-foreground hover:bg-background/60"
+                  }`}
+                  aria-label={`Go to page ${pageNum}`}
+                  aria-current={pageNum === page ? "page" : undefined}
+                >
+                  {pageNum}
+                </button>
+              ))}
             </div>
 
             <button
               onClick={() => dispatch(setPageAction(page + 1))}
-              disabled={filteredData.length < limit}
+              disabled={page >= totalPages}
               className={`${STYLES.paginationButton} disabled:opacity-50 disabled:cursor-not-allowed`}
               aria-label="Go to next page"
             >

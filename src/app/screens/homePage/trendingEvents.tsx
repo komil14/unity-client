@@ -14,10 +14,13 @@ export default function TrendingEventsSection() {
     direction: "desc",
   });
 
-  const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
+  const eventIds = useMemo(
+    () => data?.items?.map((e) => e._id) ?? [],
+    [data?.items],
+  );
   const { data: likesData } = useCheckLikesBatchQuery(
     { likeGroup: "EVENT", likeRefIds: eventIds },
-    { skip: eventIds.length === 0 }
+    { skip: eventIds.length === 0 },
   );
 
   const likedSet = useMemo(() => {
@@ -56,11 +59,11 @@ export default function TrendingEventsSection() {
           <div className="text-muted-foreground">Loading…</div>
         ) : isError ? (
           <div className="text-destructive">Failed to load events.</div>
-        ) : !data?.length ? (
+        ) : !data?.items?.length ? (
           <div className="text-muted-foreground">No events yet.</div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {data.map((event) => (
+            {data.items.map((event) => (
               <div key={event._id} className="h-full">
                 <EventCard event={event} likedByMe={likedSet.has(event._id)} />
               </div>

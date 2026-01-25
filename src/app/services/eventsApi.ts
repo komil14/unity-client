@@ -3,6 +3,7 @@ import type {
   MemberData,
   EventDto,
   GetEventsParams,
+  GetEventsResponse,
   WeeklyPopularParams,
   WeeklyPopularEventDto,
 } from "../../libs/types/api";
@@ -11,21 +12,25 @@ export type {
   MemberData,
   EventDto,
   GetEventsParams,
+  GetEventsResponse,
   WeeklyPopularParams,
   WeeklyPopularEventDto,
 };
 
 export const eventsApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getEvents: build.query<EventDto[], GetEventsParams | void>({
+    getEvents: build.query<GetEventsResponse, GetEventsParams | void>({
       query: (params) => ({
         url: "/event/all",
         params: params ?? undefined,
       }),
       providesTags: (result) =>
-        result
+        result?.items
           ? [
-              ...result.map((e) => ({ type: "Event" as const, id: e._id })),
+              ...result.items.map((e) => ({
+                type: "Event" as const,
+                id: e._id,
+              })),
               { type: "Event" as const, id: "LIST" },
             ]
           : [{ type: "Event" as const, id: "LIST" }],

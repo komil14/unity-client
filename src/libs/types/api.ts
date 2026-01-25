@@ -75,6 +75,14 @@ export interface GetEventsParams {
   memberId?: string;
 }
 
+export interface GetEventsResponse {
+  items: EventDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface WeeklyPopularParams {
   days?: number;
   limit?: number;

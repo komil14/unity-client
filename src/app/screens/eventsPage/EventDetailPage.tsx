@@ -284,11 +284,11 @@ export default function EventDetailPage() {
   const similarEvents = (() => {
     if (!data) return [];
 
-    const filteredOrganizerEvents = (organizerEvents || [])
+    const filteredOrganizerEvents = (organizerEvents?.items || [])
       .filter((e) => e._id !== eventId && isUpcoming(e.eventDate || ""))
       .slice(0, 4);
 
-    const filteredLocationEvents = (locationEvents || [])
+    const filteredLocationEvents = (locationEvents?.items || [])
       .filter(
         (e) =>
           e._id !== eventId &&
@@ -647,6 +647,9 @@ export default function EventDetailPage() {
               </div>
             </div>
 
+            {/* Comments Section */}
+            <Comments eventId={eventId} eventTitle={data.eventTitle} />
+
             {/* Location Map */}
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -688,9 +691,6 @@ export default function EventDetailPage() {
                 </div>
               )}
             </div>
-
-            {/* Comments Section */}
-            <Comments eventId={eventId} eventTitle={data.eventTitle} />
           </div>
 
           {/* Right Column - Sidebar (30%) */}
@@ -895,7 +895,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Trending Events */}
-            {trendingEvents && trendingEvents.length > 0 && (
+            {trendingEvents?.items && trendingEvents.items.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <h3 className="flex items-center gap-2 text-base font-bold text-foreground mb-4">
                   <Eye className="h-4 w-4" />
@@ -903,7 +903,7 @@ export default function EventDetailPage() {
                 </h3>
 
                 <div className="space-y-3">
-                  {trendingEvents.slice(0, 4).map((event) => (
+                  {trendingEvents.items.slice(0, 4).map((event) => (
                     <Link
                       key={event._id}
                       to={`/events/${event._id}`}
