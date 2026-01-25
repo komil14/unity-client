@@ -561,15 +561,11 @@ export default function EventDetailPage() {
                       joinState.isLoading ||
                       !upcoming ||
                       capacityRemaining <= 0 ||
-                      alreadyApplied
+                      alreadyApplied ||
+                      !isAuthenticated ||
+                      isOrganizer
                     }
                     onClick={async () => {
-                      // Check if user is authenticated
-                      if (!isAuthenticated) {
-                        setShowLoginAlert(true);
-                        return;
-                      }
-
                       try {
                         await joinEvent({ eventId }).unwrap();
                         showToast("Application submitted successfully!");
@@ -586,13 +582,17 @@ export default function EventDetailPage() {
                   >
                     {joinState.isLoading
                       ? "Applying…"
-                      : !upcoming
-                        ? "Event Closed"
-                        : capacityRemaining <= 0
-                          ? "Event Full"
-                          : alreadyApplied
-                            ? "Already Applied"
-                            : "Apply to Join"}
+                      : !isAuthenticated
+                        ? "Login to Apply"
+                        : isOrganizer
+                          ? "Organizers Cannot Apply"
+                          : !upcoming
+                            ? "Event Closed"
+                            : capacityRemaining <= 0
+                              ? "Event Full"
+                              : alreadyApplied
+                                ? "Already Applied"
+                                : "Apply to Join"}
                   </button>
 
                   {applicationStatusLabel && (
@@ -623,11 +623,9 @@ export default function EventDetailPage() {
 
               {joinState.isError && (
                 <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive text-center">
-                  Failed to apply. Please{" "}
-                  <Link to="/login" className="underline hover:no-underline">
-                    login
-                  </Link>{" "}
-                  first.
+                  {isOrganizer
+                    ? "Organizers cannot apply for events"
+                    : "Failed to apply. Please login first."}
                 </div>
               )}
             </div>
