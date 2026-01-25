@@ -147,7 +147,16 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
   const getMemberImageUrl = (memberImage?: string) => {
     if (!memberImage) return undefined;
-    return `${import.meta.env.VITE_API_URL}/uploads/members/${memberImage}`;
+
+    // If backend already returns an absolute URL, use it directly.
+    if (memberImage.startsWith("http")) return memberImage;
+
+    const apiBase =
+      import.meta.env.VITE_API_URL ||
+      import.meta.env.VITE_BACKEND_URL ||
+      window.location.origin;
+
+    return `${apiBase}/uploads/members/${memberImage}`;
   };
 
   const renderAttendeeList = (attendeesList: typeof attendees) => {
