@@ -1036,6 +1036,7 @@ export default function EventDetailPage() {
         description="This will withdraw you from the event. You can re-apply later if spots remain."
         confirmText="Yes, cancel"
         cancelText="Keep Application"
+        variant="destructive"
       />
     </div>
   );
