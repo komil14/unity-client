@@ -28,7 +28,6 @@ export default function SignupPage() {
       </div>
 
       <div style={{ marginTop: 14 }}>
-        <Card>
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -63,7 +62,7 @@ export default function SignupPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -91,7 +90,7 @@ export default function SignupPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -117,7 +116,7 @@ export default function SignupPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -144,7 +143,7 @@ export default function SignupPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -188,7 +187,6 @@ export default function SignupPage() {
               </Link>
             </div>
           </form>
-        </Card>
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../services/authApi";
-import { Card } from "../../../libs/shared/ui";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Login failed.";
@@ -25,7 +24,6 @@ export default function LoginPage() {
       </div>
 
       <div style={{ marginTop: 14 }}>
-        <Card>
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -44,7 +42,7 @@ export default function LoginPage() {
             <label
               style={{
                 display: "block",
-                marginBottom: 6,
+                marginBottom: "6px",
                 color: "var(--text-muted)",
               }}
             >
@@ -58,7 +56,7 @@ export default function LoginPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -85,7 +83,7 @@ export default function LoginPage() {
                 height: 40,
                 padding: "0 12px",
                 borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-color)",
+                border: "1px solid rgba(16,185,129,0.35)",
                 background: "var(--bg-card)",
                 color: "var(--text-main)",
               }}
@@ -129,7 +127,6 @@ export default function LoginPage() {
               </Link>
             </div>
           </form>
-        </Card>
       </div>
     </div>
   );
