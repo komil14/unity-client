@@ -569,7 +569,6 @@ export default function EventDetailPage() {
                   {/* Like Button */}
                   <button
                     onClick={handleLike}
-                    disabled={!isAuthenticated}
                     className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                       isLiked
                         ? "bg-primary text-white hover:bg-primary/90"
