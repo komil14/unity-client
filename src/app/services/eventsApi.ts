@@ -146,7 +146,7 @@ export const eventsApi = api.injectEndpoints({
 
         return {
           url: `/event/update/${id}`,
-          method: "PATCH",
+          method: "POST",
           body: formData,
         };
       },
