@@ -6,6 +6,7 @@ import type { WhyTab } from "../../../libs/types";
 import PopularEventsSection from "./popularEvents";
 import TrendingEventsSection from "./trendingEvents";
 import TopOrganizersSection from "./topOrganizers";
+import LatestArticlesSection from "./latestArticles";
 import AdvertisementSection from "./advertisement";
 import FinalCtaSection from "./finalCta";
 import { useScrollToTop } from "../../hooks/useScrollToTop";
@@ -25,7 +26,7 @@ export default function HomePage() {
       <TrendingEventsSection />
       <AdvertisementSection />
       <TopOrganizersSection />
-
+      <LatestArticlesSection />
       <FinalCtaSection />
     </div>
   );
