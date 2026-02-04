@@ -66,7 +66,7 @@ export default function OrganizerDashboard() {
     eventTitle: string;
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "upcoming" | "past" | "draft" | "canceled"
+    "all" | "active" | "upcoming" | "past" | "draft" | "canceled" | "deleted"
   >("active");
   const [sortBy, setSortBy] = useState<
     "date" | "views" | "likes" | "applicants" | "capacity"
@@ -113,6 +113,8 @@ export default function OrganizerDashboard() {
           return eventDate ? eventDate > now : false;
         case "canceled":
           return statusRaw === "CANCELED";
+        case "deleted":
+          return statusRaw === "DELETE";
         case "active":
           return (
             statusRaw !== "CANCELED" &&
@@ -492,15 +494,22 @@ export default function OrganizerDashboard() {
                 <div className="space-y-4">
                   {/* Filters / Sorting / Search */}
                   <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-muted-foreground">
+                        Status
+                      </label>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 capitalize"
+                      >
+                        <option value="active">Active</option>
+                        <option value="canceled">Canceled</option>
+                        <option value="deleted">Deleted</option>
+                      </select>
+                    </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {[
-                        "active",
-                        "upcoming",
-                        "past",
-                        "canceled",
-                        "draft",
-                        "all",
-                      ].map((status) => (
+                      {["all", "upcoming", "past", "draft"].map((status) => (
                         <Button
                           key={status}
                           size="sm"
@@ -707,7 +716,9 @@ export default function OrganizerDashboard() {
                                           }
                                         >
                                           <CheckCircle className="h-4 w-4 mr-2" />
-                                          Activate Event
+                                          {event.eventStatus === "DELETE"
+                                            ? "Restore Event"
+                                            : "Activate Event"}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           onClick={() =>
