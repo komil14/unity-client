@@ -252,6 +252,7 @@ export default function EventDetailPage() {
 
   // const img = eventImageUrlFromFilename(data.eventImages?.[0]);
   const upcoming = isUpcoming(data.eventDate || "");
+  const isEventCompleted = data.eventStatus === "COMPLETED";
   const capacityRemaining = (data.eventCapacity || 0) - (data.eventJoined || 0);
   const totalAttendeesCount = data.eventJoined || 0;
   const hasMoreAttendees =
@@ -269,6 +270,8 @@ export default function EventDetailPage() {
   const activeApplication =
     applicationStatusLabel === "PENDING" ||
     applicationStatusLabel === "APPROVED";
+  const isApplicationCompleted = applicationStatusLabel === "COMPLETED";
+  const isApplicationRejected = applicationStatusLabel === "REJECTED";
   const alreadyApplied = activeApplication;
   const canCancel = activeApplication;
 
@@ -620,6 +623,9 @@ export default function EventDetailPage() {
                     type="button"
                     disabled={
                       joinState.isLoading ||
+                      isEventCompleted ||
+                      isApplicationCompleted ||
+                      isApplicationRejected ||
                       !upcoming ||
                       capacityRemaining <= 0 ||
                       alreadyApplied ||
@@ -652,13 +658,19 @@ export default function EventDetailPage() {
                         ? "Login to Apply"
                         : isOrganizer
                           ? "Organizers Cannot Apply"
-                          : !upcoming
-                            ? "Event Closed"
-                            : capacityRemaining <= 0
-                              ? "Event Full"
-                              : alreadyApplied
-                                ? "Already Applied"
-                                : "Apply to Join"}
+                          : isEventCompleted
+                            ? "Event Completed"
+                            : isApplicationCompleted
+                              ? "Completed"
+                              : isApplicationRejected
+                                ? "Rejected"
+                                : !upcoming
+                                  ? "Event Closed"
+                                  : capacityRemaining <= 0
+                                    ? "Event Full"
+                                    : alreadyApplied
+                                      ? "Already Applied"
+                                      : "Apply to Join"}
                   </button>
 
                   {canCancel && (
