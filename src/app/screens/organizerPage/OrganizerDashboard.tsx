@@ -613,7 +613,7 @@ export default function OrganizerDashboard() {
                             key={event._id}
                             className="rounded-xl border border-border bg-background p-4 sm:p-6 hover:shadow-md transition-shadow"
                           >
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-4 sm:flex-row">
                               {/* Event Image */}
                               {event.eventImages?.[0] && (
                                 <img
@@ -621,7 +621,7 @@ export default function OrganizerDashboard() {
                                     event.eventImages[0],
                                   )}
                                   alt={event.eventTitle}
-                                  className="w-full h-32 sm:h-40 object-cover rounded-lg"
+                                  className="w-32 h-32 sm:h-40 object-cover rounded-lg"
                                 />
                               )}
 
