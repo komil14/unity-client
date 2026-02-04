@@ -5,6 +5,7 @@ import {
   X,
   Home,
   Calendar,
+  Newspaper,
   HelpCircle,
   Users,
   Building2,
@@ -37,6 +38,7 @@ const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/events", label: "Events", icon: Calendar },
   { href: "/groups", label: "Groups", icon: Users },
+  { href: "/articles", label: "Articles", icon: Newspaper },
   { href: "/organizers", label: "Organizers", icon: Building2 },
   { href: "/help", label: "Help", icon: HelpCircle },
 ];
