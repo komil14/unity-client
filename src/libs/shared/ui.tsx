@@ -20,7 +20,7 @@ export function imageUrlFromFilename(filename?: string): string | undefined {
 
 export function uploadUrlFromFilename(
   folder: string,
-  filename?: string
+  filename?: string,
 ): string | undefined {
   if (!filename) return undefined;
   if (filename.startsWith("http://") || filename.startsWith("https://")) {

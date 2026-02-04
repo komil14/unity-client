@@ -58,7 +58,10 @@ export default function TopOrganizersSection() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {data.map((org) => {
-              const avatarImg = memberImageUrlFromFilename(org.memberImage, org.memberNick);
+              const avatarImg = memberImageUrlFromFilename(
+                org.memberImage,
+                org.memberNick,
+              );
               const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
 
               return (
@@ -71,7 +74,7 @@ export default function TopOrganizersSection() {
                     <div className="flex items-start gap-3">
                       <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border bg-muted flex-shrink-0">
                         <img
-                          src={avatarImg || ''}
+                          src={avatarImg || ""}
                           alt={org.memberNick}
                           className="h-full w-full object-cover"
                           loading="lazy"

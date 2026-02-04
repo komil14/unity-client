@@ -171,7 +171,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
               <div className="flex items-center gap-3 flex-1">
                 <Avatar className="w-12 h-12 border-2 border-purple-100">
                   <AvatarImage
-                    src={getMemberImageUrl(attendee.memberData.memberImage, attendee.memberData.memberNick)}
+                    src={getMemberImageUrl(
+                      attendee.memberData.memberImage,
+                      attendee.memberData.memberNick,
+                    )}
                     alt={attendee.memberData.memberNick}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white font-semibold">

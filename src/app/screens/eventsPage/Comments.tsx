@@ -171,7 +171,10 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                 />
               ) : (
                 <img
-                  src={memberImageUrlFromFilename(undefined, authData?.member?.memberNick)}
+                  src={memberImageUrlFromFilename(
+                    undefined,
+                    authData?.member?.memberNick,
+                  )}
                   alt={authData.member.memberNick}
                   className="h-full w-full object-cover"
                 />
@@ -269,7 +272,10 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                     />
                   ) : (
                     <img
-                      src={memberImageUrlFromFilename(undefined, comment.memberData?.memberNick)}
+                      src={memberImageUrlFromFilename(
+                        undefined,
+                        comment.memberData?.memberNick,
+                      )}
                       alt={comment.memberData?.memberNick}
                       className="h-full w-full object-cover"
                     />

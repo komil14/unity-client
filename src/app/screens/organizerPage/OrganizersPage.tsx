@@ -274,7 +274,10 @@ export default function OrganizersPage() {
         <>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {data.map((org) => {
-              const avatar = memberImageUrlFromFilename(org.memberImage, org.memberNick);
+              const avatar = memberImageUrlFromFilename(
+                org.memberImage,
+                org.memberNick,
+              );
               const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
               const apiLikedByMe = likedSet.has(org._id);
               const likedByMe = likedOverrides[org._id] ?? apiLikedByMe;
@@ -291,7 +294,7 @@ export default function OrganizersPage() {
                     <div className="flex items-start gap-4">
                       <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted">
                         <img
-                          src={avatar || ''}
+                          src={avatar || ""}
                           alt={org.memberNick}
                           className="h-full w-full object-cover"
                           loading="lazy"
