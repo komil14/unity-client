@@ -32,8 +32,16 @@ export function uploadUrlFromFilename(
 // Explicit helpers for clarity in components
 export function memberImageUrlFromFilename(
   filename?: string,
+  fallbackName?: string,
 ): string | undefined {
-  return uploadUrlFromFilename("members", filename);
+  if (filename) {
+    return uploadUrlFromFilename("members", filename);
+  }
+  // Use Dicebear API for default avatar when no image
+  if (fallbackName) {
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fallbackName)}`;
+  }
+  return undefined;
 }
 
 export function eventImageUrlFromFilename(

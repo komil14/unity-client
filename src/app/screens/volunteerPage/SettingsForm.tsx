@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Upload } from "lucide-react";
 import { useUpdateProfileMutation } from "../../services/authApi";
-import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
 import { useToast } from "../../../libs/components/ui/toast";
 import type {
   SettingsFormProps,
@@ -162,14 +162,16 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
           <div className="h-32 w-32 rounded-full bg-muted border-4 border-border flex items-center justify-center overflow-hidden">
             {member.memberImage ? (
               <img
-                src={uploadUrlFromFilename("members", member.memberImage)}
+                src={memberImageUrlFromFilename(member.memberImage)}
                 alt={member.memberNick}
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span className="text-5xl font-extrabold text-foreground">
-                {member.memberNick?.charAt(0).toUpperCase() || "U"}
-              </span>
+              <img
+                src={memberImageUrlFromFilename(undefined, member.memberNick)}
+                alt={member.memberNick}
+                className="h-full w-full object-cover"
+              />
             )}
           </div>
         </div>

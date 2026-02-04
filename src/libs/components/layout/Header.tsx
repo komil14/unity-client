@@ -29,6 +29,7 @@ import {
 } from "@/libs/components/ui/dropdown-menu";
 import { Logo } from "@/libs/components/common/Logo";
 import { cn } from "@/libs/utils";
+import { memberImageUrlFromFilename } from "@/libs/shared/ui";
 
 import { useCheckAuthQuery, useLogoutMutation } from "@/app/services/authApi";
 
@@ -49,16 +50,7 @@ export default function Header() {
   const avatarSrcRaw = authData?.member?.memberImage;
   const [logout] = useLogoutMutation();
 
-  function avatarUrl(src?: string): string | undefined {
-    if (!src) return undefined;
-    if (src.startsWith("http://") || src.startsWith("https://")) return src;
-    if (src.startsWith("/uploads/")) return src;
-    if (src.startsWith("uploads/")) return `/${src}`;
-    if (src.includes("/")) return `/uploads/${src.replace(/^\/+/, "")}`;
-    if (src.startsWith("/")) return src;
-    return `/uploads/members/${src}`;
-  }
-  const avatar = avatarUrl(avatarSrcRaw);
+  const avatar = memberImageUrlFromFilename(avatarSrcRaw, displayName);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

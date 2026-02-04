@@ -776,9 +776,11 @@ export default function EventDetailPage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-foreground">
-                        {data.memberData.memberNick.charAt(0).toUpperCase()}
-                      </div>
+                      <img
+                        src={memberImageUrlFromFilename(undefined, data.memberData.memberNick)}
+                        alt={data.memberData.memberNick}
+                        className="h-full w-full object-cover"
+                      />
                     )}
                   </div>
 
@@ -843,9 +845,11 @@ export default function EventDetailPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          attendee.memberData?.memberNick
-                            ?.charAt(0)
-                            .toUpperCase()
+                          <img
+                            src={memberImageUrlFromFilename(undefined, attendee.memberData?.memberNick)}
+                            alt={attendee.memberData?.memberNick}
+                            className="h-full w-full object-cover"
+                          />
                         )}
                       </div>
                     ))}
@@ -873,9 +877,13 @@ export default function EventDetailPage() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="h-full w-full flex items-center justify-center text-xs font-semibold text-foreground">
-                              {attendee.memberData?.memberNick
-                                ?.charAt(0)
+                            <img
+                              src={memberImageUrlFromFilename(undefined, attendee.memberData?.memberNick)}
+                              alt={attendee.memberData?.memberNick}
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
                                 .toUpperCase()}
                             </div>
                           )}

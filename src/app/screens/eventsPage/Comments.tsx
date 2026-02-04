@@ -9,7 +9,7 @@ import {
 } from "../../services/commentsApi";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { useToast } from "../../../libs/components/ui/toast";
-import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
 interface CommentsProps {
@@ -165,17 +165,16 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
               {authData?.member?.memberImage ? (
                 <img
-                  src={uploadUrlFromFilename(
-                    "members",
-                    authData.member.memberImage,
-                  )}
+                  src={memberImageUrlFromFilename(authData.member.memberImage)}
                   alt={authData.member.memberNick}
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="text-sm font-bold text-foreground">
-                  {authData?.member?.memberNick?.charAt(0).toUpperCase()}
-                </span>
+                <img
+                  src={memberImageUrlFromFilename(undefined, authData?.member?.memberNick)}
+                  alt={authData.member.memberNick}
+                  className="h-full w-full object-cover"
+                />
               )}
             </div>
 
@@ -262,17 +261,18 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                 <div className="flex-shrink-0 h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
                   {comment.memberData?.memberImage ? (
                     <img
-                      src={uploadUrlFromFilename(
-                        "members",
+                      src={memberImageUrlFromFilename(
                         comment.memberData.memberImage,
                       )}
                       alt={comment.memberData.memberNick}
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="text-xs font-bold text-foreground">
-                      {comment.memberData?.memberNick?.charAt(0).toUpperCase()}
-                    </span>
+                    <img
+                      src={memberImageUrlFromFilename(undefined, comment.memberData?.memberNick)}
+                      alt={comment.memberData?.memberNick}
+                      className="h-full w-full object-cover"
+                    />
                   )}
                 </div>
 

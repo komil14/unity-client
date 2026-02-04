@@ -22,16 +22,7 @@ import {
 import { useCheckAuthQuery } from "../../services/authApi";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
-
-function organizerImageUrl(src?: string): string | undefined {
-  if (!src) return undefined;
-  if (src.startsWith("http://") || src.startsWith("https://")) return src;
-  if (src.startsWith("/uploads/")) return src;
-  if (src.startsWith("uploads/")) return `/${src}`;
-  if (src.includes("/")) return `/uploads/${src.replace(/^\/+/, "")}`;
-  if (src.startsWith("/")) return src;
-  return `/uploads/members/${src}`;
-}
+import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
   { label: "Newest", value: "createdAt" },
@@ -283,7 +274,7 @@ export default function OrganizersPage() {
         <>
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {data.map((org) => {
-              const avatar = organizerImageUrl(org.memberImage);
+              const avatar = memberImageUrlFromFilename(org.memberImage, org.memberNick);
               const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
               const apiLikedByMe = likedSet.has(org._id);
               const likedByMe = likedOverrides[org._id] ?? apiLikedByMe;
@@ -299,18 +290,12 @@ export default function OrganizersPage() {
                   <div className="p-5">
                     <div className="flex items-start gap-4">
                       <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border bg-muted">
-                        {avatar ? (
-                          <img
-                            src={avatar}
-                            alt={org.memberNick}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-lg font-extrabold text-foreground">
-                            {initial}
-                          </div>
-                        )}
+                        <img
+                          src={avatar || ''}
+                          alt={org.memberNick}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">

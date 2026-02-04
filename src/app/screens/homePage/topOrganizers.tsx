@@ -11,23 +11,11 @@ import {
 } from "lucide-react";
 
 import { useGetTopOrganizersQuery } from "../../services/organizersApi";
+import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
 
 function formatCompactNumber(value?: number): string {
   const num = typeof value === "number" ? value : 0;
   return new Intl.NumberFormat(undefined, { notation: "compact" }).format(num);
-}
-
-function organizerImageUrl(src?: string): string | undefined {
-  if (!src) return undefined;
-  if (src.startsWith("http://") || src.startsWith("https://")) return src;
-  // Accept already-normalized paths
-  if (src.startsWith("/uploads/")) return src;
-  if (src.startsWith("uploads/")) return `/${src}`;
-  // If DB stores a folder prefix like `members/<file>`
-  if (src.includes("/")) return `/uploads/${src.replace(/^\/+/, "")}`;
-  // Default: member images live in /uploads/members
-  if (src.startsWith("/")) return src;
-  return `/uploads/members/${src}`;
 }
 
 export default function TopOrganizersSection() {
@@ -70,7 +58,7 @@ export default function TopOrganizersSection() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {data.map((org) => {
-              const avatarImg = organizerImageUrl(org.memberImage);
+              const avatarImg = memberImageUrlFromFilename(org.memberImage, org.memberNick);
               const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
 
               return (
@@ -82,18 +70,12 @@ export default function TopOrganizersSection() {
                   <div className="flex h-full flex-col rounded-xl border border-border bg-background/30 p-3 transition-colors hover:bg-background/40">
                     <div className="flex items-start gap-3">
                       <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border bg-muted flex-shrink-0">
-                        {avatarImg ? (
-                          <img
-                            src={avatarImg}
-                            alt={org.memberNick}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-lg font-extrabold text-foreground">
-                            {initial}
-                          </div>
-                        )}
+                        <img
+                          src={avatarImg || ''}
+                          alt={org.memberNick}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">

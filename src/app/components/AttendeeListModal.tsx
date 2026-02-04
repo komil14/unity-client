@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -65,32 +65,26 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
   const handleApprove = async (applicationId: string, memberName: string) => {
     try {
-      console.log("Approving:", applicationId);
       await approveApplication({
         applicationId,
         eventId,
       }).unwrap();
 
-      console.log("✓ Approved!");
       showToast(`✓ ${memberName} approved!`);
     } catch (error: any) {
-      console.error("✗ Error:", error);
       showToast(error?.data?.message || "Failed to approve", "error");
     }
   };
 
   const handleReject = async (applicationId: string, memberName: string) => {
     try {
-      console.log("Rejecting:", applicationId);
       await rejectApplication({
         applicationId,
         eventId,
       }).unwrap();
 
-      console.log("✓ Rejected!");
       showToast(`✓ ${memberName} rejected`);
     } catch (error: any) {
-      console.error("✗ Error:", error);
       showToast(error?.data?.message || "Failed to reject", "error");
     }
   };
@@ -132,14 +126,20 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
     }
   };
 
-  const getMemberImageUrl = (memberImage?: string) => {
-    if (!memberImage) return undefined;
-    if (memberImage.startsWith("http")) return memberImage;
-    const apiBase =
-      import.meta.env.VITE_API_URL ||
-      import.meta.env.VITE_BACKEND_URL ||
-      window.location.origin;
-    return `${apiBase}/uploads/members/${memberImage}`;
+  const getMemberImageUrl = (memberImage?: string, memberNick?: string) => {
+    if (memberImage) {
+      if (memberImage.startsWith("http")) return memberImage;
+      const apiBase =
+        import.meta.env.VITE_API_URL ||
+        import.meta.env.VITE_BACKEND_URL ||
+        window.location.origin;
+      return `${apiBase}/uploads/members/${memberImage}`;
+    }
+    // Use Dicebear API for default avatar
+    if (memberNick) {
+      return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memberNick)}`;
+    }
+    return undefined;
   };
 
   const renderAttendeeList = (attendeesList: typeof attendees) => {
@@ -171,7 +171,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
               <div className="flex items-center gap-3 flex-1">
                 <Avatar className="w-12 h-12 border-2 border-purple-100">
                   <AvatarImage
-                    src={getMemberImageUrl(attendee.memberData.memberImage)}
+                    src={getMemberImageUrl(attendee.memberData.memberImage, attendee.memberData.memberNick)}
                     alt={attendee.memberData.memberNick}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white font-semibold">

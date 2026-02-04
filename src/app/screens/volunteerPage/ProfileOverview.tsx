@@ -1,5 +1,5 @@
 import { Sparkles, Clock, Check, X, Zap } from "lucide-react";
-import { uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
 import type { ProfileOverviewProps } from "../../../libs/types";
 
 export default function ProfileOverview({
@@ -20,14 +20,16 @@ export default function ProfileOverview({
             <div className="h-32 w-32 rounded-full bg-muted border-4 border-border flex items-center justify-center overflow-hidden">
               {member.memberImage ? (
                 <img
-                  src={uploadUrlFromFilename("members", member.memberImage)}
+                  src={memberImageUrlFromFilename(member.memberImage)}
                   alt={member.memberNick}
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="text-5xl font-extrabold text-foreground">
-                  {avatarInitial}
-                </span>
+                <img
+                  src={memberImageUrlFromFilename(undefined, member.memberNick)}
+                  alt={member.memberNick}
+                  className="h-full w-full object-cover"
+                />
               )}
             </div>
           </div>
