@@ -106,24 +106,26 @@ export default function OrganizerDashboard() {
 
       switch (statusFilter) {
         case "draft":
+          // Show only DRAFT status events (regardless of canceled/deleted - though uncommon)
           return statusRaw === "DRAFT";
         case "past":
-          return eventDate ? eventDate < now : false;
+          // Show ACTIVE events that already happened
+          return statusRaw === "ACTIVE" && eventDate && eventDate < now;
         case "upcoming":
-          return eventDate ? eventDate > now : false;
+          // Show ACTIVE events that haven't happened yet
+          return statusRaw === "ACTIVE" && eventDate && eventDate > now;
         case "canceled":
+          // Show only CANCELED events
           return statusRaw === "CANCELED";
         case "deleted":
+          // Show only DELETE status events
           return statusRaw === "DELETE";
         case "active":
-          return (
-            statusRaw !== "CANCELED" &&
-            statusRaw !== "DELETE" &&
-            (statusRaw === "ACTIVE" || !eventDate || eventDate >= now)
-          );
+          // Show only events with ACTIVE status (not draft, not canceled, not deleted)
+          return statusRaw === "ACTIVE";
         default:
-          // "all" - show all statuses except DELETE
-          return statusRaw !== "DELETE";
+          // "all" - show all statuses (ACTIVE, DRAFT, CANCELED, DELETE)
+          return true;
       }
     });
 
@@ -494,35 +496,23 @@ export default function OrganizerDashboard() {
                 <div className="space-y-4">
                   {/* Filters / Sorting / Search */}
                   <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-muted-foreground">
-                        Status
-                      </label>
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as any)}
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 capitalize"
-                      >
-                        <option value="active">Active</option>
-                        <option value="canceled">Canceled</option>
-                        <option value="deleted">Deleted</option>
-                      </select>
-                    </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {["all", "upcoming", "past", "draft"].map((status) => (
-                        <Button
-                          key={status}
-                          size="sm"
-                          variant={
-                            statusFilter === status ? "default" : "outline"
-                          }
-                          onClick={() => setStatusFilter(status as any)}
-                          className="capitalize"
-                        >
-                          <Filter className="h-4 w-4 mr-1" />
-                          {status}
-                        </Button>
-                      ))}
+                      {["all", "active", "upcoming", "past", "draft", "canceled", "deleted"].map(
+                        (status) => (
+                          <Button
+                            key={status}
+                            size="sm"
+                            variant={
+                              statusFilter === status ? "default" : "outline"
+                            }
+                            onClick={() => setStatusFilter(status as any)}
+                            className="capitalize"
+                          >
+                            <Filter className="h-4 w-4 mr-1" />
+                            {status}
+                          </Button>
+                        ),
+                      )}
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -630,6 +620,16 @@ export default function OrganizerDashboard() {
                                         Past Event
                                       </span>
                                     )}
+                                    {event.eventStatus === "CANCELED" && (
+                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold">
+                                        CANCELED
+                                      </span>
+                                    )}
+                                    {event.eventStatus === "DELETE" && (
+                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-semibold">
+                                        DELETED
+                                      </span>
+                                    )}
                                   </div>
 
                                   {/* Action Menu */}
@@ -729,10 +729,12 @@ export default function OrganizerDashboard() {
                                             )
                                           }
                                           disabled={
-                                            event.eventStatus === "CANCELED"
+                                            event.eventStatus === "CANCELED" ||
+                                            event.eventStatus === "DELETE"
                                           }
                                           className={
-                                            event.eventStatus === "CANCELED"
+                                            event.eventStatus === "CANCELED" ||
+                                            event.eventStatus === "DELETE"
                                               ? "opacity-50 cursor-not-allowed"
                                               : "text-amber-600 focus:text-amber-600 focus:bg-amber-50"
                                           }
