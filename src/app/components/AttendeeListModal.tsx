@@ -26,6 +26,7 @@ import {
 } from "../services/applicationsApi";
 import { Check, X, User, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "../../libs/components/ui/toast";
+import { memberImageUrlFromFilename } from "../../libs/shared/ui";
 
 interface AttendeeListModalProps {
   eventId: string;
@@ -127,19 +128,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
   };
 
   const getMemberImageUrl = (memberImage?: string, memberNick?: string) => {
-    if (memberImage) {
-      if (memberImage.startsWith("http")) return memberImage;
-      const apiBase =
-        import.meta.env.VITE_API_URL ||
-        import.meta.env.VITE_BACKEND_URL ||
-        window.location.origin;
-      return `${apiBase}/uploads/members/${memberImage}`;
-    }
-    // Use Dicebear API for default avatar
-    if (memberNick) {
-      return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(memberNick)}`;
-    }
-    return undefined;
+    return memberImageUrlFromFilename(memberImage, memberNick);
   };
 
   const renderAttendeeList = (attendeesList: typeof attendees) => {

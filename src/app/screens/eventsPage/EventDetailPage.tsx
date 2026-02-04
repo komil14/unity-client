@@ -777,7 +777,10 @@ export default function EventDetailPage() {
                       />
                     ) : (
                       <img
-                        src={memberImageUrlFromFilename(undefined, data.memberData.memberNick)}
+                        src={memberImageUrlFromFilename(
+                          undefined,
+                          data.memberData.memberNick,
+                        )}
                         alt={data.memberData.memberNick}
                         className="h-full w-full object-cover"
                       />
@@ -846,7 +849,10 @@ export default function EventDetailPage() {
                           />
                         ) : (
                           <img
-                            src={memberImageUrlFromFilename(undefined, attendee.memberData?.memberNick)}
+                            src={memberImageUrlFromFilename(
+                              undefined,
+                              attendee.memberData?.memberNick,
+                            )}
                             alt={attendee.memberData?.memberNick}
                             className="h-full w-full object-cover"
                           />
@@ -877,11 +883,14 @@ export default function EventDetailPage() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="h-full w-full flex items-center justify-center text-xs font-semibold text-foreground">
-                              {attendee.memberData?.memberNick
-                                ?.charAt(0)
-                                .toUpperCase()}
-                            </div>
+                            <img
+                              src={memberImageUrlFromFilename(
+                                undefined,
+                                attendee.memberData?.memberNick,
+                              )}
+                              alt={attendee.memberData?.memberNick}
+                              className="h-full w-full object-cover"
+                            />
                           )}
                         </div>
                         <div className="min-w-0">
