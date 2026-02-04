@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import type { MemberData } from "./api";
 
 export type ArticleStatus = "ACTIVE" | "DELETE";
@@ -49,6 +48,7 @@ export interface GetArticlesResponse {
   page: number;
   limit: number;
   total: number;
+  totalPages?: number;
 }
 
 /**

@@ -21,6 +21,22 @@ export type {
   GetArticlesResponse,
 };
 
+const normalizeArticlesResponse = (
+  response: GetArticlesResponse | Article[]
+): GetArticlesResponse => {
+  if (Array.isArray(response)) {
+    return {
+      items: response,
+      page: 1,
+      limit: response.length,
+      total: response.length,
+      totalPages: 1,
+    };
+  }
+
+  return response;
+};
+
 export const articlesApi = api.injectEndpoints({
   endpoints: (build) => ({
     /**
@@ -38,6 +54,8 @@ export const articlesApi = api.injectEndpoints({
             }
           : undefined,
       }),
+      transformResponse: (response: GetArticlesResponse | Article[]) =>
+        normalizeArticlesResponse(response),
       providesTags: (result) =>
         result?.items
           ? [
@@ -116,6 +134,8 @@ export const articlesApi = api.injectEndpoints({
           order: "createdAt",
         },
       }),
+      transformResponse: (response: GetArticlesResponse | Article[]) =>
+        normalizeArticlesResponse(response),
       providesTags: (result, _err, arg) =>
         result?.items
           ? [

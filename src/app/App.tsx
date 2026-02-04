@@ -10,6 +10,7 @@ import CreateEventPage from "./screens/eventsPage/CreateEventPage.tsx";
 import UpdateEventPage from "./screens/eventsPage/UpdateEventPage.tsx";
 import GroupsPage from "./screens/groupPage/GroupsPage.tsx";
 import GroupDetailPage from "./screens/groupPage/GroupDetailPage.tsx";
+import ArticlesPage from "./screens/articlesPage/ArticlesPage.tsx";
 import OrganizersPage from "./screens/organizerPage/OrganizersPage.tsx";
 import OrganizerDetailPage from "./screens/organizerPage/OrganizerDetailPage.tsx";
 import OrganizerDashboard from "./screens/organizerPage/OrganizerDashboard.tsx";
@@ -48,6 +49,7 @@ function App() {
             <Route path="/events/:id/edit" element={<UpdateEventPage />} />
             <Route path="/groups" element={<GroupsPage />} />
             <Route path="/groups/:id" element={<GroupDetailPage />} />
+            <Route path="/articles" element={<ArticlesPage />} />
             <Route path="/organizers" element={<OrganizersPage />} />
             <Route path="/organizers/:id" element={<OrganizerDetailPage />} />
             <Route path="/dashboard" element={<OrganizerDashboard />} />
