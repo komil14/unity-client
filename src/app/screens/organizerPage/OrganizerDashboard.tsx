@@ -427,6 +427,20 @@ export default function OrganizerDashboard() {
           </div>
         </div>
 
+        {/* Pending Approval Warning */}
+        {member.memberStatus === "PENDING" && (
+          <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-6 flex items-center gap-4">
+            <AlertCircle className="h-8 w-8 text-yellow-600 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-bold text-yellow-900">Pending Approval</h3>
+              <p className="text-sm text-yellow-800 mt-1">
+                Your organizer account is pending approval. Once approved,
+                you'll be able to see full analytics and access all features.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Verification Badge */}
         {member.isVerified && (
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 flex items-center gap-4">
@@ -497,22 +511,28 @@ export default function OrganizerDashboard() {
                   {/* Filters / Sorting / Search */}
                   <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      {["all", "active", "upcoming", "past", "draft", "canceled", "deleted"].map(
-                        (status) => (
-                          <Button
-                            key={status}
-                            size="sm"
-                            variant={
-                              statusFilter === status ? "default" : "outline"
-                            }
-                            onClick={() => setStatusFilter(status as any)}
-                            className="capitalize"
-                          >
-                            <Filter className="h-4 w-4 mr-1" />
-                            {status}
-                          </Button>
-                        ),
-                      )}
+                      {[
+                        "all",
+                        "active",
+                        "upcoming",
+                        "past",
+                        "draft",
+                        "canceled",
+                        "deleted",
+                      ].map((status) => (
+                        <Button
+                          key={status}
+                          size="sm"
+                          variant={
+                            statusFilter === status ? "default" : "outline"
+                          }
+                          onClick={() => setStatusFilter(status as any)}
+                          className="capitalize"
+                        >
+                          <Filter className="h-4 w-4 mr-1" />
+                          {status}
+                        </Button>
+                      ))}
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">

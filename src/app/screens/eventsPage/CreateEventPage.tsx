@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { useCreateEventMutation } from "../../services/eventsApi";
@@ -311,6 +313,83 @@ export default function CreateEventPage() {
           >
             Back to Events
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (authData?.member?.memberStatus === "PENDING") {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
+        <div className="mx-auto max-w-3xl px-4 space-y-6">
+          {/* Main Pending Banner */}
+          <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-8 flex items-start gap-6">
+            <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="h-6 w-6 text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-yellow-900 mb-2">
+                Account Pending Approval
+              </h1>
+              <p className="text-sm text-yellow-800">
+                Your organizer account is under review by our team. We typically
+                approve accounts within 24-48 hours. Once approved, you'll be
+                able to create and manage events immediately.
+              </p>
+            </div>
+          </div>
+
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* What's Being Reviewed */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                Application Status
+              </h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>✓ Your application is submitted</p>
+                <p>✓ Our team is reviewing your profile</p>
+                <p>✓ Approval typically takes 24-48 hours</p>
+              </div>
+            </div>
+
+            {/* What You Can Do */}
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                In the Meantime
+              </h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>• Complete your profile details</p>
+                <p>• Explore other events for inspiration</p>
+                <p>• Prepare event ideas and photos</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Support Section */}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
+            <h3 className="font-bold text-foreground">Need Assistance?</h3>
+            <p className="text-sm text-muted-foreground">
+              If you have questions or concerns about your application, our
+              support team is here to help.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                to="/help"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-primary-foreground font-medium hover:bg-primary/90"
+              >
+                Contact Support
+              </Link>
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-6 py-3 text-foreground font-medium hover:bg-muted"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
