@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Calendar,
@@ -73,10 +73,6 @@ export default function OrganizerDashboard() {
   >("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchTerm, setSearchTerm] = useState("");
-
-  const prevMetricsRef = useRef<
-    Record<string, { joined: number; likes: number; capacity: number }>
-  >({});
 
   const [deleteEvent] = useDeleteEventMutation();
   const [duplicateEvent, { isLoading: isDuplicating }] =
@@ -222,53 +218,6 @@ export default function OrganizerDashboard() {
       avgCapacity: Math.round(avgCapacity),
     };
   }, [myEvents]);
-
-  // Lightweight real-time style notifications based on data changes
-  useEffect(() => {
-    if (!myEvents.length) return;
-
-    const prev = prevMetricsRef.current;
-    const hasPrev = Object.keys(prev).length > 0;
-
-    myEvents.forEach((event) => {
-      const joined = event.eventJoined || 0;
-      const likes = event.eventLikes || 0;
-      const capacity =
-        ((event.eventJoined || 0) / (event.eventCapacity || 1)) * 100;
-
-      const prevEntry = prev[event._id];
-
-      if (hasPrev && prevEntry) {
-        // New applicants
-        const deltaApplicants = joined - prevEntry.joined;
-        if (deltaApplicants > 0) {
-          showToast(
-            `${deltaApplicants} new applicant${deltaApplicants > 1 ? "s" : ""} for ${event.eventTitle || "your event"}`,
-          );
-        }
-
-        // Capacity milestones
-        if (capacity >= 50 && prevEntry.capacity < 50) {
-          showToast(`${event.eventTitle || "Event"} reached 50% capacity`);
-        }
-        if (capacity >= 100 && prevEntry.capacity < 100) {
-          showToast(`${event.eventTitle || "Event"} is now fully booked!`);
-        }
-
-        // Like spike
-        const deltaLikes = likes - prevEntry.likes;
-        if (deltaLikes > 0) {
-          showToast(
-            `${event.eventTitle || "Event"} received ${deltaLikes} new like${deltaLikes > 1 ? "s" : ""}`,
-          );
-        }
-      }
-
-      prev[event._id] = { joined, likes, capacity };
-    });
-
-    prevMetricsRef.current = prev;
-  }, [myEvents, showToast]);
 
   // Event Action Handlers
   const handleDelete = async () => {
@@ -568,39 +517,6 @@ export default function OrganizerDashboard() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="relative inline-flex">
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            className="h-9 w-9"
-                            title="Live alerts: applicants, capacity milestones, likes"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                            </svg>
-                          </Button>
-                          <span
-                            className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <span className="text-xs sm:text-sm text-muted-foreground">
-                          Live alerts show as toasts
-                        </span>
-                      </div>
-
                       <div className="relative flex-1 min-w-[220px]">
                         <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                         <input
@@ -1109,33 +1025,12 @@ export default function OrganizerDashboard() {
                     Notifications
                   </h3>
                   <div className="rounded-xl border border-border bg-background p-6">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Manage how you receive notifications about your events.
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Notification preferences are coming soon.
                     </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-sm">
-                          New Applicant Notifications
-                        </span>
-                        <span className="text-sm text-green-600 font-semibold">
-                          Enabled (Toast)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-sm">
-                          Capacity Milestone Alerts
-                        </span>
-                        <span className="text-sm text-green-600 font-semibold">
-                          Enabled (Toast)
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-sm">Like Notifications</span>
-                        <span className="text-sm text-green-600 font-semibold">
-                          Enabled (Toast)
-                        </span>
-                      </div>
-                    </div>
+                    <Button variant="outline" className="w-full" disabled>
+                      Configure Notifications (Coming Soon)
+                    </Button>
                   </div>
                 </div>
               </div>
