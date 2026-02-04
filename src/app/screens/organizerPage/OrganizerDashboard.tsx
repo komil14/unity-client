@@ -84,7 +84,7 @@ export default function OrganizerDashboard() {
 
   // Fetch organizer's events
   const { data: eventsData, isLoading: eventsLoading } = useGetEventsQuery(
-    isOrganizer ? { memberId: member?._id } : undefined,
+    isOrganizer ? { memberId: member?._id, limit: 100 } : undefined,
     { skip: !isOrganizer || !member?._id },
   );
 
@@ -749,7 +749,14 @@ export default function OrganizerDashboard() {
                                                 event.eventTitle || "Event",
                                             })
                                           }
-                                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                          disabled={
+                                            event.eventStatus === "DELETE"
+                                          }
+                                          className={
+                                            event.eventStatus === "DELETE"
+                                              ? "opacity-50 cursor-not-allowed"
+                                              : "text-red-600 focus:text-red-600 focus:bg-red-50"
+                                          }
                                         >
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Delete Event
