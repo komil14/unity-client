@@ -6,9 +6,11 @@ import {
   useGetOrganizerByIdQuery,
   useViewOrganizerMutation,
 } from "../../services/organizersApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { Card, clampText } from "../../../libs/shared/ui";
 
 export default function OrganizerDetailPage() {
+  useScrollToTop();
   const { id } = useParams();
   const organizerId = id ?? "";
 

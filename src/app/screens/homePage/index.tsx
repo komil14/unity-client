@@ -8,8 +8,10 @@ import TrendingEventsSection from "./trendingEvents";
 import TopOrganizersSection from "./topOrganizers";
 import AdvertisementSection from "./advertisement";
 import FinalCtaSection from "./finalCta";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 
 export default function HomePage() {
+  useScrollToTop();
   const [whyTab, setWhyTab] = useState<WhyTab>("volunteers");
 
   return (

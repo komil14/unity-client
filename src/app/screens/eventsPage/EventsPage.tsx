@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useGetEventsQuery } from "../../services/eventsApi";
 import { useCheckLikesBatchQuery } from "../../services/likesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import EventCard from "./EventCard";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -77,6 +78,7 @@ function viewsEqual(a: EventsPageState, b: EventsPageState) {
 }
 
 export default function EventsPage() {
+  useScrollToTop();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
   const { data: authData } = useCheckAuthQuery();

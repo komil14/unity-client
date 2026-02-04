@@ -20,6 +20,7 @@ import {
   useToggleLikeMutation,
 } from "../../services/likesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
 import { memberImageUrlFromFilename } from "../../../libs/shared/ui";
@@ -31,6 +32,7 @@ const ORDER_OPTIONS: { label: string; value: string }[] = [
 ];
 
 export default function OrganizersPage() {
+  useScrollToTop();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: authData } = useCheckAuthQuery();

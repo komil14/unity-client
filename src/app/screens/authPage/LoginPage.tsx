@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../services/authApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Login failed.";
@@ -9,6 +10,7 @@ function errorMessage(err: unknown): string {
 }
 
 export default function LoginPage() {
+  useScrollToTop();
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
 

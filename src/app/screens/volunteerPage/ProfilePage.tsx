@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Clock, Check, X, Zap, Settings } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { useGetMyApplicationsQuery } from "../../services/applicationsApi";
 import { useToast } from "../../../libs/components/ui/toast";
 import {
@@ -15,6 +16,7 @@ import {
 import type { TabType, TabConfig } from "../../../libs/types";
 
 export default function ProfilePage() {
+  useScrollToTop();
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
   const { data: applications, isLoading: appsLoading } =
     useGetMyApplicationsQuery();

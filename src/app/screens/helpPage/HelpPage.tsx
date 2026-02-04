@@ -1,6 +1,8 @@
 import { Card, Section } from "../../../libs/shared/ui";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 
 export default function HelpPage() {
+  useScrollToTop();
   return (
     <div>
       <Section title="Help" description="Quick answers for Unity.">

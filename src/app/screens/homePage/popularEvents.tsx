@@ -15,7 +15,7 @@ export default function PopularEventsSection() {
   const eventIds = useMemo(() => data?.map((e) => e._id) ?? [], [data]);
   const { data: likesData } = useCheckLikesBatchQuery(
     { likeGroup: "EVENT", likeRefIds: eventIds },
-    { skip: eventIds.length === 0 }
+    { skip: eventIds.length === 0 },
   );
 
   const likedSet = useMemo(() => {

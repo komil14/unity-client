@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useGetGroupsQuery } from "../../services/groupsApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import {
   Card,
   clampText,
@@ -16,6 +17,7 @@ const ORDER_OPTIONS: { label: string; value: string }[] = [
 ];
 
 export default function GroupsPage() {
+  useScrollToTop();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const initialOrder = searchParams.get("order") || "createdAt";

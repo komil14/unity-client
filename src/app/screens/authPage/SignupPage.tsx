@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSignupMutation } from "../../services/authApi";
 import { Card } from "../../../libs/shared/ui";
 import type { MemberTypeFilter } from "../../../libs/types";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 
 function errorMessage(err: unknown): string {
   if (!err || typeof err !== "object") return "Signup failed.";
@@ -11,6 +12,7 @@ function errorMessage(err: unknown): string {
 }
 
 export default function SignupPage() {
+  useScrollToTop();
   const navigate = useNavigate();
   const [signup, { isLoading }] = useSignupMutation();
 

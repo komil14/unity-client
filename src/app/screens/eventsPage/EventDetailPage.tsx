@@ -36,6 +36,7 @@ import {
 } from "../../../libs/shared/ui";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useToast } from "../../../libs/components/ui/toast";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import Comments from "./Comments";
 
 function formatDate(value: string): string {
@@ -66,6 +67,7 @@ function isUpcoming(dateValue: string): boolean {
 }
 
 export default function EventDetailPage() {
+  useScrollToTop();
   const { id } = useParams();
   const eventId = id ?? "";
   const navigate = useNavigate();

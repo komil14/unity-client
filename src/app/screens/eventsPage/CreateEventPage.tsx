@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { useCreateEventMutation } from "../../services/eventsApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { useToast } from "../../../libs/components/ui/toast";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
@@ -36,6 +37,7 @@ function formatDateDisplay(dateString: string) {
 }
 
 export default function CreateEventPage() {
+  useScrollToTop();
   const navigate = useNavigate();
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
   const isOrganizer = authData?.member?.memberType === "ORG";

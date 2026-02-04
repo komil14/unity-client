@@ -17,6 +17,7 @@ import {
   useGetEventByIdQuery,
   useUpdateEventMutation,
 } from "../../services/eventsApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { useToast } from "../../../libs/components/ui/toast";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 
@@ -37,6 +38,7 @@ function formatDateDisplay(dateString: string) {
 }
 
 export default function UpdateEventPage() {
+  useScrollToTop();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();

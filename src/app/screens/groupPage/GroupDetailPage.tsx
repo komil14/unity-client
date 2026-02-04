@@ -4,6 +4,7 @@ import {
   useGetGroupByIdQuery,
   useJoinGroupMutation,
 } from "../../services/groupsApi";
+import { useScrollToTop } from "../../hooks/useScrollToTop";
 import {
   Card,
   clampText,
@@ -11,6 +12,7 @@ import {
 } from "../../../libs/shared/ui";
 
 export default function GroupDetailPage() {
+  useScrollToTop();
   const { id } = useParams();
   const groupId = id ?? "";
 
