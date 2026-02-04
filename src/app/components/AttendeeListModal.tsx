@@ -19,20 +19,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../libs/components/ui/tabs";
-import { AlertDialog } from "../../libs/components/ui/alert-dialog";
 import {
   useGetEventAttendeesQuery,
   useApproveApplicationMutation,
   useRejectApplicationMutation,
 } from "../services/applicationsApi";
-import {
-  Check,
-  X,
-  MessageCircle,
-  User,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
+import { Check, X, User, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "../../libs/components/ui/toast";
 
 interface AttendeeListModalProps {
@@ -50,11 +42,6 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 }) => {
   const { showToast } = useToast();
   const [selectedTab, setSelectedTab] = useState("pending");
-  const [confirmAction, setConfirmAction] = useState<{
-    type: "approve" | "reject";
-    applicationId: string;
-    memberName: string;
-  } | null>(null);
 
   const { data: attendees = [], isLoading } = useGetEventAttendeesQuery(
     { eventId, limit: 100 },
@@ -76,35 +63,35 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
     (a) => a.applicationStatus === "REJECTED",
   );
 
-  const handleApprove = async () => {
-    if (!confirmAction) return;
-
+  const handleApprove = async (applicationId: string, memberName: string) => {
     try {
+      console.log("Approving:", applicationId);
       await approveApplication({
-        applicationId: confirmAction.applicationId,
+        applicationId,
+        eventId,
       }).unwrap();
 
-      showToast(
-        `${confirmAction.memberName} has been approved for this event.`,
-      );
-      setConfirmAction(null);
-    } catch (error) {
-      showToast("Failed to approve application. Please try again.", "error");
+      console.log("✓ Approved!");
+      showToast(`✓ ${memberName} approved!`);
+    } catch (error: any) {
+      console.error("✗ Error:", error);
+      showToast(error?.data?.message || "Failed to approve", "error");
     }
   };
 
-  const handleReject = async () => {
-    if (!confirmAction) return;
-
+  const handleReject = async (applicationId: string, memberName: string) => {
     try {
+      console.log("Rejecting:", applicationId);
       await rejectApplication({
-        applicationId: confirmAction.applicationId,
+        applicationId,
+        eventId,
       }).unwrap();
 
-      showToast(`${confirmAction.memberName}'s application has been rejected.`);
-      setConfirmAction(null);
-    } catch (error) {
-      showToast("Failed to reject application. Please try again.", "error");
+      console.log("✓ Rejected!");
+      showToast(`✓ ${memberName} rejected`);
+    } catch (error: any) {
+      console.error("✗ Error:", error);
+      showToast(error?.data?.message || "Failed to reject", "error");
     }
   };
 
@@ -147,15 +134,11 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
   const getMemberImageUrl = (memberImage?: string) => {
     if (!memberImage) return undefined;
-
-    // If backend already returns an absolute URL, use it directly.
     if (memberImage.startsWith("http")) return memberImage;
-
     const apiBase =
       import.meta.env.VITE_API_URL ||
       import.meta.env.VITE_BACKEND_URL ||
       window.location.origin;
-
     return `${apiBase}/uploads/members/${memberImage}`;
   };
 
@@ -228,11 +211,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                       variant="outline"
                       className="text-green-600 border-green-300 hover:bg-green-50"
                       onClick={() =>
-                        setConfirmAction({
-                          type: "approve",
-                          applicationId: attendee._id,
-                          memberName: attendee.memberData.memberNick,
-                        })
+                        handleApprove(
+                          attendee._id,
+                          attendee.memberData.memberNick,
+                        )
                       }
                       disabled={isApproving || isRejecting}
                     >
@@ -244,11 +226,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                       variant="outline"
                       className="text-red-600 border-red-300 hover:bg-red-50"
                       onClick={() =>
-                        setConfirmAction({
-                          type: "reject",
-                          applicationId: attendee._id,
-                          memberName: attendee.memberData.memberNick,
-                        })
+                        handleReject(
+                          attendee._id,
+                          attendee.memberData.memberNick,
+                        )
                       }
                       disabled={isApproving || isRejecting}
                     >
@@ -257,19 +238,6 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                     </Button>
                   </>
                 )}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-purple-600 hover:bg-purple-50"
-                  onClick={() => {
-                    showToast(
-                      "Messaging feature will be available soon.",
-                      "info",
-                    );
-                  }}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           ))}
@@ -345,19 +313,6 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog
-        isOpen={confirmAction !== null}
-        onClose={() => setConfirmAction(null)}
-        onConfirm={
-          confirmAction?.type === "approve" ? handleApprove : handleReject
-        }
-        title={`${confirmAction?.type === "approve" ? "Approve" : "Reject"} Application`}
-        description={`Are you sure you want to ${confirmAction?.type} ${confirmAction?.memberName}'s application?`}
-        confirmText={confirmAction?.type === "approve" ? "Approve" : "Reject"}
-        cancelText="Cancel"
-        variant={confirmAction?.type === "reject" ? "destructive" : "primary"}
-      />
     </>
   );
 };

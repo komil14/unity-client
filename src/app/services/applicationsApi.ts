@@ -61,30 +61,42 @@ export const applicationsApi = api.injectEndpoints({
 
     approveApplication: build.mutation<
       ApplicationDto,
-      { applicationId: string }
+      { applicationId: string; eventId?: string }
     >({
       query: ({ applicationId }) => ({
         url: `/application/approve/${applicationId}`,
         method: "POST",
       }),
-      invalidatesTags: (_result, _err, { applicationId }) => [
-        { type: "Application", id: applicationId },
-        { type: "Application", id: "LIST" },
-      ],
+      invalidatesTags: (_result, _err, args) => {
+        const tags: any[] = [
+          { type: "Application", id: args.applicationId },
+          { type: "Application", id: "LIST" },
+        ];
+        if (args.eventId) {
+          tags.push({ type: "Application", id: `ATTENDEES-${args.eventId}` });
+        }
+        return tags;
+      },
     }),
 
     rejectApplication: build.mutation<
       ApplicationDto,
-      { applicationId: string }
+      { applicationId: string; eventId?: string }
     >({
       query: ({ applicationId }) => ({
         url: `/application/reject/${applicationId}`,
         method: "POST",
       }),
-      invalidatesTags: (_result, _err, { applicationId }) => [
-        { type: "Application", id: applicationId },
-        { type: "Application", id: "LIST" },
-      ],
+      invalidatesTags: (_result, _err, args) => {
+        const tags: any[] = [
+          { type: "Application", id: args.applicationId },
+          { type: "Application", id: "LIST" },
+        ];
+        if (args.eventId) {
+          tags.push({ type: "Application", id: `ATTENDEES-${args.eventId}` });
+        }
+        return tags;
+      },
     }),
   }),
 });
