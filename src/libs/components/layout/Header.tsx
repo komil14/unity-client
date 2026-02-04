@@ -310,12 +310,12 @@ export default function Header() {
                               buttonVariants({
                                 variant: isActive ? "secondary" : "ghost",
                               }),
-                              "w-full justify-start gap-3 h-11",
+                              "w-full justify-start gap-2 h-11 text-base font-medium flex flex-row items-center",
                             )
                           }
                           end={link.href === "/"}
                         >
-                          <link.icon className="h-4 w-4" />
+                          <link.icon className="h-5 w-5 flex-shrink-0" />
                           <span>{link.label}</span>
                         </NavLink>
                       </SheetClose>

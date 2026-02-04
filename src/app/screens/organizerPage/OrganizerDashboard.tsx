@@ -611,9 +611,9 @@ export default function OrganizerDashboard() {
                         return (
                           <div
                             key={event._id}
-                            className="rounded-xl border border-border bg-background p-6 hover:shadow-md transition-shadow"
+                            className="rounded-xl border border-border bg-background p-4 sm:p-6 hover:shadow-md transition-shadow"
                           >
-                            <div className="flex flex-col lg:flex-row gap-6">
+                            <div className="flex flex-col gap-4">
                               {/* Event Image */}
                               {event.eventImages?.[0] && (
                                 <img
@@ -621,39 +621,42 @@ export default function OrganizerDashboard() {
                                     event.eventImages[0],
                                   )}
                                   alt={event.eventTitle}
-                                  className="w-full lg:w-48 h-32 object-cover rounded-lg"
+                                  className="w-full h-32 sm:h-40 object-cover rounded-lg"
                                 />
                               )}
 
                               {/* Event Details */}
                               <div className="flex-1 space-y-3">
-                                <div className="flex items-start justify-between gap-4">
-                                  <div className="flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                                  <div className="flex-1 min-w-0">
                                     <Link
                                       to={`/events/${event._id}`}
-                                      className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+                                      className="text-lg sm:text-xl font-bold text-foreground hover:text-primary transition-colors line-clamp-2"
                                     >
                                       {event.eventTitle}
                                     </Link>
-                                    {isPast && (
-                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                                        Past Event
-                                      </span>
-                                    )}
-                                    {event.eventStatus === "CANCELED" && (
-                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold">
-                                        CANCELED
-                                      </span>
-                                    )}
-                                    {event.eventStatus === "DELETE" && (
-                                      <span className="ml-3 text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-semibold">
-                                        DELETED
-                                      </span>
-                                    )}
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {isPast && (
+                                        <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                                          Past Event
+                                        </span>
+                                      )}
+                                      {event.eventStatus === "CANCELED" && (
+                                        <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-semibold">
+                                          CANCELED
+                                        </span>
+                                      )}
+                                      {event.eventStatus === "DELETE" && (
+                                        <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700 font-semibold">
+                                          DELETED
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
 
                                   {/* Action Menu */}
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                                    {/* Desktop Button */}
                                     <Button
                                       size="sm"
                                       variant="outline"
@@ -664,12 +667,37 @@ export default function OrganizerDashboard() {
                                             event.eventTitle || "Event",
                                         })
                                       }
-                                      className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                                      className="text-purple-600 border-purple-300 hover:bg-purple-50 hidden sm:flex"
                                     >
                                       <UserCheck className="h-4 w-4 mr-2" />
-                                      Manage Applicants
+                                      <span className="hidden lg:inline">
+                                        Manage Applicants
+                                      </span>
+                                      <span className="lg:hidden">Manage</span>
                                       {applicantsCount > 0 && (
                                         <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
+                                          {applicantsCount}
+                                        </span>
+                                      )}
+                                    </Button>
+
+                                    {/* Mobile Button */}
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        setAttendeeModal({
+                                          eventId: event._id,
+                                          eventTitle:
+                                            event.eventTitle || "Event",
+                                        })
+                                      }
+                                      className="text-purple-600 border-purple-300 hover:bg-purple-50 sm:hidden"
+                                      title="Manage Applicants"
+                                    >
+                                      <UserCheck className="h-4 w-4" />
+                                      {applicantsCount > 0 && (
+                                        <span className="ml-1 text-xs font-semibold">
                                           {applicantsCount}
                                         </span>
                                       )}
@@ -792,31 +820,39 @@ export default function OrganizerDashboard() {
                                   {event.eventDesc}
                                 </p>
 
-                                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4" />
-                                    {eventDate.toLocaleDateString("en-US", {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    })}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <Clock className="h-4 w-4 flex-shrink-0" />
+                                    <span className="truncate">
+                                      {eventDate.toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year:
+                                          window.innerWidth >= 640
+                                            ? "numeric"
+                                            : undefined,
+                                      })}
+                                    </span>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <MapPin className="h-4 w-4" />
-                                    {event.eventLocation}
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                                    <span className="truncate">
+                                      {event.eventLocation}
+                                    </span>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Users className="h-4 w-4" />
-                                    {applicantsCount} / {event.eventCapacity}{" "}
-                                    volunteers
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <Users className="h-4 w-4 flex-shrink-0" />
+                                    <span className="truncate">
+                                      {applicantsCount}/{event.eventCapacity}
+                                    </span>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Eye className="h-4 w-4" />
-                                    {event.eventViews || 0} views
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <Eye className="h-4 w-4 flex-shrink-0" />
+                                    <span>{event.eventViews || 0}</span>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Heart className="h-4 w-4" />
-                                    {event.eventLikes || 0} likes
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <Heart className="h-4 w-4 flex-shrink-0" />
+                                    <span>{event.eventLikes || 0}</span>
                                   </div>
                                 </div>
 

@@ -9,7 +9,6 @@ import {
 } from "../../../libs/components/ui/tabs";
 import {
   ChevronDown,
-  ChevronRight,
   Search,
   HelpCircle,
   Plus,
