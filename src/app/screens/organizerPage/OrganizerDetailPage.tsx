@@ -13,11 +13,6 @@ import {
   Building2,
   Mail,
   MessageSquare,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  Globe,
   Phone,
   Zap,
 } from "lucide-react";

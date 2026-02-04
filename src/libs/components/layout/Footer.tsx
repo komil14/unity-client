@@ -6,7 +6,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  ArrowRight,
   Heart,
   Users,
   Zap,

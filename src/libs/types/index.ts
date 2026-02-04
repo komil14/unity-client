@@ -5,6 +5,7 @@ export * from "./event";
 export * from "./group";
 export * from "./comment";
 export * from "./like";
+export * from "./article";
 export * from "./components";
 export * from "./api";
 export * from "./store";

@@ -18,6 +18,7 @@ export const api = createApi({
     "Organizer",
     "Like",
     "Comment",
-  ],
+    "Article",
+  ] as const,
   endpoints: () => ({}),
 });
