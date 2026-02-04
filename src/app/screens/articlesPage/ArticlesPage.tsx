@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Calendar,
@@ -32,26 +32,55 @@ export default function ArticlesPage() {
 
   type ArticleOrder = NonNullable<ArticleInquiry["order"]>;
 
-  const orderFromUrl =
-    (ORDER_OPTIONS.find((opt) => opt.value === searchParams.get("order"))
-      ?.value as ArticleOrder | undefined) ?? "createdAt";
-  const initialSearch = searchParams.get("search") || "";
+  const resolveOrder = (value: string | null): ArticleOrder =>
+    (ORDER_OPTIONS.find((opt) => opt.value === value)?.value as
+      | ArticleOrder
+      | undefined) ?? "createdAt";
 
-  const [order, setOrder] = useState<ArticleOrder>(orderFromUrl);
-  const [search, setSearch] = useState(initialSearch);
+  const resolvePage = (value: string | null): number => {
+    const parsed = Number.parseInt(value || "1", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  };
+
+  const [order, setOrder] = useState<ArticleOrder>(
+    resolveOrder(searchParams.get("order")),
+  );
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [page, setPage] = useState(resolvePage(searchParams.get("page")));
+
+  useEffect(() => {
+    setOrder(resolveOrder(searchParams.get("order")));
+    setSearch(searchParams.get("search") || "");
+    setPage(resolvePage(searchParams.get("page")));
+  }, [searchParams]);
 
   const query = useMemo(() => {
     const trimmed = search.trim();
     return {
-      page: 1,
+      page,
       limit: 12,
       order,
       search: trimmed ? trimmed : undefined,
     };
-  }, [order, search]);
+  }, [order, page, search]);
 
   const { data, isLoading, isError } = useGetArticlesQuery(query);
   const items = data?.items ?? [];
+  const totalPages =
+    data?.totalPages ??
+    Math.max(1, Math.ceil((data?.total ?? items.length) / query.limit));
+
+  const pageNumbers = useMemo(() => {
+    const maxButtons = 5;
+    const current = Math.min(page, totalPages);
+    const half = Math.floor(maxButtons / 2);
+    let start = Math.max(1, current - half);
+    let end = Math.min(totalPages, start + maxButtons - 1);
+    if (end - start + 1 < maxButtons) {
+      start = Math.max(1, end - maxButtons + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }, [page, totalPages]);
 
   return (
     <div className="space-y-8">
@@ -113,6 +142,8 @@ export default function ArticlesPage() {
               const next = new URLSearchParams();
               if (order !== "createdAt") next.set("order", order);
               if (search.trim()) next.set("search", search.trim());
+              next.set("page", "1");
+              setPage(1);
               setSearchParams(next);
             }}
             className="h-11 px-4 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm font-semibold text-foreground hover:bg-background/60 transition-colors"
@@ -132,91 +163,150 @@ export default function ArticlesPage() {
             No articles yet. Be the first to share your story.
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {items.map((article) => {
-              const authorName =
-                article.memberData?.memberNick || "Community member";
-              const authorAvatar = memberImageUrlFromFilename(
-                article.memberData?.memberImage,
-                authorName,
-              );
-              const cover = uploadUrlFromFilename(
-                "community",
-                article.boardImage,
-              );
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {items.map((article) => {
+                const authorName =
+                  article.memberData?.memberNick || "Community member";
+                const authorAvatar = memberImageUrlFromFilename(
+                  article.memberData?.memberImage,
+                  authorName,
+                );
+                const cover = uploadUrlFromFilename(
+                  "community",
+                  article.boardImage,
+                );
 
-              return (
-                <Link
-                  key={article._id}
-                  to={`/articles/${article._id}`}
-                  className="group block h-full"
+                return (
+                  <Link
+                    key={article._id}
+                    to={`/articles/${article._id}`}
+                    className="group block h-full"
+                  >
+                    <article className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background/30 transition-colors hover:bg-background/40">
+                      <div className="relative aspect-[16/9] w-full bg-muted">
+                        {cover ? (
+                          <img
+                            src={cover}
+                            alt={article.boardTitle}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                            <Newspaper className="h-8 w-8" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-1 flex-col p-4">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDate(article.createdAt)}
+                          </span>
+                          <span>•</span>
+                          <span>{authorName}</span>
+                        </div>
+
+                        <h3 className="mt-2 text-base font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {article.boardTitle}
+                        </h3>
+
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {clampText(article.boardContent, 140)}
+                        </p>
+
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <Eye className="h-3.5 w-3.5 text-primary" />
+                              {article.boardViews ?? 0}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Heart className="h-3.5 w-3.5 text-primary" />
+                              {article.boardLikes ?? 0}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {authorAvatar ? (
+                              <img
+                                src={authorAvatar}
+                                alt={authorName}
+                                className="h-7 w-7 rounded-full object-cover border border-border"
+                                loading="lazy"
+                              />
+                            ) : null}
+                            <span className="text-xs text-muted-foreground">
+                              {authorName}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {totalPages > 1 ? (
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextPage = Math.max(1, page - 1);
+                    const next = new URLSearchParams(searchParams);
+                    if (nextPage > 1) next.set("page", String(nextPage));
+                    else next.delete("page");
+                    setPage(nextPage);
+                    setSearchParams(next);
+                  }}
+                  disabled={page <= 1}
+                  className="h-10 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm font-semibold text-foreground hover:bg-background/60 disabled:opacity-50"
                 >
-                  <article className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background/30 transition-colors hover:bg-background/40">
-                    <div className="relative aspect-[16/9] w-full bg-muted">
-                      {cover ? (
-                        <img
-                          src={cover}
-                          alt={article.boardTitle}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <Newspaper className="h-8 w-8" />
-                        </div>
-                      )}
-                    </div>
+                  Prev
+                </button>
 
-                    <div className="flex flex-1 flex-col p-4">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {formatDate(article.createdAt)}
-                        </span>
-                        <span>•</span>
-                        <span>{authorName}</span>
-                      </div>
+                {pageNumbers.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => {
+                      const next = new URLSearchParams(searchParams);
+                      if (p > 1) next.set("page", String(p));
+                      else next.delete("page");
+                      setPage(p);
+                      setSearchParams(next);
+                    }}
+                    className={`h-10 w-10 rounded-[var(--radius-lg)] border text-sm font-semibold transition-colors ${
+                      p === page
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background/40 text-foreground hover:bg-background/60"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
 
-                      <h3 className="mt-2 text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {article.boardTitle}
-                      </h3>
-
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {clampText(article.boardContent, 140)}
-                      </p>
-
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span className="inline-flex items-center gap-1">
-                            <Eye className="h-3.5 w-3.5 text-primary" />
-                            {article.boardViews ?? 0}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Heart className="h-3.5 w-3.5 text-primary" />
-                            {article.boardLikes ?? 0}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {authorAvatar ? (
-                            <img
-                              src={authorAvatar}
-                              alt={authorName}
-                              className="h-7 w-7 rounded-full object-cover border border-border"
-                              loading="lazy"
-                            />
-                          ) : null}
-                          <span className="text-xs text-muted-foreground">
-                            {authorName}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              );
-            })}
-          </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextPage = Math.min(totalPages, page + 1);
+                    const next = new URLSearchParams(searchParams);
+                    if (nextPage > 1) next.set("page", String(nextPage));
+                    else next.delete("page");
+                    setPage(nextPage);
+                    setSearchParams(next);
+                  }}
+                  disabled={page >= totalPages}
+                  className="h-10 px-3 rounded-[var(--radius-lg)] border border-border bg-background/40 text-sm font-semibold text-foreground hover:bg-background/60 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </div>
