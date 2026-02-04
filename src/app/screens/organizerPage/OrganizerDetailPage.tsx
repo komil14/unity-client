@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { BadgeCheck, Clock } from "lucide-react";
 
 import {
   useGetOrganizerByIdQuery,
@@ -57,11 +58,22 @@ export default function OrganizerDetailPage() {
             justifyContent: "space-between",
             gap: 12,
             flexWrap: "wrap",
+            alignItems: "center",
           }}
         >
           <h1 style={{ margin: 0, fontSize: 28 }}>{data.memberNick}</h1>
-          <div style={{ color: "var(--text-muted)" }}>
-            {data.isVerified ? "Verified" : ""}
+          <div className="flex items-center gap-2">
+            {data.isVerified ? (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0 text-[10px] font-semibold text-primary">
+                <BadgeCheck className="h-2.5 w-2.5" />
+                Verified
+              </span>
+            ) : data.memberStatus === "PENDING" ? (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-yellow-100 px-1.5 py-0 text-[10px] font-semibold text-yellow-700">
+                <Clock className="h-2.5 w-2.5" />
+                Pending
+              </span>
+            ) : null}
           </div>
         </div>
 

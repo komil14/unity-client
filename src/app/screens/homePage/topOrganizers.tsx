@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   Building2,
   CalendarCheck,
+  Clock,
   Eye,
   Heart,
   MessageCircle,
@@ -106,6 +107,11 @@ export default function TopOrganizersSection() {
                             <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0 text-[10px] font-semibold text-primary">
                               <BadgeCheck className="h-2.5 w-2.5" />
                               Verified
+                            </span>
+                          ) : org.memberStatus === "PENDING" ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-yellow-100 px-1.5 py-0 text-[10px] font-semibold text-yellow-700">
+                              <Clock className="h-2.5 w-2.5" />
+                              Pending
                             </span>
                           ) : null}
                         </div>

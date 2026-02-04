@@ -769,7 +769,9 @@ export default function EventDetailPage() {
                   <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-border bg-muted flex-shrink-0">
                     {data.memberData.memberImage ? (
                       <img
-                        src={memberImageUrlFromFilename(data.memberData.memberImage)}
+                        src={memberImageUrlFromFilename(
+                          data.memberData.memberImage,
+                        )}
                         alt={data.memberData.memberNick}
                         className="h-full w-full object-cover"
                       />
@@ -790,13 +792,18 @@ export default function EventDetailPage() {
                     </div>
                   </div>
 
-                  {/* Column 3: Verified Badge */}
-                  {data.memberData.isVerified && (
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1">
+                  {/* Column 3: Verified/Pending Badge */}
+                  {data.memberData.isVerified ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-2.5 py-1">
                       <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0" />
                       <span className="text-xs font-semibold">Verified</span>
                     </div>
-                  )}
+                  ) : data.memberData.memberStatus === "PENDING" ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 text-yellow-700 px-2.5 py-1">
+                      <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="text-xs font-semibold">Pending</span>
+                    </div>
+                  ) : null}
                 </Link>
               </div>
             )}
@@ -919,7 +926,9 @@ export default function EventDetailPage() {
                       <div className="aspect-square w-16 overflow-hidden bg-muted flex-shrink-0 rounded-lg border border-border">
                         {event.eventImages?.[0] ? (
                           <img
-                            src={eventImageUrlFromFilename(event.eventImages[0])}
+                            src={eventImageUrlFromFilename(
+                              event.eventImages[0],
+                            )}
                             alt={event.eventTitle}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                           />
@@ -969,7 +978,9 @@ export default function EventDetailPage() {
                       <div className="aspect-square w-16 overflow-hidden bg-muted flex-shrink-0 rounded-lg border border-border">
                         {event.eventImages?.[0] ? (
                           <img
-                            src={eventImageUrlFromFilename(event.eventImages[0])}
+                            src={eventImageUrlFromFilename(
+                              event.eventImages[0],
+                            )}
                             alt={event.eventTitle}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                           />

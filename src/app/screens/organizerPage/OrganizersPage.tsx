@@ -10,6 +10,8 @@ import {
   Users,
   Calendar,
   X,
+  BadgeCheck,
+  Clock,
 } from "lucide-react";
 
 import { useGetOrganizersQuery } from "../../services/organizersApi";
@@ -57,7 +59,7 @@ export default function OrganizersPage() {
 
   const initialPage = Number(searchParams.get("page") || 1);
   const [page, setPage] = useState<number>(
-    Number.isFinite(initialPage) ? initialPage : 1
+    Number.isFinite(initialPage) ? initialPage : 1,
   );
 
   useEffect(() => {
@@ -104,20 +106,20 @@ export default function OrganizersPage() {
   const orgIds = useMemo(() => data?.map((o) => o._id) ?? [], [data]);
   const { data: likesData } = useCheckLikesBatchQuery(
     { likeGroup: "MEMBER", likeRefIds: orgIds },
-    { skip: orgIds.length === 0 }
+    { skip: orgIds.length === 0 },
   );
   const likedSet = useMemo(
     () => new Set(likesData?.likedRefIds ?? []),
-    [likesData]
+    [likesData],
   );
 
   const [toggleLike] = useToggleLikeMutation();
 
   const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
   const [likedOverrides, setLikedOverrides] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
   const [likesCountOverrides, setLikesCountOverrides] = useState<
     Record<string, number>
@@ -126,7 +128,7 @@ export default function OrganizersPage() {
   const handleToggleLike = async (
     orgId: string,
     likedByMe: boolean,
-    memberLikes: number
+    memberLikes: number,
   ) => {
     if (!isAuthenticated) {
       setShowLoginAlert(true);
@@ -165,7 +167,7 @@ export default function OrganizersPage() {
       showToast(
         finalLiked
           ? "Organizer added to your favorites!"
-          : "Organizer removed from your favorites!"
+          : "Organizer removed from your favorites!",
       );
     } catch (err: any) {
       setLikedOverrides((prev) => {
@@ -319,6 +321,17 @@ export default function OrganizersPage() {
                         <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                           <User className="h-3.5 w-3.5" />
                           <span>Organizer</span>
+                          {org.isVerified ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0 text-[10px] font-semibold text-primary">
+                              <BadgeCheck className="h-2.5 w-2.5" />
+                              Verified
+                            </span>
+                          ) : org.memberStatus === "PENDING" ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-yellow-100 px-1.5 py-0 text-[10px] font-semibold text-yellow-700">
+                              <Clock className="h-2.5 w-2.5" />
+                              Pending
+                            </span>
+                          ) : null}
                         </div>
 
                         <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -372,7 +385,7 @@ export default function OrganizersPage() {
                           await handleToggleLike(
                             org._id,
                             likedByMe,
-                            memberLikes
+                            memberLikes,
                           );
                         }}
                       >
