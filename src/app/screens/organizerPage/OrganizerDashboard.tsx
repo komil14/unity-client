@@ -28,6 +28,7 @@ import {
   useGetEventsQuery,
   useDeleteEventMutation,
   useDuplicateEventMutation,
+  useChangeEventStatusMutation,
 } from "../../services/eventsApi";
 import { eventImageUrlFromFilename } from "../../../libs/shared/ui";
 import AttendeeListModal from "../../components/AttendeeListModal";
@@ -65,7 +66,7 @@ export default function OrganizerDashboard() {
     eventTitle: string;
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "upcoming" | "past" | "draft"
+    "all" | "active" | "upcoming" | "past" | "draft" | "canceled"
   >("active");
   const [sortBy, setSortBy] = useState<
     "date" | "views" | "likes" | "applicants" | "capacity"
@@ -80,6 +81,7 @@ export default function OrganizerDashboard() {
   const [deleteEvent] = useDeleteEventMutation();
   const [duplicateEvent, { isLoading: isDuplicating }] =
     useDuplicateEventMutation();
+  const [changeEventStatus] = useChangeEventStatusMutation();
 
   const member = authData?.member;
   const isOrganizer = member?.memberType === "ORG";
@@ -113,6 +115,8 @@ export default function OrganizerDashboard() {
           return eventDate ? eventDate < now : false;
         case "upcoming":
           return eventDate ? eventDate > now : false;
+        case "canceled":
+          return statusRaw === "CANCELED";
         case "active":
           return (
             statusRaw !== "CANCELED" &&
@@ -120,7 +124,8 @@ export default function OrganizerDashboard() {
             (statusRaw === "ACTIVE" || !eventDate || eventDate >= now)
           );
         default:
-          return true;
+          // "all" - show all statuses except DELETE
+          return statusRaw !== "DELETE";
       }
     });
 
@@ -291,6 +296,22 @@ export default function OrganizerDashboard() {
     const eventUrl = `${window.location.origin}/events/${eventId}`;
     navigator.clipboard.writeText(eventUrl);
     showToast("Event link has been copied to clipboard.");
+  };
+
+  const handleChangeStatus = async (
+    eventId: string,
+    eventTitle: string,
+    newStatus: string,
+  ) => {
+    try {
+      await changeEventStatus({
+        id: eventId,
+        eventStatus: newStatus,
+      }).unwrap();
+      showToast(`${eventTitle} status changed to ${newStatus.toLowerCase()}.`);
+    } catch (error) {
+      showToast("Failed to change event status. Please try again.", "error");
+    }
   };
 
   if (authLoading || eventsLoading) {
@@ -523,22 +544,27 @@ export default function OrganizerDashboard() {
                   {/* Filters / Sorting / Search */}
                   <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      {["active", "upcoming", "past", "draft", "all"].map(
-                        (status) => (
-                          <Button
-                            key={status}
-                            size="sm"
-                            variant={
-                              statusFilter === status ? "default" : "outline"
-                            }
-                            onClick={() => setStatusFilter(status as any)}
-                            className="capitalize"
-                          >
-                            <Filter className="h-4 w-4 mr-1" />
-                            {status}
-                          </Button>
-                        ),
-                      )}
+                      {[
+                        "active",
+                        "upcoming",
+                        "past",
+                        "canceled",
+                        "draft",
+                        "all",
+                      ].map((status) => (
+                        <Button
+                          key={status}
+                          size="sm"
+                          variant={
+                            statusFilter === status ? "default" : "outline"
+                          }
+                          onClick={() => setStatusFilter(status as any)}
+                          className="capitalize"
+                        >
+                          <Filter className="h-4 w-4 mr-1" />
+                          {status}
+                        </Button>
+                      ))}
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -745,6 +771,47 @@ export default function OrganizerDashboard() {
                                         >
                                           <Share2 className="h-4 w-4 mr-2" />
                                           Share Link
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleChangeStatus(
+                                              event._id,
+                                              event.eventTitle || "Event",
+                                              "ACTIVE",
+                                            )
+                                          }
+                                          disabled={
+                                            event.eventStatus === "ACTIVE"
+                                          }
+                                          className={
+                                            event.eventStatus === "ACTIVE"
+                                              ? "opacity-50 cursor-not-allowed"
+                                              : "text-green-600 focus:text-green-600 focus:bg-green-50"
+                                          }
+                                        >
+                                          <CheckCircle className="h-4 w-4 mr-2" />
+                                          Activate Event
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleChangeStatus(
+                                              event._id,
+                                              event.eventTitle || "Event",
+                                              "CANCELED",
+                                            )
+                                          }
+                                          disabled={
+                                            event.eventStatus === "CANCELED"
+                                          }
+                                          className={
+                                            event.eventStatus === "CANCELED"
+                                              ? "opacity-50 cursor-not-allowed"
+                                              : "text-amber-600 focus:text-amber-600 focus:bg-amber-50"
+                                          }
+                                        >
+                                          <AlertCircle className="h-4 w-4 mr-2" />
+                                          Cancel Event
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem

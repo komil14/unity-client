@@ -178,6 +178,22 @@ export const eventsApi = api.injectEndpoints({
         { type: "Event", id: "POPULAR_WEEKLY" },
       ],
     }),
+
+    changeEventStatus: build.mutation<
+      EventDto,
+      { id: string; eventStatus: string }
+    >({
+      query: ({ id, eventStatus }) => ({
+        url: `/event/status/${id}`,
+        method: "PATCH",
+        body: { eventStatus },
+      }),
+      invalidatesTags: (_result, _err, { id }) => [
+        { type: "Event", id },
+        { type: "Event", id: "LIST" },
+        { type: "Event", id: "POPULAR_WEEKLY" },
+      ],
+    }),
   }),
 });
 
@@ -190,4 +206,5 @@ export const {
   useUpdateEventMutation,
   useDeleteEventMutation,
   useDuplicateEventMutation,
+  useChangeEventStatusMutation,
 } = eventsApi;
