@@ -69,9 +69,9 @@ export default function Header() {
           "text-sm font-medium transition-colors duration-300",
           isActive
             ? "text-primary font-semibold underline underline-offset-6"
-            : "text-muted-foreground hover:text-primary"
+            : "text-muted-foreground hover:text-primary",
         ),
-    []
+    [],
   );
 
   return (
@@ -146,6 +146,17 @@ export default function Header() {
                     Profile
                   </Link>
                 </DropdownMenuItem>
+
+                {authData?.member?.memberType === "ORG" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="w-full">
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -267,6 +278,16 @@ export default function Header() {
                                 Profile
                               </Link>
                             </DropdownMenuItem>
+                            {authData?.member?.memberType === "ORG" && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                  <Link to="/dashboard" className="w-full">
+                                    Dashboard
+                                  </Link>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={async () => {
@@ -297,7 +318,7 @@ export default function Header() {
                               buttonVariants({
                                 variant: isActive ? "secondary" : "ghost",
                               }),
-                              "w-full justify-start gap-3 h-11"
+                              "w-full justify-start gap-3 h-11",
                             )
                           }
                           end={link.href === "/"}

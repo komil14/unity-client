@@ -351,9 +351,7 @@ export default function OrganizerDashboard() {
       label: "Settings",
       icon: <Settings className="h-4 w-4" />,
     },
-    
   ];
-
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
@@ -835,52 +833,132 @@ export default function OrganizerDashboard() {
           {/* Analytics Tab */}
           {activeTab === "analytics" && (
             <div className="space-y-6">
-              <div className="text-center py-16">
-                <TrendingUp className="h-16 w-16 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  Analytics Overview
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  Track your event performance and volunteer engagement.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 text-left">
-                  <div className="rounded-xl border border-border bg-background p-6">
-                    <h4 className="font-bold text-foreground mb-4">
-                      Engagement Rate
-                    </h4>
-                    <div className="text-4xl font-extrabold text-primary mb-2">
-                      {stats.totalEvents > 0
-                        ? Math.round(
-                            (stats.totalLikes / stats.totalViews) * 100,
-                          ) || 0
-                        : 0}
-                      %
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Likes per view across all events
-                    </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-blue-600" />
+                    Engagement Rate
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.totalEvents > 0 && stats.totalViews > 0
+                      ? Math.round((stats.totalLikes / stats.totalViews) * 100)
+                      : 0}
+                    %
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Likes per view across all events
+                  </p>
+                </div>
 
-                  <div className="rounded-xl border border-border bg-background p-6">
-                    <h4 className="font-bold text-foreground mb-4">
-                      Avg Capacity Fill
-                    </h4>
-                    <div className="text-4xl font-extrabold text-primary mb-2">
-                      {stats.totalEvents > 0
-                        ? Math.round(
-                            (stats.totalApplicants /
-                              (stats.avgCapacity * stats.totalEvents)) *
-                              100,
-                          )
-                        : 0}
-                      %
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Average volunteer sign-up rate
-                    </p>
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-green-600" />
+                    Avg Capacity Fill
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.totalEvents > 0 && stats.avgCapacity > 0
+                      ? Math.round(
+                          (stats.totalApplicants /
+                            (stats.avgCapacity * stats.totalEvents)) *
+                            100,
+                        )
+                      : 0}
+                    %
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Average volunteer sign-up rate
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    Avg per Event
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.totalEvents > 0
+                      ? Math.round(stats.totalViews / stats.totalEvents)
+                      : 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Average views per event
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-pink-600" />
+                    Like Rate
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.totalEvents > 0
+                      ? (stats.totalLikes / stats.totalEvents).toFixed(1)
+                      : 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Average likes per event
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                    Application Rate
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.totalEvents > 0
+                      ? (stats.totalApplicants / stats.totalEvents).toFixed(1)
+                      : 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Average applicants per event
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    Active Events
+                  </h4>
+                  <div className="text-4xl font-extrabold text-primary mb-2">
+                    {stats.activeEvents}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Out of {stats.totalEvents} total events
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-background p-6">
+                <h4 className="font-bold text-foreground mb-4">
+                  Performance Insights
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm">Total Reach</span>
+                    <span className="font-semibold">
+                      {stats.totalViews} views
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm">Total Engagement</span>
+                    <span className="font-semibold">
+                      {stats.totalLikes} likes + {stats.totalApplicants}{" "}
+                      applications
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <span className="text-sm">Avg Event Capacity</span>
+                    <span className="font-semibold">
+                      {stats.avgCapacity} volunteers
+                    </span>
                   </div>
                 </div>
+              </div>
+
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>More detailed charts and trends coming soon!</p>
               </div>
             </div>
           )}
@@ -888,20 +966,111 @@ export default function OrganizerDashboard() {
           {/* Settings Tab */}
           {activeTab === "settings" && (
             <div className="space-y-6">
-              <div className="text-center py-16">
-                <Settings className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  Organizer Settings
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  Manage your organization profile and preferences.
-                </p>
-                <button
-                  onClick={() => navigate("/profile")}
-                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-primary-foreground hover:bg-primary/90"
-                >
-                  Go to Profile Settings
-                </button>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-foreground mb-4">
+                    Organization Profile
+                  </h3>
+                  <div className="rounded-xl border border-border bg-background p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-foreground">
+                            {member.memberNick}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {member.memberDesc || "No description"}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => navigate("/profile")}
+                          variant="outline"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Phone</p>
+                          <p className="font-medium">{member.memberPhone}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Status
+                          </p>
+                          <p className="font-medium capitalize">
+                            {member.memberStatus || "Active"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-foreground mb-4">
+                    Event Defaults
+                  </h3>
+                  <div className="rounded-xl border border-border bg-background p-6">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Set default values for new events to speed up event
+                      creation.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm">Default Capacity</span>
+                        <span className="text-sm text-muted-foreground">
+                          {stats.avgCapacity || 20} volunteers
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm">Default Points</span>
+                        <span className="text-sm text-muted-foreground">
+                          10 points
+                        </span>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4" disabled>
+                      Configure Defaults (Coming Soon)
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-foreground mb-4">
+                    Notifications
+                  </h3>
+                  <div className="rounded-xl border border-border bg-background p-6">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Manage how you receive notifications about your events.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm">
+                          New Applicant Notifications
+                        </span>
+                        <span className="text-sm text-green-600 font-semibold">
+                          Enabled (Toast)
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm">
+                          Capacity Milestone Alerts
+                        </span>
+                        <span className="text-sm text-green-600 font-semibold">
+                          Enabled (Toast)
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm">Like Notifications</span>
+                        <span className="text-sm text-green-600 font-semibold">
+                          Enabled (Toast)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
