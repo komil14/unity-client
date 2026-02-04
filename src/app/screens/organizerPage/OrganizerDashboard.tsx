@@ -621,7 +621,7 @@ export default function OrganizerDashboard() {
                                     event.eventImages[0],
                                   )}
                                   alt={event.eventTitle}
-                                  className="w-32 h-32 sm:h-40 object-cover rounded-lg"
+                                  className="w-80 h-32 sm:h-40 object-cover rounded-lg"
                                 />
                               )}
 
