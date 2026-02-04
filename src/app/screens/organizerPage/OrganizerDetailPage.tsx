@@ -459,134 +459,139 @@ export default function OrganizerDetailPage() {
           </div>
         </div>
 
-        {/* Recent Activity Timeline */}
-        {data.organizedEvents && data.organizedEvents.length > 0 && (
-          <div className="bg-card rounded-2xl border border-border shadow-sm p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-6">
-              <Zap className="h-6 w-6 text-primary" />
-              Recent Activity
-            </h2>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {data.organizedEvents
-                .slice(0, 5)
-                .sort(
-                  (a: any, b: any) =>
-                    new Date(b.createdAt || 0).getTime() -
-                    new Date(a.createdAt || 0).getTime(),
-                )
-                .map((event: any, index: number) => (
-                  <div
-                    key={String(event._id)}
-                    className="flex gap-4 pb-4 last:pb-0 border-b border-border last:border-0"
-                  >
-                    <div className="flex flex-col items-center">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Calendar className="h-5 w-5 text-primary" />
-                      </div>
-                      {index < 4 && (
-                        <div className="w-0.5 h-8 bg-border my-2" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0 pt-1">
-                      <Link
-                        to={`/events/${String(event._id)}`}
-                        className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-1"
+        {/* Statistics & Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Statistics Cards - Left Side (2x2 Grid) */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Events Organized
+                  </p>
+                  <p className="text-3xl font-extrabold text-foreground mt-2">
+                    {data.eventsOrganizedCount ?? 0}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Groups Managed
+                  </p>
+                  <p className="text-3xl font-extrabold text-foreground mt-2">
+                    {data.groupsOrganizedCount ?? 0}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Views
+                  </p>
+                  <p className="text-3xl font-extrabold text-foreground mt-2">
+                    {data.memberViews ?? 0}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <Eye className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Likes
+                  </p>
+                  <p className="text-3xl font-extrabold text-foreground mt-2">
+                    {data.memberLikes ?? 0}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-pink-500/10 flex items-center justify-center">
+                  <Heart className="h-6 w-6 text-pink-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity - Right Side */}
+          {data.organizedEvents && data.organizedEvents.length > 0 && (
+            <div>
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-6 sm:p-8 h-full">
+                <h2 className="text-lg font-bold text-foreground flex items-center gap-2 mb-6">
+                  <Zap className="h-6 w-6 text-primary" />
+                  Recent Activity
+                </h2>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {data.organizedEvents
+                    .slice(0, 5)
+                    .sort(
+                      (a: any, b: any) =>
+                        new Date(b.createdAt || 0).getTime() -
+                        new Date(a.createdAt || 0).getTime(),
+                    )
+                    .map((event: any, index: number) => (
+                      <div
+                        key={String(event._id)}
+                        className="flex gap-4 pb-4 last:pb-0 border-b border-border last:border-0"
                       >
-                        {event.eventTitle}
-                      </Link>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Created{" "}
-                        {event.createdAt
-                          ? new Date(event.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              },
-                            )
-                          : "recently"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-            {data.organizedEvents.length > 5 && (
-              <Link
-                to={`/organizers/${organizerId}/events`}
-                className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-primary hover:text-primary/80"
-              >
-                View all events →
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Events Organized
-                </p>
-                <p className="text-3xl font-extrabold text-foreground mt-2">
-                  {data.eventsOrganizedCount ?? 0}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-blue-600" />
+                        <div className="flex flex-col items-center">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Calendar className="h-5 w-5 text-primary" />
+                          </div>
+                          {index < 4 && (
+                            <div className="w-0.5 h-8 bg-border my-2" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0 pt-1">
+                          <Link
+                            to={`/events/${String(event._id)}`}
+                            className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-1"
+                          >
+                            {event.eventTitle}
+                          </Link>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Created{" "}
+                            {event.createdAt
+                              ? new Date(event.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                )
+                              : "recently"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                {data.organizedEvents.length > 5 && (
+                  <Link
+                    to={`/organizers/${organizerId}/events`}
+                    className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-primary hover:text-primary/80"
+                  >
+                    View all events →
+                  </Link>
+                )}
               </div>
             </div>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Groups Managed
-                </p>
-                <p className="text-3xl font-extrabold text-foreground mt-2">
-                  {data.groupsOrganizedCount ?? 0}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total Views
-                </p>
-                <p className="text-3xl font-extrabold text-foreground mt-2">
-                  {data.memberViews ?? 0}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <Eye className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total Likes
-                </p>
-                <p className="text-3xl font-extrabold text-foreground mt-2">
-                  {data.memberLikes ?? 0}
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-pink-500/10 flex items-center justify-center">
-                <Heart className="h-6 w-6 text-pink-600" />
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Events Section */}
