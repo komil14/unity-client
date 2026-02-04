@@ -23,6 +23,7 @@ import {
   useGetEventAttendeesQuery,
   useApproveApplicationMutation,
   useRejectApplicationMutation,
+  useCompleteApplicationMutation,
 } from "../services/applicationsApi";
 import { Check, X, User, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "../../libs/components/ui/toast";
@@ -44,6 +45,18 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
   const { showToast } = useToast();
   const [selectedTab, setSelectedTab] = useState("pending");
 
+  const handleComplete = async (applicationId: string, memberName: string) => {
+    try {
+      await completeApplication({
+        applicationId,
+        eventId,
+      }).unwrap();
+
+      showToast(`✓ ${memberName} completed`);
+    } catch (error: any) {
+      showToast(error?.data?.message || "Failed to complete", "error");
+    }
+  };
   const { data: attendees = [], isLoading } = useGetEventAttendeesQuery(
     { eventId, limit: 100 },
     { skip: !isOpen },
@@ -53,6 +66,8 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
     useApproveApplicationMutation();
   const [rejectApplication, { isLoading: isRejecting }] =
     useRejectApplicationMutation();
+  const [completeApplication, { isLoading: isCompleting }] =
+    useCompleteApplicationMutation();
 
   const pendingAttendees = attendees.filter(
     (a) => a.applicationStatus === "PENDING",
@@ -62,6 +77,9 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
   );
   const rejectedAttendees = attendees.filter(
     (a) => a.applicationStatus === "REJECTED",
+  );
+  const completedAttendees = attendees.filter(
+    (a) => a.applicationStatus === "COMPLETED",
   );
 
   const handleApprove = async (applicationId: string, memberName: string) => {
@@ -120,6 +138,16 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
           >
             <X className="w-3 h-3 mr-1" />
             Rejected
+          </Badge>
+        );
+      case "COMPLETED":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-purple-50 text-purple-700 border-purple-300"
+          >
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Completed
           </Badge>
         );
       default:
@@ -208,7 +236,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                           attendee.memberData.memberNick,
                         )
                       }
-                      disabled={isApproving || isRejecting}
+                      disabled={isApproving || isRejecting || isCompleting}
                     >
                       <Check className="w-4 h-4 mr-1" />
                       Approve
@@ -223,12 +251,30 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                           attendee.memberData.memberNick,
                         )
                       }
-                      disabled={isApproving || isRejecting}
+                      disabled={isApproving || isRejecting || isCompleting}
                     >
                       <X className="w-4 h-4 mr-1" />
                       Reject
                     </Button>
                   </>
+                )}
+
+                {attendee.applicationStatus === "APPROVED" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-purple-700 border-purple-300 hover:bg-purple-50"
+                    onClick={() =>
+                      handleComplete(
+                        attendee._id,
+                        attendee.memberData.memberNick,
+                      )
+                    }
+                    disabled={isApproving || isRejecting || isCompleting}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Complete
+                  </Button>
                 )}
               </div>
             </div>
@@ -254,7 +300,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
             onValueChange={setSelectedTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger value="pending" className="relative">
                 Pending
                 {pendingAttendees.length > 0 && (
@@ -279,6 +325,14 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                   </Badge>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="completed" className="relative">
+                Completed
+                {completedAttendees.length > 0 && (
+                  <Badge className="ml-2 bg-purple-500 text-white text-xs px-2">
+                    {completedAttendees.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="pending" className="mt-0">
@@ -291,6 +345,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
             <TabsContent value="rejected" className="mt-0">
               {renderAttendeeList(rejectedAttendees)}
+            </TabsContent>
+
+            <TabsContent value="completed" className="mt-0">
+              {renderAttendeeList(completedAttendees)}
             </TabsContent>
           </Tabs>
 

@@ -98,6 +98,26 @@ export const applicationsApi = api.injectEndpoints({
         return tags;
       },
     }),
+
+    completeApplication: build.mutation<
+      ApplicationDto,
+      { applicationId: string; eventId?: string }
+    >({
+      query: ({ applicationId }) => ({
+        url: `/application/complete/${applicationId}`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _err, args) => {
+        const tags: any[] = [
+          { type: "Application", id: args.applicationId },
+          { type: "Application", id: "LIST" },
+        ];
+        if (args.eventId) {
+          tags.push({ type: "Application", id: `ATTENDEES-${args.eventId}` });
+        }
+        return tags;
+      },
+    }),
   }),
 });
 
@@ -109,4 +129,5 @@ export const {
   useCancelApplicationMutation,
   useApproveApplicationMutation,
   useRejectApplicationMutation,
+  useCompleteApplicationMutation,
 } = applicationsApi;

@@ -175,7 +175,7 @@ export default function GroupsPage() {
                       fontSize: 14,
                     }}
                   >
-                    {clampText(group.groupDesc, 130)}
+                    {clampText(group.groupDesc || "", 130)}
                   </div>
 
                   <div
