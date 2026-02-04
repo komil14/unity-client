@@ -15,6 +15,7 @@ import {
   uploadUrlFromFilename,
 } from "../../../libs/shared/ui";
 import { useToast } from "../../../libs/components/ui/toast";
+import ArticleComments from "./ArticleComments";
 
 export default function ArticleDetailPage() {
   useScrollToTop();
@@ -97,7 +98,7 @@ export default function ArticleDetailPage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: data.boardTitle,
+          title: data?.boardTitle || "Article",
           url,
         });
         return;
@@ -111,10 +112,10 @@ export default function ArticleDetailPage() {
     }
   };
 
-  const cover = uploadUrlFromFilename("community", data.boardImage);
-  const authorName = data.memberData?.memberNick || "Community member";
+  const cover = uploadUrlFromFilename("community", data?.boardImage);
+  const authorName = data?.memberData?.memberNick || "Community member";
   const authorAvatar = memberImageUrlFromFilename(
-    data.memberData?.memberImage,
+    data?.memberData?.memberImage,
     authorName,
   );
 
@@ -251,6 +252,9 @@ export default function ArticleDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Comments Section */}
+      <ArticleComments articleId={articleId} />
     </div>
   );
 }
