@@ -33,7 +33,6 @@ export default function ArticlesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: authData } = useCheckAuthQuery();
-  const isAuthenticated = Boolean(authData?.member?._id);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   type ArticleOrder = NonNullable<ArticleInquiry["order"]>;
@@ -105,8 +104,9 @@ export default function ArticlesPage() {
         </div>
 
         <button
+        //only Orniganizers can write articles
           onClick={() => {
-            if (isAuthenticated) {
+            if (authData?.member?.memberType === "ORG") {
               navigate("/articles/create");
             } else {
               setShowLoginAlert(true);

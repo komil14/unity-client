@@ -143,7 +143,6 @@ export default function CreateArticlePage() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Write your article using Markdown...&#10;&#10;Examples:&#10;# Heading 1&#10;## Heading 2&#10;**bold text**&#10;*italic text*&#10;- List item&#10;[Link text](url)"
             rows={10}
             className="w-full rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring resize-y"
           />
