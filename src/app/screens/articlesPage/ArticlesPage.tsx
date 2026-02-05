@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   Calendar,
   Eye,
@@ -10,13 +10,15 @@ import {
 } from "lucide-react";
 
 import { useGetArticlesQuery } from "../../services/articlesApi";
+import { useCheckAuthQuery } from "../../services/authApi";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import { useScrollToTop } from "../../hooks/useScrollToTop";
 import {
-  clampText,
   formatDate,
   memberImageUrlFromFilename,
   uploadUrlFromFilename,
 } from "../../../libs/shared/ui";
+import { getMarkdownPreview } from "../../../libs/utils/markdown";
 import type { ArticleInquiry } from "../../../libs/types/article";
 
 const ORDER_OPTIONS: { label: string; value: string }[] = [
@@ -28,7 +30,11 @@ const ORDER_OPTIONS: { label: string; value: string }[] = [
 
 export default function ArticlesPage() {
   useScrollToTop();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { data: authData } = useCheckAuthQuery();
+  const isAuthenticated = Boolean(authData?.member?._id);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   type ArticleOrder = NonNullable<ArticleInquiry["order"]>;
 
@@ -98,15 +104,21 @@ export default function ArticlesPage() {
           </p>
         </div>
 
-        <Link
-          to="/articles/create"
-          className="inline-flex items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 py-2 text-sm font-semibold text-foreground hover:bg-background/60"
+        <button
+          onClick={() => {
+            if (isAuthenticated) {
+              navigate("/articles/create");
+            } else {
+              setShowLoginAlert(true);
+            }
+          }}
+          className="inline-flex items-center justify-center rounded-[var(--radius-lg)] border border-border bg-background/40 px-4 py-2 text-sm font-semibold text-foreground hover:bg-background/60 transition-colors"
         >
           Write an Article
           <span className="ml-2 text-primary" aria-hidden="true">
             →
           </span>
-        </Link>
+        </button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -214,7 +226,7 @@ export default function ArticlesPage() {
                         </h3>
 
                         <p className="mt-2 text-sm text-muted-foreground">
-                          {clampText(article.boardContent, 140)}
+                          {getMarkdownPreview(article.boardContent, 140)}
                         </p>
 
                         <div className="mt-4 flex items-center justify-between">
@@ -309,6 +321,21 @@ export default function ArticlesPage() {
           </>
         )}
       </div>
+
+      {/* Login Required Alert */}
+      <AlertDialog
+        isOpen={showLoginAlert}
+        onClose={() => setShowLoginAlert(false)}
+        onConfirm={() => {
+          setShowLoginAlert(false);
+          navigate("/login");
+        }}
+        title="Login Required"
+        description="You need to be logged in as an organizer to write articles. Please login or create an account to continue."
+        confirmText="Login Now"
+        cancelText="Maybe Later"
+        variant="warning"
+      />
     </div>
   );
 }

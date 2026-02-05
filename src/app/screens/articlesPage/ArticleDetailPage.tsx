@@ -30,6 +30,7 @@ import {
 } from "../../../libs/shared/ui";
 import { useToast } from "../../../libs/components/ui/toast";
 import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
+import { MarkdownContent } from "../../../libs/components/ui/markdown-content";
 import ArticleComments from "./ArticleComments";
 
 export default function ArticleDetailPage() {
@@ -390,6 +391,13 @@ export default function ArticleDetailPage() {
                     maxLength={5000}
                     className="w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
+                  <div className="mt-2 rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+                    <strong className="text-foreground">
+                      Markdown supported:
+                    </strong>{" "}
+                    Use **bold**, *italic*, # headings, - lists, [links](url),
+                    `code`, &gt; quotes, and more!
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">
@@ -444,11 +452,7 @@ export default function ArticleDetailPage() {
               </div>
             </div>
           ) : (
-            <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
-              <p className="whitespace-pre-line leading-7 text-foreground">
-                {data.boardContent}
-              </p>
-            </div>
+            <MarkdownContent content={data.boardContent} />
           )}
         </div>
       </div>

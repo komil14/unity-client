@@ -2,11 +2,8 @@ import { Link } from "react-router-dom";
 import { Calendar, Eye, Heart, Newspaper } from "lucide-react";
 
 import { useGetArticlesQuery } from "../../services/articlesApi";
-import {
-  clampText,
-  formatDate,
-  uploadUrlFromFilename,
-} from "../../../libs/shared/ui";
+import { formatDate, uploadUrlFromFilename } from "../../../libs/shared/ui";
+import { getMarkdownPreview } from "../../../libs/utils/markdown";
 
 export default function LatestArticlesSection() {
   const { data, isLoading, isError } = useGetArticlesQuery({
@@ -26,7 +23,7 @@ export default function LatestArticlesSection() {
             </h2>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            Stories and insights from organizers and volunteers.
+            Stories and insights from organizers.
           </p>
         </div>
 
@@ -91,7 +88,7 @@ export default function LatestArticlesSection() {
                       </h3>
 
                       <p className="mt-2 text-sm text-muted-foreground">
-                        {clampText(article.boardContent, 110)}
+                        {getMarkdownPreview(article.boardContent, 110)}
                       </p>
 
                       <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
