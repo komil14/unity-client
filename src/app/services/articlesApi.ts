@@ -22,7 +22,7 @@ export type {
 };
 
 const normalizeArticlesResponse = (
-  response: GetArticlesResponse | Article[]
+  response: GetArticlesResponse | Article[],
 ): GetArticlesResponse => {
   if (Array.isArray(response)) {
     return {
@@ -147,6 +147,51 @@ export const articlesApi = api.injectEndpoints({
             ]
           : [{ type: "Article" as const, id: `AUTHOR_${arg.memberId}` }],
     }),
+
+    /**
+     * PATCH /board/update/:id - Update article
+     */
+    updateArticle: build.mutation<
+      ArticleDto,
+      { id: string; data: CreateArticleInput }
+    >({
+      query: ({ id, data }) => {
+        const formData = new FormData();
+        formData.append("boardTitle", data.boardTitle);
+        formData.append("boardContent", data.boardContent);
+
+        if (data.boardImage) {
+          formData.append("boardImage", data.boardImage);
+        }
+
+        return {
+          url: `/board/update/${id}`,
+          method: "PATCH",
+          body: formData,
+        };
+      },
+      invalidatesTags: (_result, _err, { id }) => [
+        { type: "Article", id },
+        { type: "Article", id: "LIST" },
+      ],
+    }),
+
+    /**
+     * DELETE /board/delete/:id - Delete article (soft delete)
+     */
+    deleteArticle: build.mutation<
+      { message: string; data: ArticleDto },
+      string
+    >({
+      query: (id) => ({
+        url: `/board/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _err, id) => [
+        { type: "Article", id },
+        { type: "Article", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -155,6 +200,8 @@ export const {
   useGetArticleByIdQuery,
   useCreateArticleMutation,
   useGetArticlesByAuthorQuery,
+  useUpdateArticleMutation,
+  useDeleteArticleMutation,
   useLazyGetArticlesQuery,
   useLazyGetArticleByIdQuery,
 } = articlesApi;

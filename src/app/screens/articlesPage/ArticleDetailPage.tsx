@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Calendar, Eye, Heart, Newspaper, Share2, User } from "lucide-react";
+import {
+  Calendar,
+  Eye,
+  Heart,
+  Newspaper,
+  Share2,
+  User,
+  Edit3,
+  Trash2,
+  Loader,
+} from "lucide-react";
 
-import { useGetArticleByIdQuery } from "../../services/articlesApi";
+import {
+  useGetArticleByIdQuery,
+  useUpdateArticleMutation,
+  useDeleteArticleMutation,
+} from "../../services/articlesApi";
 import { useCheckAuthQuery } from "../../services/authApi";
 import {
   useCheckLikesBatchQuery,
@@ -15,6 +29,7 @@ import {
   uploadUrlFromFilename,
 } from "../../../libs/shared/ui";
 import { useToast } from "../../../libs/components/ui/toast";
+import { AlertDialog } from "../../../libs/components/ui/alert-dialog";
 import ArticleComments from "./ArticleComments";
 
 export default function ArticleDetailPage() {
@@ -27,8 +42,16 @@ export default function ArticleDetailPage() {
   const { showToast } = useToast();
 
   const [toggleLike] = useToggleLikeMutation();
+  const [updateArticle, updateState] = useUpdateArticleMutation();
+  const [deleteArticle, deleteState] = useDeleteArticleMutation();
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { data, isLoading, isError } = useGetArticleByIdQuery(articleId, {
     skip: !articleId,
   });
@@ -112,12 +135,80 @@ export default function ArticleDetailPage() {
     }
   };
 
+  const handleEditClick = () => {
+    if (!data) return;
+    setEditTitle(data.boardTitle);
+    setEditContent(data.boardContent);
+    setEditImagePreview(cover || null);
+    setIsEditing(true);
+  };
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Please select an image file", "error");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Image must be less than 5MB", "error");
+      return;
+    }
+
+    setEditImage(file);
+    setEditImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleEditSubmit = async () => {
+    const trimmedTitle = editTitle.trim();
+    const trimmedContent = editContent.trim();
+
+    if (!trimmedTitle || !trimmedContent) {
+      showToast("Title and content are required", "error");
+      return;
+    }
+
+    try {
+      await updateArticle({
+        id: articleId,
+        data: {
+          boardTitle: trimmedTitle,
+          boardContent: trimmedContent,
+          boardImage: editImage || undefined,
+        },
+      }).unwrap();
+
+      showToast("Article updated successfully!");
+      setIsEditing(false);
+      setEditImage(null);
+      setEditImagePreview(null);
+    } catch (err: any) {
+      const msg = err?.data?.message || "Failed to update article";
+      showToast(msg, "error");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteArticle(articleId).unwrap();
+      showToast("Article deleted successfully!");
+      navigate("/articles");
+    } catch (err: any) {
+      const msg = err?.data?.message || "Failed to delete article";
+      showToast(msg, "error");
+      setShowDeleteDialog(false);
+    }
+  };
+
   const cover = uploadUrlFromFilename("community", data?.boardImage);
   const authorName = data?.memberData?.memberNick || "Community member";
   const authorAvatar = memberImageUrlFromFilename(
     data?.memberData?.memberImage,
     authorName,
   );
+  const isOwner = authData?.member?._id === data?.memberId;
 
   if (!articleId) {
     return <div className="text-muted-foreground">Invalid article id.</div>;
@@ -191,6 +282,31 @@ export default function ArticleDetailPage() {
                 </div>
               </div>
             </div>
+            {isOwner && !isEditing && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleEditClick}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                  title="Edit article"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={deleteState.isLoading}
+                  className="inline-flex items-center gap-2 rounded-lg border border-destructive bg-background px-3 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Delete article"
+                >
+                  {deleteState.isLoading ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Interactive Action Bar */}
@@ -245,16 +361,111 @@ export default function ArticleDetailPage() {
             </div>
           </div>
 
-          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
-            <p className="whitespace-pre-line leading-7 text-foreground">
-              {data.boardContent}
-            </p>
-          </div>
+          {isEditing ? (
+            <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-6">
+              <h3 className="text-lg font-bold text-foreground">
+                Edit Article
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    maxLength={200}
+                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Content
+                  </label>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    rows={10}
+                    maxLength={5000}
+                    className="w-full resize-none rounded-lg border border-border bg-background px-4 py-2.5 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Cover Image (Optional)
+                  </label>
+                  {editImagePreview && (
+                    <div className="mb-3 relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-border">
+                      <img
+                        src={editImagePreview}
+                        alt="Preview"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditImageChange}
+                    className="block w-full text-sm text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-primary/90"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Max size: 5MB
+                  </p>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleEditSubmit}
+                    disabled={updateState.isLoading}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {updateState.isLoading ? (
+                      <>
+                        <Loader className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditImage(null);
+                      setEditImagePreview(null);
+                    }}
+                    disabled={updateState.isLoading}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-6 py-2.5 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none">
+              <p className="whitespace-pre-line leading-7 text-foreground">
+                {data.boardContent}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Comments Section */}
       <ArticleComments articleId={articleId} />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete this article?"
+        description="This will permanently remove your article. You can't undo this action."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
