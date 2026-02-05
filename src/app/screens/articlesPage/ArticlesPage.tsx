@@ -104,7 +104,7 @@ export default function ArticlesPage() {
         </div>
 
         <button
-        //only Orniganizers can write articles
+          //only Orniganizers can write articles
           onClick={() => {
             if (authData?.member?.memberType === "ORG") {
               navigate("/articles/create");
@@ -193,10 +193,10 @@ export default function ArticlesPage() {
                   <Link
                     key={article._id}
                     to={`/articles/${article._id}`}
-                    className="group block h-full"
+                    className="group block"
                   >
                     <article className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background/30 transition-colors hover:bg-background/40">
-                      <div className="relative aspect-[16/9] w-full bg-muted">
+                      <div className="relative aspect-[16/9] w-full bg-muted flex-shrink-0">
                         {cover ? (
                           <img
                             src={cover}
@@ -218,18 +218,18 @@ export default function ArticlesPage() {
                             {formatDate(article.createdAt)}
                           </span>
                           <span>•</span>
-                          <span>{authorName}</span>
+                          <span className="truncate">{authorName}</span>
                         </div>
 
-                        <h3 className="mt-2 text-base font-semibold text-foreground group-hover:text-primary transition-colors">
+                        <h3 className="mt-2 text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
                           {article.boardTitle}
                         </h3>
 
-                        <p className="mt-2 text-sm text-muted-foreground">
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-3 flex-1">
                           {getMarkdownPreview(article.boardContent, 140)}
                         </p>
 
-                        <div className="mt-4 flex items-center justify-between">
+                        <div className="mt-4 flex items-center justify-between pt-3 border-t border-border/50">
                           <div className="flex items-center gap-3 text-xs text-muted-foreground">
                             <span className="inline-flex items-center gap-1">
                               <Eye className="h-3.5 w-3.5 text-primary" />
@@ -250,7 +250,7 @@ export default function ArticlesPage() {
                                 loading="lazy"
                               />
                             ) : null}
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
                               {authorName}
                             </span>
                           </div>
