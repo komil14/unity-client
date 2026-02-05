@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Clock, Check, X, Zap, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCheckAuthQuery } from "../../services/authApi";
 import { useScrollToTop } from "../../hooks/useScrollToTop";
 import { useGetMyApplicationsQuery } from "../../services/applicationsApi";
@@ -17,6 +18,7 @@ import type { TabType, TabConfig } from "../../../libs/types";
 
 export default function ProfilePage() {
   useScrollToTop();
+  const navigate = useNavigate();
   const { data: authData, isLoading: authLoading } = useCheckAuthQuery();
   const { data: applications, isLoading: appsLoading } =
     useGetMyApplicationsQuery();
@@ -24,6 +26,13 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>("settings");
 
   const member = authData?.member;
+
+  // Redirect organizers to dashboard - profile is for volunteers only
+  useEffect(() => {
+    if (!authLoading && member?.memberType === "ORG") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [authLoading, member?.memberType, navigate]);
 
   // Calculate statistics
   const stats = useMemo(() => {

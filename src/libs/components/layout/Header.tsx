@@ -132,14 +132,19 @@ export default function Header() {
                     {displayPhone}
                   </div>
                 </div>
-                <DropdownMenuSeparator />
+
 
                 {/* Menu links */}
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="w-full">
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
+                {authData?.member?.memberType === "USER" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="w-full">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
 
                 {authData?.member?.memberType === "ORG" && (
                   <>
@@ -267,11 +272,13 @@ export default function Header() {
                               </div>
                             </div>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                              <Link to="/profile" className="w-full">
-                                Profile
-                              </Link>
-                            </DropdownMenuItem>
+                            {authData?.member?.memberType === "USER" && (
+                              <DropdownMenuItem asChild>
+                                <Link to="/profile" className="w-full">
+                                  Profile
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
                             {authData?.member?.memberType === "ORG" && (
                               <>
                                 <DropdownMenuSeparator />

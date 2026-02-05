@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "../../../libs/components/ui/dropdown-menu";
 import { Button } from "../../../libs/components/ui/button";
+import OrganizerSettingsForm from "./OrganizerSettingsForm";
 
 type TabType = "events" | "analytics" | "settings";
 
@@ -1025,89 +1026,53 @@ export default function OrganizerDashboard() {
           {/* Settings Tab */}
           {activeTab === "settings" && (
             <div className="space-y-6">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-foreground mb-4">
-                    Organization Profile
-                  </h3>
-                  <div className="rounded-xl border border-border bg-background p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-semibold text-foreground">
-                            {member.memberNick}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {member.memberDesc || "No description"}
-                          </p>
-                        </div>
-                        <Button
-                          onClick={() => navigate("/profile")}
-                          variant="outline"
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Profile
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Phone</p>
-                          <p className="font-medium">{member.memberPhone}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">
-                            Status
-                          </p>
-                          <p className="font-medium capitalize">
-                            {member.memberStatus || "Active"}
-                          </p>
-                        </div>
-                      </div>
+              <OrganizerSettingsForm
+                member={member}
+                onUpdate={() => {
+                  showToast("Profile updated successfully!");
+                }}
+              />
+
+              <div>
+                <h3 className="text-lg font-bold text-foreground mb-4">
+                  Event Defaults
+                </h3>
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Set default values for new events to speed up event
+                    creation.
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm">Default Capacity</span>
+                      <span className="text-sm text-muted-foreground">
+                        {stats.avgCapacity || 20} volunteers
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm">Default Points</span>
+                      <span className="text-sm text-muted-foreground">
+                        10 points
+                      </span>
                     </div>
                   </div>
+                  <Button variant="outline" className="w-full mt-4" disabled>
+                    Configure Defaults (Coming Soon)
+                  </Button>
                 </div>
+              </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-foreground mb-4">
-                    Event Defaults
-                  </h3>
-                  <div className="rounded-xl border border-border bg-background p-6">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Set default values for new events to speed up event
-                      creation.
-                    </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-sm">Default Capacity</span>
-                        <span className="text-sm text-muted-foreground">
-                          {stats.avgCapacity || 20} volunteers
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-2">
-                        <span className="text-sm">Default Points</span>
-                        <span className="text-sm text-muted-foreground">
-                          10 points
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="outline" className="w-full mt-4" disabled>
-                      Configure Defaults (Coming Soon)
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-foreground mb-4">
-                    Notifications
-                  </h3>
-                  <div className="rounded-xl border border-border bg-background p-6">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Notification preferences are coming soon.
-                    </p>
-                    <Button variant="outline" className="w-full" disabled>
-                      Configure Notifications (Coming Soon)
-                    </Button>
-                  </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground mb-4">
+                  Notifications
+                </h3>
+                <div className="rounded-xl border border-border bg-background p-6">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Notification preferences are coming soon.
+                  </p>
+                  <Button variant="outline" className="w-full" disabled>
+                    Configure Notifications (Coming Soon)
+                  </Button>
                 </div>
               </div>
             </div>
