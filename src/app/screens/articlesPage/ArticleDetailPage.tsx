@@ -465,6 +465,7 @@ export default function ArticleDetailPage() {
         description="This will permanently remove your article. You can't undo this action."
         confirmText="Delete"
         cancelText="Cancel"
+        variant="destructive"
       />
     </div>
   );

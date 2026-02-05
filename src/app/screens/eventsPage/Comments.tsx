@@ -158,12 +158,12 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
       </div>
 
       {/* Comment Form */}
-      {isAuthenticated ? (
+      {isAuthenticated && authData ? (
         <form onSubmit={handleSubmitComment} className="mb-6 space-y-3">
           <div className="flex gap-3">
             {/* User Avatar */}
             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
-              {authData?.member?.memberImage ? (
+              {authData.member?.memberImage ? (
                 <img
                   src={memberImageUrlFromFilename(authData.member.memberImage)}
                   alt={authData.member.memberNick}
@@ -173,9 +173,9 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
                 <img
                   src={memberImageUrlFromFilename(
                     undefined,
-                    authData?.member?.memberNick,
+                    authData.member?.memberNick,
                   )}
-                  alt={authData.member.memberNick}
+                  alt={authData.member?.memberNick}
                   className="h-full w-full object-cover"
                 />
               )}
@@ -446,6 +446,7 @@ export default function Comments({ eventId, eventTitle }: CommentsProps) {
         description="This will remove your comment from the event. You can’t undo this action."
         confirmText="Delete"
         cancelText="Cancel"
+        variant="destructive"
       />
     </div>
   );
