@@ -445,6 +445,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         description="This will remove your comment from the article. You can't undo this action."
         confirmText="Delete"
         cancelText="Cancel"
+        variant="destructive"
       />
     </div>
   );

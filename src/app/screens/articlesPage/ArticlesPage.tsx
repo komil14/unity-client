@@ -321,19 +321,16 @@ export default function ArticlesPage() {
           </>
         )}
       </div>
-
       {/* Login Required Alert */}
       <AlertDialog
+      //onlhy organizers can write articles
         isOpen={showLoginAlert}
         onClose={() => setShowLoginAlert(false)}
         onConfirm={() => {
           setShowLoginAlert(false);
-          navigate("/login");
         }}
-        title="Login Required"
-        description="You need to be logged in as an organizer to write articles. Please login or create an account to continue."
-        confirmText="Login Now"
-        cancelText="Maybe Later"
+        title="Only Organizers Can Write Articles"
+        description="You need to be logged in as an organizer to write articles."
         variant="warning"
       />
     </div>
