@@ -37,7 +37,7 @@ function formatCommentDate(dateStr: string): string {
   });
 }
 
-export default function Comments({ eventId, eventTitle }: CommentsProps) {
+export default function Comments({ eventId}: CommentsProps) {
   const { showToast } = useToast();
   const { data: authData } = useCheckAuthQuery();
   const isAuthenticated = Boolean(authData?.member?._id);
