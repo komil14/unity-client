@@ -43,7 +43,7 @@ export default function SignupPage() {
               }).unwrap();
 
               // Redirect organizers to dashboard, volunteers to home
-              navigate(memberType === "ORG" ? "/dashboard" : "/", {
+              navigate(memberType === "ORG" ? "/dashboard" : "/profile", {
                 replace: true,
               });
             } catch (err) {
@@ -68,7 +68,7 @@ export default function SignupPage() {
               height: 40,
               padding: "0 12px",
               borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-color)",
+              border: "1px solid rgba(16,185,129,0.35)",
               background: "var(--bg-card)",
               color: "var(--text-main)",
             }}
@@ -96,7 +96,7 @@ export default function SignupPage() {
               height: 40,
               padding: "0 12px",
               borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-color)",
+              border: "1px solid rgba(16,185,129,0.35)",
               background: "var(--bg-card)",
               color: "var(--text-main)",
             }}
@@ -122,7 +122,7 @@ export default function SignupPage() {
               height: 40,
               padding: "0 12px",
               borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-color)",
+              border: "1px solid rgba(16,185,129,0.35)",
               background: "var(--bg-card)",
               color: "var(--text-main)",
             }}
@@ -149,7 +149,7 @@ export default function SignupPage() {
               height: 40,
               padding: "0 12px",
               borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-color)",
+              border: "1px solid rgba(16,185,129,0.35)",
               background: "var(--bg-card)",
               color: "var(--text-main)",
             }}

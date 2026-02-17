@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
 
   const [memberNick, setMemberNick] = useState("");
+  const [memberType] = useState<"USER" | "ORG">("USER");
   const [memberPassword, setMemberPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -35,7 +36,7 @@ export default function LoginPage() {
                   memberNick: memberNick.trim(),
                   memberPassword,
                 }).unwrap();
-                navigate("/", { replace: true });
+                navigate(memberType === "ORG" ? "/dashboard" : "/profile", { replace: true });
               } catch (err) {
                 setFormError(errorMessage(err));
               }
