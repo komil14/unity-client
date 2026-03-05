@@ -1,7 +1,9 @@
-FROM node:20-alpine AS build
+FROM node:20-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install --include=optional
+RUN npm install @rollup/rollup-linux-arm64-gnu --no-save || true
+RUN npm install @rollup/rollup-linux-x64-gnu --no-save || true
 COPY . .
 RUN npm run build
 
