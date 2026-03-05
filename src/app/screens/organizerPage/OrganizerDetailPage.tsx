@@ -163,7 +163,7 @@ export default function OrganizerDetailPage() {
     }
 
     try {
-      // TODO: Implement contact API call
+      // Contact API not yet implemented - shows success toast as placeholder
       showToast("Message sent to organizer!");
       setShowContactModal(false);
       setContactMessage("");
@@ -184,8 +184,8 @@ export default function OrganizerDetailPage() {
         await navigator.clipboard.writeText(url);
         showToast("Profile link copied to clipboard!");
       }
-    } catch (err) {
-      console.log("Share cancelled or failed", err);
+    } catch {
+      // Share cancelled or clipboard failed
     }
   };
 
@@ -609,7 +609,7 @@ export default function OrganizerDetailPage() {
                   className="group h-full"
                 >
                   <div className="bg-background rounded-lg border border-border overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-200 flex flex-col h-full">
-                    <div className="relative h-40 overflow-hidden flex-shrink-0">
+                    <div className="relative h-40 w-full overflow-hidden flex-shrink-0">
                       {e.eventImages?.[0] ? (
                         <>
                           <img

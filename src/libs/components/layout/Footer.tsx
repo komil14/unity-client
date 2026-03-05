@@ -75,7 +75,7 @@ export default function Footer() {
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/4komil"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2.5 rounded-full bg-muted/60 hover:bg-primary hover:text-primary-foreground transition-all hover:scale-110 duration-200"
@@ -84,7 +84,7 @@ export default function Footer() {
                 <Instagram className="w-4 h-4" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/4komil"
                 target="_blank"
                 rel="noreferrer"
                 className="p-2.5 rounded-full bg-muted/60 hover:bg-primary hover:text-primary-foreground transition-all hover:scale-110 duration-200"
@@ -169,12 +169,12 @@ export default function Footer() {
                 </span>
               </a>
               <a
-                href="mailto:info@unity.com"
+                href="mailto:kamilyakub@sju.ac.kr"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors group"
               >
                 <Mail className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <span className="group-hover:translate-x-0.5 transition-transform">
-                  info@unity.com
+                  kamilyakub@sju.ac.kr
                 </span>
               </a>
             </div>
@@ -189,7 +189,7 @@ export default function Footer() {
           <p className="text-xs md:text-sm text-muted-foreground">
             © 2026 Unity. All rights reserved. • Made with{" "}
             <Heart className="w-3 h-3 inline text-primary fill-primary" /> by
-            the community
+            Kamil (Jacob)
           </p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs md:text-sm">
             <button className="text-muted-foreground hover:text-primary transition-colors">

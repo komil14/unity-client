@@ -177,7 +177,7 @@ export default function EventsPage() {
       showLikedOnly: searchParams.get("liked") === "true",
       order: urlOrder,
       direction: urlDirection,
-      page: parseInt(searchParams.get("page") || "1", 8) || 1,
+      page: parseInt(searchParams.get("page") || "1", 10) || 1,
       limit,
     } satisfies EventsPageState;
   }, [limit, searchParams]);

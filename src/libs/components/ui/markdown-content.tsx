@@ -151,11 +151,13 @@ export function MarkdownContent({
 
           // Images
           img: ({ node, ...props }) => (
-            <img
-              className="rounded-lg max-w-full h-auto mb-4"
-              loading="lazy"
-              {...props}
-            />
+            <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-lg mb-4">
+              <img
+                className="h-full w-full object-cover"
+                loading="lazy"
+                {...props}
+              />
+            </div>
           ),
 
           // Strong/Bold

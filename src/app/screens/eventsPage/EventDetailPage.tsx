@@ -126,7 +126,7 @@ export default function EventDetailPage() {
 
   const { data: attendees, isLoading: attendeesLoading } =
     useGetEventAttendeesQuery(
-      { eventId, limit: attendeeLimit },
+      { eventId, limit: attendeeLimit, status: "APPROVED,COMPLETED" },
       { skip: !eventId },
     );
 
@@ -214,9 +214,8 @@ export default function EventDetailPage() {
         await navigator.clipboard.writeText(url);
         showToast("Event link copied to clipboard!");
       }
-    } catch (err) {
+    } catch {
       // User cancelled share or clipboard failed
-      console.log("Share cancelled or failed", err);
     }
   };
 
@@ -634,16 +633,13 @@ export default function EventDetailPage() {
                     }
                     onClick={async () => {
                       try {
-                        console.log("Attempting to join event:", eventId);
-                        const result = await joinEvent({ eventId }).unwrap();
-                        console.log("Join successful:", result);
+                        await joinEvent({ eventId }).unwrap();
                         showToast("Application submitted successfully!");
                         // Refetch to update status
                         setTimeout(() => {
                           refetchApplicationStatus();
                         }, 500);
                       } catch (err: any) {
-                        console.error("Full error object:", err);
                         const msg =
                           err?.data?.message ||
                           "Failed to apply. Please try again.";
@@ -912,7 +908,9 @@ export default function EventDetailPage() {
                             {attendee.memberData?.memberNick}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Approved attendee
+                            {attendee.applicationStatus === "COMPLETED"
+                              ? "Completed"
+                              : "Approved attendee"}
                           </div>
                         </div>
                       </div>

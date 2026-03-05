@@ -170,7 +170,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
     if (attendeesList.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
           <User className="w-12 h-12 mb-2 opacity-30" />
           <p>No applicants in this category</p>
         </div>
@@ -183,7 +183,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
           {attendeesList.map((attendee) => (
             <div
               key={attendee._id}
-              className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-purple-300 transition-colors"
+              className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:border-purple-400 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1">
                 <Avatar className="w-12 h-12 border-2 border-purple-100">
@@ -201,7 +201,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
 
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-gray-900">
+                    <h4 className="font-semibold text-foreground">
                       {attendee.memberData.memberNick}
                     </h4>
                     {attendee.memberData.isVerified && (
@@ -210,10 +210,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500 line-clamp-1">
+                  <p className="text-sm text-muted-foreground line-clamp-1">
                     {attendee.memberData.memberDesc || "No bio provided"}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground/70 mt-1">
                     Applied: {new Date(attendee.createdAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -289,10 +289,10 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-900">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               Manage Applicants
             </DialogTitle>
-            <p className="text-sm text-gray-600 mt-1">{eventTitle}</p>
+            <p className="text-sm text-muted-foreground mt-1">{eventTitle}</p>
           </DialogHeader>
 
           <Tabs
@@ -353,7 +353,7 @@ const AttendeeListModal: React.FC<AttendeeListModalProps> = ({
           </Tabs>
 
           <div className="flex justify-between items-center pt-4 border-t">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               Total Applicants:{" "}
               <span className="font-semibold">{attendees.length}</span>
             </div>

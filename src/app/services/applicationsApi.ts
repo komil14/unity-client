@@ -48,11 +48,11 @@ export const applicationsApi = api.injectEndpoints({
 
     getEventAttendees: build.query<
       EventAttendeeDto[],
-      { eventId: string; limit?: number }
+      { eventId: string; limit?: number; status?: string }
     >({
-      query: ({ eventId, limit = 12 }) => ({
+      query: ({ eventId, limit = 12, status }) => ({
         url: `/event/${eventId}/attendees`,
-        params: { limit },
+        params: { limit, ...(status ? { status } : {}) },
       }),
       providesTags: (_result, _err, { eventId }) => [
         { type: "Application", id: `ATTENDEES-${eventId}` },

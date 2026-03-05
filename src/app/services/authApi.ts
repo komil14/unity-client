@@ -28,6 +28,18 @@ export const authApi = api.injectEndpoints({
         body,
       }),
       invalidatesTags: [{ type: "Me", id: "ME" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            authApi.util.updateQueryData("checkAuth", undefined, (draft) => {
+              draft.member = data.member;
+            }),
+          );
+        } catch {
+          // let invalidatesTags handle refetch on error
+        }
+      },
     }),
     signup: build.mutation<AuthResponse, SignupInput>({
       query: (body) => ({
@@ -36,48 +48,56 @@ export const authApi = api.injectEndpoints({
         body,
       }),
       invalidatesTags: [{ type: "Me", id: "ME" }],
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            authApi.util.updateQueryData("checkAuth", undefined, (draft) => {
+              draft.member = data.member;
+            }),
+          );
+        } catch {
+          // let invalidatesTags handle refetch on error
+        }
+      },
     }),
-    updateProfile: build.mutation<MemberDto, UpdateProfileInput>({
+    updateProfile: build.mutation<MemberDto, UpdateProfileInput | FormData>({
       query: (body) => {
-        console.log("updateProfile query called with body:", body);
+        // If body is FormData (image upload), send as-is
+        // If body is a plain object (text fields), convert to FormData for multer compatibility
+        let formBody: FormData;
+        if (body instanceof FormData) {
+          formBody = body;
+        } else {
+          formBody = new FormData();
+          Object.entries(body).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              formBody.append(key, String(value));
+            }
+          });
+        }
         return {
           url: "/member/profile",
           method: "POST",
-          body,
+          body: formBody,
         };
       },
-      invalidatesTags: (result, err) => {
-        console.log(
-          "updateProfile invalidatesTags - result:",
-          result,
-          "error:",
-          err,
-        );
+      invalidatesTags: () => {
         return [{ type: "Me", id: "ME" }];
       },
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        console.log("updateProfile onQueryStarted - arg:", arg);
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("updateProfile - got data response:", data);
           // Update the cached auth data
           dispatch(
             authApi.util.updateQueryData("checkAuth", undefined, (draft) => {
-              console.log(
-                "Updating cache - draft.member before:",
-                draft.member,
-              );
               if (draft.member) {
                 Object.assign(draft.member, data);
-                console.log(
-                  "Updated cache - draft.member after:",
-                  draft.member,
-                );
               }
             }),
           );
-        } catch (err) {
-          console.error("Failed to update cache:", err);
+        } catch {
+          // Cache update failed silently
         }
       },
     }),

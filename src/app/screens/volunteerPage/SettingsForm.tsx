@@ -21,13 +21,8 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log("=== SettingsForm Rendered ===");
-  console.log("Current member prop:", member);
-  console.log("Current formData state:", formData);
-
   // Sync form with member data when member changes
   useEffect(() => {
-    console.log("useEffect: member changed, updating form");
     setFormData({
       memberNick: member.memberNick || "",
       memberPhone: member.memberPhone || "",
@@ -40,19 +35,12 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    console.log(`Form field changed: ${name} = ${value}`);
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-      console.log("Updated formData:", updated);
-      return updated;
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    console.log("Image file selected:", file.name, file.size);
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
@@ -73,19 +61,14 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
 
   const uploadImage = async (file: File) => {
     try {
-      console.log("Starting image upload:", file.name);
       const formData = new FormData();
       formData.append("memberImage", file);
 
       // RTK Query handles FormData serialization, so we need to cast it
-      const result = await updateProfile(
-        formData as unknown as MemberUpdatePayload,
-      ).unwrap();
-      console.log("Image upload successful:", result);
+      await updateProfile(formData as unknown as MemberUpdatePayload).unwrap();
       onUpdate();
     } catch (err) {
       const error = err as ApiError;
-      console.error("Image upload failed:", error);
       const errorMsg =
         error?.data?.message || error?.message || "Failed to upload image";
       showToast(errorMsg);
@@ -110,36 +93,17 @@ export default function SettingsForm({ member, onUpdate }: SettingsFormProps) {
         payload.memberDesc = formData.memberDesc;
 
       if (Object.keys(payload).length === 0) {
-        console.log("No changes detected");
         setIsSaving(false);
         return;
       }
 
-      console.log("=== handleSave Started ===");
-      console.log("Current member:", member);
-      console.log("Saving profile with payload:", payload);
-
-      // Perform update via API
-      console.log("Calling updateProfile mutation...");
-      const result = await updateProfile(payload).unwrap();
-
-      console.log("✅ Update successful! Result:", result);
-      console.log("Result type:", typeof result);
-      console.log("Result keys:", Object.keys(result));
+      await updateProfile(payload).unwrap();
 
       onUpdate();
     } catch (err) {
       const error = err as ApiError;
-      console.error("❌ Failed to save profile");
-      console.error("Error type:", typeof error);
-      console.error("Full error object:", error);
-      console.error("Error status:", error?.status);
-      console.error("Error data:", error?.data);
-      console.error("Error message:", error?.message);
-
       const errorMsg =
         error?.data?.message || error?.message || "Failed to update profile";
-      console.error("Final error message:", errorMsg);
       showToast(errorMsg);
     } finally {
       setIsSaving(false);

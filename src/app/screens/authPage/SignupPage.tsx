@@ -20,6 +20,7 @@ export default function SignupPage() {
   const [memberNick, setMemberNick] = useState("");
   const [memberPhone, setMemberPhone] = useState("");
   const [memberPassword, setMemberPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
   return (
@@ -34,11 +35,32 @@ export default function SignupPage() {
           onSubmit={async (e) => {
             e.preventDefault();
             setFormError(null);
+
+            const nick = memberNick.trim();
+            const phone = memberPhone.trim();
+
+            if (!nick || nick.length < 3) {
+              setFormError("Username must be at least 3 characters.");
+              return;
+            }
+            if (!phone) {
+              setFormError("Phone number is required.");
+              return;
+            }
+            if (memberPassword.length < 6) {
+              setFormError("Password must be at least 6 characters.");
+              return;
+            }
+            if (memberPassword !== confirmPassword) {
+              setFormError("Passwords do not match.");
+              return;
+            }
+
             try {
               await signup({
                 memberType,
-                memberNick: memberNick.trim(),
-                memberPhone: memberPhone.trim(),
+                memberNick: nick,
+                memberPhone: phone,
                 memberPassword,
               }).unwrap();
 
@@ -143,6 +165,33 @@ export default function SignupPage() {
           <input
             value={memberPassword}
             onChange={(e) => setMemberPassword(e.target.value)}
+            type="password"
+            style={{
+              width: "100%",
+              height: 40,
+              padding: "0 12px",
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid rgba(16,185,129,0.35)",
+              background: "var(--bg-card)",
+              color: "var(--text-main)",
+            }}
+            autoComplete="new-password"
+          />
+
+          <div style={{ height: 12 }} />
+
+          <label
+            style={{
+              display: "block",
+              marginBottom: 6,
+              color: "var(--text-muted)",
+            }}
+          >
+            Confirm Password
+          </label>
+          <input
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             type="password"
             style={{
               width: "100%",

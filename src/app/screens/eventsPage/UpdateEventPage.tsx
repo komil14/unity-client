@@ -107,6 +107,13 @@ export default function UpdateEventPage() {
     }
   }, [showCalendar]);
 
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -636,7 +643,7 @@ export default function UpdateEventPage() {
               {existingImages.map((img, idx) => (
                 <div key={idx} className="relative group">
                   <img
-                    src={`${import.meta.env.VITE_API_URL}/uploads/events/${img}`}
+                    src={`/uploads/events/${img}`}
                     alt={`Event ${idx + 1}`}
                     className="w-full h-32 object-cover rounded-lg border border-border"
                   />

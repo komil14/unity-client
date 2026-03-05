@@ -76,6 +76,15 @@ export default function ArticleDetailPage() {
     }
   }, [likeData, articleId, isAuthenticated]);
 
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (editImagePreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(editImagePreview);
+      }
+    };
+  }, [editImagePreview]);
+
   const handleLike = async () => {
     if (!articleId) return;
 
@@ -159,6 +168,9 @@ export default function ArticleDetailPage() {
     }
 
     setEditImage(file);
+    if (editImagePreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(editImagePreview);
+    }
     setEditImagePreview(URL.createObjectURL(file));
   };
 

@@ -122,6 +122,13 @@ export default function CreateEventPage() {
     }
   }, [showCalendar]);
 
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imagePreviews]);
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();

@@ -9,8 +9,3 @@ export interface EventsPageState {
   page: number;
   limit: number;
 }
-
-// Root state (keep in sync with store reducers)
-export interface RootState {
-  eventsPage: EventsPageState;
-}

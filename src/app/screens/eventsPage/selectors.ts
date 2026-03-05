@@ -1,5 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
-import type { RootState } from "../../../libs/types";
+import type { RootState } from "../../store/store";
 
 const selectEventsPageState = (state: RootState) => state.eventsPage;
 
