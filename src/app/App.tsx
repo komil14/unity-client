@@ -1,6 +1,6 @@
 import "../css/App.css";
 import { lazy, Suspense } from "react";
-import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import Header from "@/libs/components/layout/Header";
 import Footer from "@/libs/components/layout/Footer";
 import { ToastProvider } from "@/libs/components/ui/toast";
@@ -57,9 +57,6 @@ function PageLoader() {
 }
 
 function HomeLayout() {
-  const location = useLocation();
-  void location;
-
   return (
     <>
       <Header />
@@ -107,7 +104,7 @@ function App() {
               <Route
                 path="/articles/create"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedTypes={["ORG"]}>
                     <CreateArticlePage />
                   </ProtectedRoute>
                 }

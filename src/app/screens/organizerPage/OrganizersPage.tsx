@@ -280,7 +280,6 @@ export default function OrganizersPage() {
                 org.memberImage,
                 org.memberNick,
               );
-              const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
               const apiLikedByMe = likedSet.has(org._id);
               const likedByMe = likedOverrides[org._id] ?? apiLikedByMe;
               const memberLikes =

@@ -8,6 +8,7 @@ export interface Group {
   groupStatus?: GroupStatus | string; // Accept both enum and raw string from API
   groupName?: string;
   groupDesc?: string;
+  groupCategories?: string[] | string;
   groupImage?: string;
   memberId?: string; // Creator (Organization)
   groupMembers?: GroupMember[];

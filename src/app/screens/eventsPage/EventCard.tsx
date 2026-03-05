@@ -253,7 +253,7 @@ function EventCard({
                 <Heart
                   className={`h-4 w-4 flex-shrink-0 ${liked ? "text-rose-500 fill-rose-500" : "text-muted-foreground"}`}
                 />
-                {event.eventLikes}
+                {likesCount}
               </button>
 
               <Link

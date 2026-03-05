@@ -94,14 +94,20 @@ export default function GroupDetailPage() {
         </div>
 
         <div style={{ marginTop: 14, lineHeight: 1.7 }}>
-          {clampText(data.groupDesc, 4000)}
+          {clampText(data.groupDesc || "", 4000)}
         </div>
 
-        {data.groupCategories?.length ? (
+        {data.groupCategories &&
+        (Array.isArray(data.groupCategories)
+          ? data.groupCategories.length > 0
+          : String(data.groupCategories).trim().length > 0) ? (
           <div
             style={{ marginTop: 14, color: "var(--text-muted)", fontSize: 14 }}
           >
-            Categories: {data.groupCategories.join(", ")}
+            Categories:{" "}
+            {Array.isArray(data.groupCategories)
+              ? data.groupCategories.join(", ")
+              : data.groupCategories}
           </div>
         ) : null}
 
@@ -161,8 +167,8 @@ export default function GroupDetailPage() {
             {data.meJoined
               ? "Joined"
               : joinState.isLoading
-              ? "Joining…"
-              : "Join group"}
+                ? "Joining…"
+                : "Join group"}
           </button>
 
           {joinState.isSuccess ? (

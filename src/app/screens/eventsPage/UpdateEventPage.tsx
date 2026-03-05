@@ -11,6 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import { useCheckAuthQuery } from "../../services/authApi";
 import {

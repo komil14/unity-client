@@ -6,10 +6,6 @@ export default function ProfileOverview({
   member,
   stats,
 }: ProfileOverviewProps) {
-  const avatarInitial = member.memberNick
-    ? member.memberNick.charAt(0).toUpperCase()
-    : "U";
-
   return (
     <div className="rounded-2xl border border-border bg-card shadow-lg p-8">
       <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">

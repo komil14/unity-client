@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
 
   const [memberNick, setMemberNick] = useState("");
-  const [memberType] = useState<"USER" | "ORG">("USER");
   const [memberPassword, setMemberPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -43,13 +42,16 @@ export default function LoginPage() {
             }
 
             try {
-              await login({
+              const result = await login({
                 memberNick: nick,
                 memberPassword,
               }).unwrap();
-              navigate(memberType === "ORG" ? "/dashboard" : "/profile", {
-                replace: true,
-              });
+              navigate(
+                result.member.memberType === "ORG" ? "/dashboard" : "/profile",
+                {
+                  replace: true,
+                },
+              );
             } catch (err) {
               setFormError(errorMessage(err));
             }

@@ -62,7 +62,6 @@ export default function TopOrganizersSection() {
                 org.memberImage,
                 org.memberNick,
               );
-              const initial = (org.memberNick || "?").slice(0, 1).toUpperCase();
 
               return (
                 <Link

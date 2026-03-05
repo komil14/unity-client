@@ -10,7 +10,6 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
 import { Logo } from "@/libs/components/common/Logo";
 
 const navigationLinks = [
@@ -27,23 +26,6 @@ const resourceLinks = [
 ];
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [subscriptionStatus, setSubscriptionStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-
-    setSubscriptionStatus("loading");
-    setTimeout(() => {
-      setSubscriptionStatus("success");
-      setEmail("");
-      setTimeout(() => setSubscriptionStatus("idle"), 3000);
-    }, 800);
-  };
-
   return (
     <footer className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 to-muted/30 border-t w-full">
       {/* Main Footer Content */}

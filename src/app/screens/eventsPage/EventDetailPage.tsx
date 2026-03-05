@@ -140,6 +140,11 @@ export default function EventDetailPage() {
   // Track view when event detail page loads
   useEffect(() => {
     if (!eventId) return;
+
+    const viewKey = `event:viewed:${eventId}`;
+    if (sessionStorage.getItem(viewKey)) return;
+
+    sessionStorage.setItem(viewKey, "1");
     viewEvent(eventId);
   }, [eventId, viewEvent]);
 
